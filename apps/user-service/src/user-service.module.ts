@@ -5,6 +5,10 @@ import { DatabaseModule } from '@app/database';
 import { ConfigModule } from '@nestjs/config';
 import { validateEnv } from './utils/env.validate';
 import { RmqModule } from 'libs/rabbitmq/src';
+import { UserModule } from './user/user.module';
+import { PlanModule } from './plan/plan.module';
+import { InterestModule } from './interest/interest.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -14,6 +18,10 @@ import { RmqModule } from 'libs/rabbitmq/src';
       isGlobal: true,
       validate: validateEnv,
     }),
+    UserModule,
+    PlanModule,
+    InterestModule,
+    AuthModule,
   ],
   controllers: [UserServiceController],
   providers: [UserServiceService],
