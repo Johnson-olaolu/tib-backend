@@ -9,6 +9,9 @@ import { UserModule } from './user/user.module';
 import { PlanModule } from './plan/plan.module';
 import { InterestModule } from './interest/interest.module';
 import { AuthModule } from './auth/auth.module';
+import { RoleModule } from './role/role.module';
+import { SeedService } from './seed/seed.service';
+import { PlanPermissionModule } from './plan-permission/plan-permission.module';
 
 @Module({
   imports: [
@@ -22,8 +25,10 @@ import { AuthModule } from './auth/auth.module';
     PlanModule,
     InterestModule,
     AuthModule,
+    RoleModule,
+    PlanPermissionModule,
   ],
   controllers: [UserServiceController],
-  providers: [UserServiceService],
+  providers: [UserServiceService, SeedService],
 })
 export class UserServiceModule {}

@@ -12,7 +12,9 @@ export class Interest extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({
+    unique: true,
+  })
   name: string;
 
   @CreateDateColumn()

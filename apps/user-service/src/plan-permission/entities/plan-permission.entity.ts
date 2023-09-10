@@ -8,11 +8,13 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Role extends BaseEntity {
+export class PlanPermision extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({
+    unique: true,
+  })
   name: string;
 
   @Column()

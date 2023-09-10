@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Profile } from './profile.entity';
-import { Role } from './role.entity';
+import { Role } from '../../role/entities/role.entity';
 
 @Entity({
   name: '_user',

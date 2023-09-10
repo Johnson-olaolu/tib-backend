@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { PlanTypeEnum } from '../../utils/constants';
 
 @Entity()
 export class Plan extends BaseEntity {
@@ -16,6 +17,18 @@ export class Plan extends BaseEntity {
   name: string;
 
   @Column()
+  description: string;
+
+  @Column({
+    type: 'enum',
+    enum: PlanTypeEnum,
+    default: PlanTypeEnum.FREE,
+  })
+  type: PlanTypeEnum;
+
+  @Column({
+    default: 0,
+  })
   price: number;
 
   @CreateDateColumn()

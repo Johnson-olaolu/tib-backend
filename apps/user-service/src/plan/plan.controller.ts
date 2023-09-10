@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { PlanService } from './plan.service';
-import { CreatePlanDto } from './dto/create-plan.dto';
+import { CreatePlanDto } from '../../../../libs/shared/src/dto/user-service/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 
 @Controller()

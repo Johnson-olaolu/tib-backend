@@ -1,26 +1,87 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePlanDto } from './dto/create-plan.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreatePlanDto } from '../../../../libs/shared/src/dto/user-service/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
+import { PlanPermissionService } from '../plan-permission/plan-permission.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Plan } from './entities/plan.entity';
+import { Repository } from 'typeorm';
+import { PlanPermision } from '../plan-permission/entities/plan-permission.entity';
 
 @Injectable()
 export class PlanService {
-  create(createPlanDto: CreatePlanDto) {
-    return 'This action adds a new plan';
+  constructor(
+    @InjectRepository(Plan) private planRepository: Repository<Plan>,
+    private planPermissionService: PlanPermissionService,
+  ) {}
+  async create(createPlanDto: CreatePlanDto) {
+    const planPermissions: PlanPermision[] = [];
+    for (const planPermissionName in createPlanDto.planPermissions) {
+      const planPermission = await this.planPermissionService.findOneByName(
+        planPermissionName,
+      );
+      planPermissions.push(planPermission);
+    }
+    const createPlanDetails = {
+      ...createPlanDto,
+      planPermissions: planPermissions,
+    };
+
+    const newPlanPermissions = await this.planRepository.save(
+      createPlanDetails,
+    );
+    return newPlanPermissions;
   }
 
-  findAll() {
-    return `This action returns all plan`;
+  async findAll() {
+    const plans = await this.planRepository.find();
+    return plans;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} plan`;
+  async findOne(id: string) {
+    const plan = await this.planRepository.findOneBy({ id });
+    if (!plan) {
+      throw new NotFoundException('Plan not found for this ID');
+    }
+    return plan;
   }
 
-  update(id: number, updatePlanDto: UpdatePlanDto) {
-    return `This action updates a #${id} plan`;
+  async findOneByName(name: string) {
+    const plan = await this.planRepository.findOneBy({ name });
+    if (!plan) {
+      throw new NotFoundException('Plan not found for this name');
+    }
+    return plan;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} plan`;
+  async update(id: string, updatePlanDto: UpdatePlanDto) {
+    const plan = await this.findOne(id);
+
+    let updatePlanDetails: any = updatePlanDto;
+    if (updatePlanDto.planPermissions) {
+      const planPermissions: PlanPermision[] = [];
+      for (const planPermissionName in updatePlanDto.planPermissions) {
+        const planPermission = await this.planPermissionService.findOneByName(
+          planPermissionName,
+        );
+        planPermissions.push(planPermission);
+      }
+      updatePlanDetails = {
+        ...updatePlanDto,
+        planPermissions: planPermissions,
+      };
+    }
+
+    for (const detail in updatePlanDetails) {
+      plan[detail] = updatePlanDetails[detail];
+    }
+    await plan.save();
+    return plan;
+  }
+
+  async remove(id: string) {
+    const deleteResponse = await this.planRepository.delete(id);
+    if (!deleteResponse.affected) {
+      throw new NotFoundException('Plan not found for this ID');
+    }
   }
 }
