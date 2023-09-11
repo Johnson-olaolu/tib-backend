@@ -1,8 +1,8 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { InterestService } from './interest.service';
-import { CreateInterestDto } from './dto/create-interest.dto';
 import { UpdateInterestDto } from './dto/update-interest.dto';
+import { CreateInterestDto } from '@app/shared/dto/user-service/create-interest.dto';
 
 @Controller()
 export class InterestController {
@@ -19,7 +19,7 @@ export class InterestController {
   }
 
   @MessagePattern('findOneInterest')
-  findOne(@Payload() id: number) {
+  findOne(@Payload() id: string) {
     return this.interestService.findOne(id);
   }
 
@@ -29,7 +29,7 @@ export class InterestController {
   }
 
   @MessagePattern('removeInterest')
-  remove(@Payload() id: number) {
+  remove(@Payload() id: string) {
     return this.interestService.remove(id);
   }
 }

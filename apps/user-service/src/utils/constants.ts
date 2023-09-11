@@ -1,9 +1,10 @@
-import { CreateUserDto } from '@app/shared/dto/user-service/create-user.dto';
-import { CreatePlanPermissionDto } from '../../../../libs/shared/src/dto/user-service/create-plan-permission.dto';
-import { CreatePlanDto } from '../../../../libs/shared/src/dto/user-service/create-plan.dto';
-import { CreateRoleDto } from '../../../../libs/shared/src/dto/user-service/create-role.dto';
 import { CreateInterestDto } from '@app/shared/dto/user-service/create-interest.dto';
+import { CreateRoleDto } from '@app/shared/dto/user-service/create-role.dto';
+import { CreatePlanPermissionDto } from '@app/shared/dto/user-service/create-plan-permission.dto';
+import { CreatePlanDto } from '@app/shared/dto/user-service/create-plan.dto';
+import { CreateUserDto } from '@app/shared/dto/user-service/create-user.dto';
 
+export const BCRYPT_HASH_ROUND = 2;
 export enum FollowStatusEnum {
   PENDING = 'PENDING',
   ACCEPTED = 'ACCEPTED',
@@ -59,6 +60,22 @@ export const defaultPlans: CreatePlanDto[] = [
   },
 ];
 
-export const defaultInterests: CreateInterestDto[] = [{ name: '' }];
+export const defaultInterests: CreateInterestDto[] = [
+  { name: 'Cartoons' },
+  { name: 'Science' },
+  { name: 'Marriage' },
+  { name: 'Technology' },
+  { name: 'Entertainment' },
+];
 
-// export const superAdmin: CreateUserDto = {};
+interface IDefaultSuperAdmin extends CreateUserDto {
+  isEmailVerified: boolean;
+}
+export const defaultSuperAdmin: IDefaultSuperAdmin = {
+  email: 'super-admin@tib.com',
+  password: 'Test_123',
+  userName: 'SuperAdmin',
+  isEmailVerified: true,
+  role: 'super_admin',
+  plan: 'Enterprise',
+};

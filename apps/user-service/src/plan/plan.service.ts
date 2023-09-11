@@ -15,7 +15,7 @@ export class PlanService {
   ) {}
   async create(createPlanDto: CreatePlanDto) {
     const planPermissions: PlanPermision[] = [];
-    for (const planPermissionName in createPlanDto.planPermissions) {
+    for (const planPermissionName of createPlanDto.planPermissions) {
       const planPermission = await this.planPermissionService.findOneByName(
         planPermissionName,
       );

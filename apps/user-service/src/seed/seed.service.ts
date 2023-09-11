@@ -1,12 +1,16 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import {
+  defaultInterests,
   defaultPlanPermissions,
   defaultPlans,
   defaultRoles,
+  defaultSuperAdmin,
 } from '../utils/constants';
 import { RoleService } from '../role/role.service';
 import { PlanPermissionService } from '../plan-permission/plan-permission.service';
 import { PlanService } from '../plan/plan.service';
+import { InterestService } from '../interest/interest.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class SeedService implements OnApplicationBootstrap {
@@ -16,10 +20,16 @@ export class SeedService implements OnApplicationBootstrap {
     private roleService: RoleService,
     private planPermissionService: PlanPermissionService,
     private planService: PlanService,
+    private interestService: InterestService,
+    private userService: UserService,
   ) {}
 
   async onApplicationBootstrap() {
     await this.seedRoles();
+    await this.seedPlanPermission();
+    await this.seedPlan();
+    await this.seedInterests();
+    await this.seedSuperAdmin();
   }
 
   async seedRoles() {
@@ -60,6 +70,32 @@ export class SeedService implements OnApplicationBootstrap {
         await this.planService.create(plan);
         this.logger.log(`Plan : ${plan.name} Seeded`);
       }
+    }
+  }
+
+  async seedInterests() {
+    for (const interest of defaultInterests) {
+      let foundInterest = null;
+      try {
+        foundInterest = await this.interestService.findOneByName(interest.name);
+      } catch (error) {}
+      if (!foundInterest) {
+        await this.interestService.create(interest);
+        this.logger.log(`Interest: ${interest.name} Seeded`);
+      }
+    }
+  }
+
+  async seedSuperAdmin() {
+    let foundSuperAdmin = null;
+    try {
+      foundSuperAdmin = await this.userService.findOneByEmailOrUserName(
+        defaultSuperAdmin.userName,
+      );
+    } catch (error) {}
+    if (!foundSuperAdmin) {
+      await this.userService.create(defaultSuperAdmin);
+      this.logger.log(`User : ${defaultSuperAdmin.userName} Seeded`);
     }
   }
 }

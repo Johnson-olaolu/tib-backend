@@ -39,7 +39,9 @@ export class PlanPermissionService {
       name,
     });
     if (!planPermission) {
-      throw new NotFoundException(' Plan Permission not found for this name');
+      throw new NotFoundException(
+        ' Plan Permission not found for this name' + name,
+      );
     }
     return planPermission;
   }

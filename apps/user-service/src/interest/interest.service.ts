@@ -12,7 +12,7 @@ export class InterestService {
     private interestRepository: Repository<Interest>,
   ) {}
   async create(createInterestDto: CreateInterestDto) {
-    const interest = await this.interestRepository.create(createInterestDto);
+    const interest = await this.interestRepository.save(createInterestDto);
     return interest;
   }
 
@@ -47,7 +47,10 @@ export class InterestService {
     return interest;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} interest`;
+  async remove(id: string) {
+    const deleteResponse = await this.interestRepository.delete(id);
+    if (!deleteResponse.affected) {
+      throw new NotFoundException('Interest not found for this ID');
+    }
   }
 }

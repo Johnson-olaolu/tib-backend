@@ -12,6 +12,7 @@ import {
 import * as bcrypt from 'bcryptjs';
 import { Profile } from './profile.entity';
 import { Role } from '../../role/entities/role.entity';
+import { Plan } from '../../plan/entities/plan.entity';
 
 @Entity({
   name: '_user',
@@ -30,8 +31,8 @@ export class User extends BaseEntity {
   })
   email: string;
 
-  @Column()
-  password: string;
+  @Column({ select: false })
+  password?: string;
 
   @Column({
     nullable: true,
@@ -56,6 +57,10 @@ export class User extends BaseEntity {
   @ManyToOne(() => Role)
   @JoinColumn({ name: 'role', referencedColumnName: 'name' })
   role: Role;
+
+  @ManyToOne(() => Plan)
+  @JoinColumn({ name: 'plan', referencedColumnName: 'name' })
+  plan: Plan;
 
   async comparePasswords(password: string): Promise<boolean> {
     const result = await bcrypt.compareSync(password, this.password);

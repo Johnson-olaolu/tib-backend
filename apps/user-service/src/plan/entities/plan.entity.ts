@@ -3,17 +3,23 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { PlanTypeEnum } from '../../utils/constants';
+import { PlanPermision } from '../../plan-permission/entities/plan-permission.entity';
 
 @Entity()
 export class Plan extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({
+    unique: true,
+  })
   name: string;
 
   @Column()
@@ -25,6 +31,10 @@ export class Plan extends BaseEntity {
     default: PlanTypeEnum.FREE,
   })
   type: PlanTypeEnum;
+
+  @ManyToMany(() => PlanPermision)
+  @JoinTable()
+  planPermissions: PlanPermision[];
 
   @Column({
     default: 0,

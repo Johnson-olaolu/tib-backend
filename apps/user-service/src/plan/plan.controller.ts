@@ -19,7 +19,7 @@ export class PlanController {
   }
 
   @MessagePattern('findOnePlan')
-  findOne(@Payload() id: number) {
+  findOne(@Payload() id: string) {
     return this.planService.findOne(id);
   }
 
@@ -29,7 +29,7 @@ export class PlanController {
   }
 
   @MessagePattern('removePlan')
-  remove(@Payload() id: number) {
+  remove(@Payload() id: string) {
     return this.planService.remove(id);
   }
 }
