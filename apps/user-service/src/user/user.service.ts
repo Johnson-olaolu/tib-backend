@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -12,6 +13,8 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { RoleService } from '../role/role.service';
 import { PlanService } from '../plan/plan.service';
+import { ValidateUserDto } from '@app/shared/dto/user-service/validate-user.dto';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class UserService {
@@ -37,7 +40,7 @@ export class UserService {
       const newUser = await this.userRepository.save(newUserDetails);
       return newUser;
     } catch (error) {
-      throw new InternalServerErrorException();
+      throw new RpcException(new InternalServerErrorException());
     }
   }
 
@@ -49,7 +52,9 @@ export class UserService {
   async findOne(id: string) {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) {
-      throw new NotFoundException('User not Found for this ID');
+      throw new RpcException(
+        new NotFoundException('User not Found for this ID'),
+      );
     }
     return user;
   }
@@ -59,9 +64,28 @@ export class UserService {
       where: [{ userName: userNameOrEmail }, { email: userNameOrEmail }],
     });
     if (!user) {
-      throw new NotFoundException('User not Found for this ID');
+      throw new RpcException(
+        new NotFoundException('User not Found for this ID'),
+      );
     }
     return user;
+  }
+
+  async validateUser(validateUserDto: ValidateUserDto) {
+    const user = await this.findOneByEmailOrUserName(
+      validateUserDto.usernameOrEmail,
+    );
+    const passwordMatched = await user.comparePasswords(
+      validateUserDto.password,
+    );
+    console.log(passwordMatched);
+    if (passwordMatched) {
+      return user;
+    } else {
+      throw new RpcException(
+        new BadRequestException('Wrong Password Provided'),
+      );
+    }
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
@@ -71,7 +95,9 @@ export class UserService {
   async remove(id: string) {
     const deleteResponse = await this.userRepository.delete(id);
     if (!deleteResponse.affected) {
-      throw new NotFoundException('User not found for this ID');
+      throw new RpcException(
+        new NotFoundException('User not found for this ID'),
+      );
     }
   }
 }

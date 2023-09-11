@@ -8,7 +8,6 @@ import { RmqModule } from 'libs/rabbitmq/src';
 import { UserModule } from './user/user.module';
 import { PlanModule } from './plan/plan.module';
 import { InterestModule } from './interest/interest.module';
-import { AuthModule } from './auth/auth.module';
 import { RoleModule } from './role/role.module';
 import { SeedService } from './seed/seed.service';
 import { PlanPermissionModule } from './plan-permission/plan-permission.module';
@@ -24,7 +23,6 @@ import { PlanPermissionModule } from './plan-permission/plan-permission.module';
     UserModule,
     PlanModule,
     InterestModule,
-    AuthModule,
     RoleModule,
     PlanPermissionModule,
   ],

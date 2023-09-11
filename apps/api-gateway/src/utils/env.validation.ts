@@ -27,6 +27,14 @@ class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty()
+  SECRET_KEY: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_EXPIRATION_TIME: string;
+
+  @IsString()
+  @IsNotEmpty()
   RABBITMQ_URL: string;
 
   @IsString()

@@ -3,6 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from '@app/shared/dto/user-service/create-user.dto';
+import { ValidateUserDto } from '@app/shared/dto/user-service/validate-user.dto';
 
 @Controller()
 export class UserController {
@@ -24,8 +25,13 @@ export class UserController {
   }
 
   @MessagePattern('findOneUserByEmailOrUserName')
-  findOneByEmailOrUserName(@Payload() id: string) {
-    return this.userService.findOneByEmailOrUserName(id);
+  findOneByEmailOrUserName(@Payload() emailOrUserName: string) {
+    return this.userService.findOneByEmailOrUserName(emailOrUserName);
+  }
+
+  @MessagePattern('validateUser')
+  validateUser(@Payload() validateUserDto: ValidateUserDto) {
+    return this.userService.validateUser(validateUserDto);
   }
 
   @MessagePattern('updateUser')

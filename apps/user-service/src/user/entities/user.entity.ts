@@ -13,6 +13,7 @@ import * as bcrypt from 'bcryptjs';
 import { Profile } from './profile.entity';
 import { Role } from '../../role/entities/role.entity';
 import { Plan } from '../../plan/entities/plan.entity';
+import { Exclude, instanceToPlain } from 'class-transformer';
 
 @Entity({
   name: '_user',
@@ -31,14 +32,17 @@ export class User extends BaseEntity {
   })
   email: string;
 
-  @Column({ select: false })
-  password?: string;
+  @Exclude({ toPlainOnly: true })
+  @Column()
+  password: string;
 
+  @Exclude({ toPlainOnly: true })
   @Column({
     nullable: true,
   })
   emailVerificationToken: string;
 
+  @Exclude({ toPlainOnly: true })
   @Column({
     nullable: true,
   })
@@ -62,14 +66,18 @@ export class User extends BaseEntity {
   @JoinColumn({ name: 'plan', referencedColumnName: 'name' })
   plan: Plan;
 
-  async comparePasswords(password: string): Promise<boolean> {
-    const result = await bcrypt.compareSync(password, this.password);
-    return result;
-  }
-
   @CreateDateColumn()
   public createdAt: Date;
 
   @UpdateDateColumn()
   public updatedAt: Date;
+
+  async comparePasswords(password: string): Promise<boolean> {
+    const result = await bcrypt.compareSync(password, this.password);
+    return result;
+  }
+
+  toJSON() {
+    return instanceToPlain(this);
+  }
 }

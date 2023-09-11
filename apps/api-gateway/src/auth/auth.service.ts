@@ -1,26 +1,55 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
-
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { lastValueFrom } from 'rxjs';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { RABBITMQ_QUEUES } from '../utils/constants';
+import { UserModel } from '../user/model/user.model';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcryptjs';
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    @Inject(RABBITMQ_QUEUES.USER_SERVICE)
+    private readonly userClient: ClientProxy,
+    private readonly jwtService: JwtService,
+  ) {}
+  async getUser(usernameOrEmail: string) {
+    const user = await lastValueFrom(
+      this.userClient.send<UserModel>(
+        'findOneUserByEmailOrUserName',
+        usernameOrEmail,
+      ),
+    );
+    return user;
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async loginUser(user: UserModel) {
+    const payload = { username: user.email, sub: user.id };
+    const accessToken = this.jwtService.sign(payload);
+    return {
+      accessToken: accessToken,
+      user: user,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  public async getAuthenticatedUser(usernameOrEmail: string, password: string) {
+    try {
+      const user = await lastValueFrom(
+        this.userClient.send<UserModel>('validateUser', {
+          usernameOrEmail,
+          password,
+        }),
+      );
+      return user;
+    } catch (error) {
+      throw new RpcException(error.response);
+    }
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async comparePasswords(
+    password: string,
+    userPassword: string,
+  ): Promise<boolean> {
+    const result = await bcrypt.compareSync(password, userPassword);
+    return result;
   }
 }

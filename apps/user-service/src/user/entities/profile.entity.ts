@@ -1,10 +1,12 @@
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Interest } from '../../interest/entities/interest.entity';
 
@@ -19,7 +21,9 @@ export class Profile extends BaseEntity {
   @Column()
   lastName: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   profilePicture: string;
 
   @ManyToMany(() => Interest)
@@ -30,4 +34,10 @@ export class Profile extends BaseEntity {
 
   @Column()
   bio: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

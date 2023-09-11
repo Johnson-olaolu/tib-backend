@@ -1,9 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { PlanService } from './plan.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
+import {
+  ApiExtraModels,
+  ApiResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
+import { ResponseDto } from '../utils/Response.dto';
+import { PlanModel } from './model/plan.model';
 
+@ApiTags('Plan')
 @Controller('plan')
+@ApiExtraModels(PlanModel)
 export class PlanController {
   constructor(private readonly planService: PlanService) {}
 
@@ -12,9 +30,33 @@ export class PlanController {
     return this.planService.create(createPlanDto);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Plans fetched successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                $ref: getSchemaPath(PlanModel),
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
   @Get()
-  findAll() {
-    return this.planService.findAll();
+  async findAll(): Promise<ResponseDto<PlanModel[]>> {
+    const plans = await this.planService.findAll();
+    return {
+      message: 'Plans fetched successfully',
+      status: true,
+      data: plans,
+    };
   }
 
   @Get(':id')
