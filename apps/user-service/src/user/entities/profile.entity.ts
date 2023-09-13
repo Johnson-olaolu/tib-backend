@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -15,10 +16,14 @@ export class Profile extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   firstName: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   lastName: string;
 
   @Column({
@@ -27,12 +32,12 @@ export class Profile extends BaseEntity {
   profilePicture: string;
 
   @ManyToMany(() => Interest)
-  @JoinColumn({
-    referencedColumnName: 'name',
-  })
+  @JoinTable()
   interests: Interest[];
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   bio: string;
 
   @CreateDateColumn()

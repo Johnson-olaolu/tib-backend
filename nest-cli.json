@@ -62,6 +62,40 @@
       "compilerOptions": {
         "tsConfigPath": "libs/shared/tsconfig.lib.json"
       }
+    },
+    "notification-service": {
+      "type": "application",
+      "root": "apps/notification-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/notification-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/notification-service/tsconfig.app.json"
+      }
+    },
+    "wallet-service": {
+      "type": "application",
+      "root": "apps/wallet-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/wallet-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/wallet-service/tsconfig.app.json"
+      }
+    },
+    "file-service": {
+      "type": "application",
+      "root": "apps/file-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/file-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/file-service/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "public/**",
+            "outDir": "dist/apps/file-service",
+            "watchAssets": true
+          }
+        ]
+      }
     }
   }
 }

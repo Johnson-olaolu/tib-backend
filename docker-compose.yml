@@ -22,7 +22,7 @@ services:
       - user_service
       - rabbitmq
     ports:
-      - 5000:5000
+      - 5001:5001
 
   user_service:
     build:
@@ -53,6 +53,37 @@ services:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=tib_user_db
 
+  file_service:
+    build:
+      context: .
+      dockerfile: ./apps/file-service/Dockerfile
+      target: development
+    env_file:
+      - ./apps/file-service/.env
+    networks:
+      - postgres
+      - rabbitmq
+    depends_on:
+      - file_db
+      - rabbitmq
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - 5000:5000
+
+  file_db:
+    image: postgres:latest
+    networks:
+      - postgres
+    ports:
+      - 5433:5432
+    volumes:
+      - file_db:/data/postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=tib_file_db
+
   pgadmin:
     image: dpage/pgadmin4:6.18
     networks:
@@ -73,4 +104,5 @@ networks:
 
 volumes:
   user_db:
+  file_db:
   pgadmin-data:

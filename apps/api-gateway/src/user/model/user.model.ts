@@ -10,7 +10,6 @@ export class UserModel {
 
   isEmailVerified: boolean;
 
-  @Exclude()
   password: string;
 
   profile?: ProfileModel;
@@ -22,8 +21,4 @@ export class UserModel {
   createdAt: Date;
 
   updatedAt: Date;
-
-  toJSON() {
-    return instanceToPlain(this);
-  }
 }

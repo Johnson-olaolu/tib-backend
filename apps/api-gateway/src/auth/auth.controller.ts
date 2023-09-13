@@ -21,17 +21,14 @@ import { LocalAuthGuard } from './guards/loginGuard.guard';
 import { UserModel } from '../user/model/user.model';
 import { ResponseDto } from '../utils/Response.dto';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { ProfileModel } from '../user/model/profile.model';
 
 @ApiTags('Auth')
-@ApiExtraModels(UserModel)
+@ApiExtraModels(UserModel, ProfileModel)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Post('register')
-  async register() {
-    return;
-  }
 
   @ApiResponse({
     status: 200,
@@ -47,8 +44,36 @@ export class AuthController {
                 accessToken: {
                   type: 'string',
                 },
-                user: {
-                  $ref: getSchemaPath(UserModel),
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Post('register')
+  async register(@Body() registerDto: RegisterDto) {
+    const data = await this.authService.registerNewUser(registerDto);
+    return {
+      success: true,
+      message: 'user logged in successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Plans fetched successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'string',
                 },
               },
             },

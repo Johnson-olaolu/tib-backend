@@ -14,6 +14,7 @@ async function bootstrap() {
     .setTitle('TIB API')
     .setDescription('TIB API Documentation')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config, {
     extraModels: [ResponseDto],

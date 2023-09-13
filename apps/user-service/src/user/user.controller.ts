@@ -4,14 +4,29 @@ import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from '@app/shared/dto/user-service/create-user.dto';
 import { ValidateUserDto } from '@app/shared/dto/user-service/validate-user.dto';
+import { UpdateProfileDto } from '@app/shared/dto/user-service/update-profile.dto';
 
 @Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @MessagePattern('createUser')
-  create(@Payload() createUserDto: CreateUserDto) {
+  createUser(@Payload() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
+  }
+
+  @MessagePattern('createProfile')
+  createProfile(
+    @Payload()
+    {
+      userId,
+      createProfileDto,
+    }: {
+      userId: string;
+      createProfileDto: UpdateProfileDto;
+    },
+  ) {
+    return this.userService.updateProfile(userId, createProfileDto);
   }
 
   @MessagePattern('findAllUser')
@@ -22,6 +37,25 @@ export class UserController {
   @MessagePattern('findOneUser')
   findOne(@Payload() id: string) {
     return this.userService.findOne(id);
+  }
+
+  @MessagePattern('getUserDetails')
+  getUserDetails(@Payload() id: string) {
+    return this.userService.getUserDetails(id);
+  }
+
+  @MessagePattern('updateUserProfile')
+  updateUserProfile(
+    @Payload()
+    {
+      id,
+      updateProfileDto,
+    }: {
+      id: string;
+      updateProfileDto: UpdateProfileDto;
+    },
+  ) {
+    return this.userService.updateProfile(id, updateProfileDto);
   }
 
   @MessagePattern('findOneUserByEmailOrUserName')

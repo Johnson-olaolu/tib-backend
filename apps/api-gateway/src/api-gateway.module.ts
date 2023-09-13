@@ -9,6 +9,8 @@ import { UserModule } from './user/user.module';
 import { InterestModule } from './interest/interest.module';
 import { PlanModule } from './plan/plan.module';
 import { PlanPermissionModule } from './plan-permission/plan-permission.module';
+import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
+import { RABBITMQ_QUEUES } from './utils/constants';
 
 @Module({
   imports: [
@@ -16,7 +18,8 @@ import { PlanPermissionModule } from './plan-permission/plan-permission.module';
       isGlobal: true,
       validate: validateEnv,
     }),
-    RmqModule.register({ name: 'USER' }),
+    NestjsFormDataModule.config({ storage: MemoryStoredFile, isGlobal: true }),
+    RmqModule.register({ name: RABBITMQ_QUEUES.USER_SERVICE }),
     AuthModule,
     UserModule,
     InterestModule,
