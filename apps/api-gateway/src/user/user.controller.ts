@@ -8,6 +8,13 @@ import {
   Delete,
   UseGuards,
   Req,
+  UploadedFile,
+  ParseFilePipeBuilder,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
+  HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -25,6 +32,7 @@ import { ResponseDto } from '../utils/Response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { UpdateProfileDto } from '@app/shared/dto/user-service/update-profile.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiBearerAuth()
 @ApiTags('User')
@@ -34,50 +42,30 @@ import { UpdateProfileDto } from '@app/shared/dto/user-service/update-profile.dt
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Plans fetched successfully',
-  //   schema: {
-  //     allOf: [
-  //       { $ref: getSchemaPath(ResponseDto) },
-  //       {
-  //         properties: {
-  //           data: {
-  //             type: 'object',
-  //             properties: {
-  //               accessToken: {
-  //                 type: 'string',
-  //               },
-  //               user: {
-  //                 $ref: getSchemaPath(UserModel),
-  //               },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     ],
-  //   },
-  // })
-  // @ApiConsumes('multipart/form-data')
-  // // @UseInterceptors(FileInterceptor('profilePicture'))
-  // @Post(':userId/profile')
-  // @FormDataRequest({ storage: FileSystemStoredFile })
-  // create(
-  //   @Body() createProfileDto: CreateProfileDto,
-  //   // @UploadedFile() profilePicture: Express.Multer.File,
-  //   @Param('userId') userId: string,
-  // ) {
-  //   console.log(userId);
-  //   console.log(createProfileDto);
-  //   // console.log(profilePicture);
-  //   // const data = this.userService.createProfile(userId, createProfileDto);
-  //   // return {
-  //   //   success: true,
-  //   //   message: 'user profile created successfully',
-  //   //   data: data,
-  //   // };
-  // }
-
+  @ApiResponse({
+    status: 200,
+    description: 'User profile updated successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'string',
+                },
+                user: {
+                  $ref: getSchemaPath(UserModel),
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
   @Patch(':userId/profile')
   async updateProfile(
     @Body() updateProfileDto: UpdateProfileDto,
@@ -90,6 +78,53 @@ export class UserController {
     return {
       success: true,
       message: 'user profile updated successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'User profile updated successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'string',
+                },
+                user: {
+                  $ref: getSchemaPath(UserModel),
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @Patch(':userId/profilePicture')
+  async updateProfilePicture(
+    @Param('userId') userId: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1e7 }),
+          // new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    const data = await this.userService.updateUserProfilePicture(userId, file);
+    return {
+      success: true,
+      message: 'user profile Picture updated successfully',
       data: data,
     };
   }

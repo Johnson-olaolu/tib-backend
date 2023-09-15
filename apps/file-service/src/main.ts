@@ -5,10 +5,10 @@ import { RmqService } from '@app/rmq';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
-export let app: NestExpressApplication;
-
 async function bootstrap() {
-  app = await NestFactory.create<NestExpressApplication>(FileServiceModule);
+  const app = await NestFactory.create<NestExpressApplication>(
+    FileServiceModule,
+  );
   const rmqService = app.get<RmqService>(RmqService);
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));

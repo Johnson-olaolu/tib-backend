@@ -29,6 +29,14 @@ export class UserController {
     return this.userService.updateProfile(userId, createProfileDto);
   }
 
+  @MessagePattern('updateProfilePicture')
+  updateProfilePicture(
+    @Payload()
+    { userId, file }: { userId: string; file: Express.Multer.File },
+  ) {
+    return this.userService.updateProfilePicture(userId, file);
+  }
+
   @MessagePattern('findAllUser')
   findAll() {
     return this.userService.findAll();

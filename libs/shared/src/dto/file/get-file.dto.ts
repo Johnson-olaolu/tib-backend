@@ -1,3 +1,3 @@
 export class GetFileDto {
-  name: string;
+  title: string;
 }

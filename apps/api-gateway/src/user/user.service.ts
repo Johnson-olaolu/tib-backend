@@ -3,8 +3,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateProfileDto } from '@app/shared/dto/user-service/update-profile.dto';
 import { lastValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
-import { RABBITMQ_QUEUES } from '../utils/constants';
 import { ProfileModel } from './model/profile.model';
+import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
+import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
 
 @Injectable()
 export class UserService {
@@ -17,6 +18,16 @@ export class UserService {
       this.userClient.send<ProfileModel>('updateUserProfile', {
         userId,
         updateProfileDto,
+      }),
+    );
+    return user;
+  }
+
+  async updateUserProfilePicture(userId: string, file: Express.Multer.File) {
+    const user = await lastValueFrom(
+      this.userClient.send<ProfileModel>('updateProfilePicture', {
+        userId,
+        file,
       }),
     );
     return user;

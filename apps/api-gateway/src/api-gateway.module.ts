@@ -10,7 +10,7 @@ import { InterestModule } from './interest/interest.module';
 import { PlanModule } from './plan/plan.module';
 import { PlanPermissionModule } from './plan-permission/plan-permission.module';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
-import { RABBITMQ_QUEUES } from './utils/constants';
+import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 
 @Module({
   imports: [

@@ -11,7 +11,7 @@ import { InterestModule } from './interest/interest.module';
 import { RoleModule } from './role/role.module';
 import { SeedService } from './seed/seed.service';
 import { PlanPermissionModule } from './plan-permission/plan-permission.module';
-import { RABBITMQ_QUEUES } from 'apps/api-gateway/src/utils/constants';
+import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 
 @Module({
   imports: [

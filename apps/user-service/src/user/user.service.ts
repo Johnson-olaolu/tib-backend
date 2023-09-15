@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -14,12 +15,20 @@ import { Repository } from 'typeorm';
 import { RoleService } from '../role/role.service';
 import { PlanService } from '../plan/plan.service';
 import { ValidateUserDto } from '@app/shared/dto/user-service/validate-user.dto';
-import { RpcException } from '@nestjs/microservices';
-import { POSTGRES_ERROR_CODES } from '@app/shared/utils/constants';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import {
+  FileTypeEnum,
+  POSTGRES_ERROR_CODES,
+  RABBITMQ_QUEUES,
+} from '@app/shared/utils/constants';
 import { UpdateProfileDto } from '@app/shared/dto/user-service/update-profile.dto';
 import { Profile } from './entities/profile.entity';
 import { InterestService } from '../interest/interest.service';
 import { Interest } from '../interest/entities/interest.entity';
+import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
+import { lastValueFrom } from 'rxjs';
+import { FileModel } from '@app/shared/model/file.model';
+import { GetFileDto } from '@app/shared/dto/file/get-file.dto';
 
 @Injectable()
 export class UserService {
@@ -29,6 +38,7 @@ export class UserService {
     private planService: PlanService,
     private roleService: RoleService,
     private interestService: InterestService,
+    @Inject(RABBITMQ_QUEUES.FILE_SERVICE) private fileClient: ClientProxy,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -145,6 +155,44 @@ export class UserService {
     for (const detail in profileDetails) {
       profile[detail] = profileDetails[detail];
     }
+    await profile.save();
+    return profile;
+  }
+
+  async updateProfilePicture(userId: string, file: Express.Multer.File) {
+    const user = await this.getUserDetails(userId);
+    const profile = await this.profileRepository.findOne({
+      where: {
+        id: user.profile.id,
+      },
+    });
+    const fileName = user.userName + '_' + 'profile_pic';
+
+    const fileDetails: SaveFileDto = {
+      author: user.id,
+      name: fileName,
+      file: file,
+      mimetype: file.mimetype,
+      parent: user.id,
+      type: FileTypeEnum.PROFILE,
+    };
+
+    let savedFile: FileModel;
+
+    try {
+      await lastValueFrom(
+        this.fileClient.send<FileModel>('getFile', { title: fileName }),
+      );
+      savedFile = await lastValueFrom(
+        this.fileClient.send<FileModel>('updateFile', fileDetails),
+      );
+    } catch (error) {
+      savedFile = await lastValueFrom(
+        this.fileClient.send<FileModel>('saveFile', fileDetails),
+      );
+    }
+
+    profile.profilePicture = savedFile.path;
     await profile.save();
     return profile;
   }

@@ -4,7 +4,7 @@ import { UpdatePlanDto } from './dto/update-plan.dto';
 import { ClientProxy } from '@nestjs/microservices';
 import { PlanModel } from './model/plan.model';
 import { lastValueFrom } from 'rxjs';
-import { RABBITMQ_QUEUES } from '../utils/constants';
+import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 
 @Injectable()
 export class PlanService {

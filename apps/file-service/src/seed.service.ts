@@ -1,10 +1,13 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
-import { join } from 'path';
+import { join, parse } from 'path';
 import { File } from './entities/file.entity';
 import { Repository } from 'typeorm';
 import { FileServiceService } from './file-service.service';
+import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
+import * as mime from 'mime-types';
+import { FileTypeEnum } from '@app/shared/utils/constants';
 
 @Injectable()
 export class SeedService implements OnApplicationBootstrap {
@@ -27,22 +30,27 @@ export class SeedService implements OnApplicationBootstrap {
       if (err) {
         return console.log('Unable to scan directory: ' + err);
       }
-      //listing all files using forEach
-
       files.forEach(async function (file) {
-        // Do whatever you want to do with the file
-        let foundFile = null;
+        const name = parse(file).name;
+
         try {
-          foundFile = await _.fileService.getFile({ name: file });
-        } catch (error) {}
-        if (!foundFile) {
-          const fileDetails: Partial<File> = {
-            name: file,
-            path: '/public/default/' + file,
-            ownerId: 'the_idea_bank',
-          };
-          const newFile = await _.fileRepository.save(fileDetails);
-          _.logger.log(`File : ${newFile.name} Seeded`);
+          await _.fileService.getFile(name);
+        } catch (error) {
+          fs.readFile(join(directoryPath, file), async (err, data) => {
+            if (err) {
+              return console.log('Unable to read file ' + err);
+            }
+            const saveFileDto: SaveFileDto = {
+              author: 'SuperAdmin',
+              file: { buffer: data.toJSON() } as any,
+              mimetype: mime.contentType(file) || '',
+              name: name,
+              parent: 'SuperAdmin',
+              type: FileTypeEnum.APP,
+            };
+            const seededFile = await _.fileService.saveFile(saveFileDto);
+            _.logger.log(`File: ${seededFile.name} Seeded`);
+          });
         }
       });
     });

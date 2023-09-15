@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { RABBITMQ_QUEUES } from '../utils/constants';
 import { UserModel } from '../user/model/user.model';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
+import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 @Injectable()
 export class AuthService {
   constructor(

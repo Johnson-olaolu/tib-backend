@@ -1,9 +1,10 @@
-import { plainToInstance } from 'class-transformer';
+import { Transform, plainToInstance } from 'class-transformer';
 import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
+  IsUrl,
   validateSync,
 } from 'class-validator';
 
@@ -20,6 +21,12 @@ class EnvironmentVariables {
 
   @IsNumber()
   PORT: number;
+
+  @IsUrl({
+    require_tld: false,
+  })
+  @IsNotEmpty()
+  BASE_URL: string;
 
   @IsString()
   @IsNotEmpty()
