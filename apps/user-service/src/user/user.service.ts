@@ -4,10 +4,12 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from '@app/shared/dto/user-service/create-user.dto';
 import * as bcrypt from 'bcryptjs';
+import * as otpGenerator from 'otp-generator';
 import { BCRYPT_HASH_ROUND } from '../utils/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -26,9 +28,18 @@ import { Profile } from './entities/profile.entity';
 import { InterestService } from '../interest/interest.service';
 import { Interest } from '../interest/entities/interest.entity';
 import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { FileModel } from '@app/shared/model/file.model';
 import { GetFileDto } from '@app/shared/dto/file/get-file.dto';
+import {
+  INotification,
+  PasswordResetNotificationData,
+  RegistrationNotificationData,
+} from '@app/shared/dto/notification/notificationTypes';
+import * as moment from 'moment';
+import { ConfirmUserDto } from '@app/shared/dto/user-service/confirm-user.dto';
+import { ConfigService } from '@nestjs/config';
+import { ChangePasswordDto } from '@app/shared/dto/user-service/change-password.dto';
 
 @Injectable()
 export class UserService {
@@ -38,7 +49,10 @@ export class UserService {
     private planService: PlanService,
     private roleService: RoleService,
     private interestService: InterestService,
+    private configService: ConfigService,
     @Inject(RABBITMQ_QUEUES.FILE_SERVICE) private fileClient: ClientProxy,
+    @Inject(RABBITMQ_QUEUES.NOTIFICATION_SERVICE)
+    private notificationClient: ClientProxy,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -57,7 +71,8 @@ export class UserService {
       profile: profile,
     };
     try {
-      const newUser = await this.userRepository.save(newUserDetails);
+      const newUser = this.userRepository.create(newUserDetails);
+      await this.generateConfirmAccountToken(newUser);
       return newUser;
     } catch (error) {
       if (error?.code == POSTGRES_ERROR_CODES.unique_violation) {
@@ -65,6 +80,118 @@ export class UserService {
       }
       throw new RpcException(new InternalServerErrorException());
     }
+  }
+
+  //Handle confirm account
+  async generateConfirmAccountToken(user: User) {
+    const verificationToken = otpGenerator.generate(6, {
+      digits: true,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+      upperCaseAlphabets: false,
+    });
+
+    const expire = moment().add(15, 'minutes');
+
+    user.emailVerificationToken = verificationToken;
+    user.emailVerificationTokenTTL = moment(expire, true).toDate();
+
+    const registrationNotification: INotification<RegistrationNotificationData> =
+      {
+        type: ['email'],
+        data: {
+          date: moment().toString(),
+          name: user.userName,
+          recipientMail: user.email,
+          token: verificationToken,
+        },
+      };
+    await firstValueFrom(
+      this.notificationClient.emit('userRegistered', registrationNotification),
+    );
+    await user.save();
+  }
+
+  async generateNewConfirmAccountToken(userId: string) {
+    const user = await this.findOne(userId);
+    this.generateConfirmAccountToken(user);
+  }
+
+  async confirmNewUser(confirmUserDto: ConfirmUserDto) {
+    const user = await this.findOne(confirmUserDto.userId);
+    const currentDate = moment.now();
+
+    if (currentDate > moment(user.emailVerificationTokenTTL).valueOf()) {
+      throw new RpcException(new UnauthorizedException('Token Expired'));
+    }
+    if (confirmUserDto.token !== user.emailVerificationToken) {
+      throw new RpcException(new UnauthorizedException('Invalid Token'));
+    }
+    user.isEmailVerified = true;
+    user.emailVerificationToken = null;
+    user.emailVerificationTokenTTL = null;
+    await user.save();
+    return user;
+  }
+
+  async generatePasswordResetLink(email: string) {
+    const user = await this.findOneByEmailOrUserName(email);
+    await this.generatePasswordResetToken(user);
+  }
+
+  async generatePasswordResetToken(user: User) {
+    const passwordResetToken = otpGenerator.generate(6, {
+      digits: true,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+      upperCaseAlphabets: false,
+    });
+
+    const expire = moment().add(15, 'minutes');
+
+    user.passwordResetToken = passwordResetToken;
+    user.passwordResetTokenTTL = moment(expire, true).toDate();
+
+    const passwordResetUrl = `${this.configService.get(
+      'CLIENT_URL',
+    )}/auth/reset-password?email=${user.email}&token=${
+      user.passwordResetToken
+    }`;
+
+    const passwordResetNotification: INotification<PasswordResetNotificationData> =
+      {
+        type: ['email'],
+        data: {
+          recipientMail: user.email,
+          url: passwordResetUrl,
+        },
+      };
+    await firstValueFrom(
+      this.notificationClient.emit('passwordReset', passwordResetNotification),
+    );
+    await user.save();
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto) {
+    const user = await this.findOneByEmailOrUserName(changePasswordDto.email);
+    const currentDate = moment.now();
+
+    if (currentDate > moment(user.passwordResetTokenTTL).valueOf()) {
+      throw new RpcException(new UnauthorizedException('Token Expired'));
+    }
+    if (changePasswordDto.token !== user.passwordResetToken) {
+      throw new RpcException(new UnauthorizedException('Invalid Token'));
+    }
+
+    const hashedPass = await bcrypt.hash(
+      changePasswordDto.password,
+      BCRYPT_HASH_ROUND,
+    );
+    user.password = hashedPass;
+    user.passwordResetToken = null;
+    user.passwordResetTokenTTL = null;
+    await user.save();
+    return user;
   }
 
   async findAll() {
@@ -118,7 +245,6 @@ export class UserService {
     const passwordMatched = await user.comparePasswords(
       validateUserDto.password,
     );
-    console.log(passwordMatched);
     if (passwordMatched) {
       return user;
     } else {
@@ -132,6 +258,7 @@ export class UserService {
     return `This action updates a #${id} user`;
   }
 
+  //handle profile updates
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
     const user = await this.getUserDetails(userId);
     const profile = await this.profileRepository.findOne({

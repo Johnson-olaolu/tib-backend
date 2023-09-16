@@ -69,7 +69,14 @@
       "entryFile": "main",
       "sourceRoot": "apps/notification-service/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/notification-service/tsconfig.app.json"
+        "tsConfigPath": "apps/notification-service/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "templates/**",
+            "outDir": "dist/apps/notification-service",
+            "watchAssets": true
+          }
+        ]
       }
     },
     "wallet-service": {

@@ -84,6 +84,21 @@ services:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=tib_file_db
 
+  notification_service:
+    build:
+      context: .
+      dockerfile: ./apps/notification-service/Dockerfile
+      target: development
+    env_file:
+      - ./apps/notification-service/.env
+    networks:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+    volumes:
+      - .:/usr/src/app
+
+
   pgadmin:
     image: dpage/pgadmin4:6.18
     networks:

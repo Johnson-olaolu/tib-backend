@@ -1,9 +1,10 @@
-import { plainToInstance } from 'class-transformer';
+import { Transform, plainToInstance } from 'class-transformer';
 import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
+  IsUrl,
   validateSync,
 } from 'class-validator';
 
@@ -20,30 +21,11 @@ class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty()
-  DB_HOST: string;
-
-  @IsNumber()
-  DB_PORT: number;
-
-  @IsString()
-  @IsNotEmpty()
-  DB_USER: string;
-
-  @IsString()
-  @IsNotEmpty()
-  DB_PASSWORD: string;
-
-  @IsString()
-  @IsNotEmpty()
-  DB_DATABASE: string;
-
-  @IsString()
-  @IsNotEmpty()
   RABBITMQ_URL: string;
 
   @IsString()
   @IsNotEmpty()
-  RABBITMQ_USER_QUEUE: string;
+  RABBITMQ_NOTIFICATION_QUEUE: string;
 
   @IsString()
   @IsNotEmpty()
@@ -51,15 +33,15 @@ class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty()
-  RABBITMQ_WALLET_QUEUE: string;
+  EMAIL_HOST: string;
 
   @IsString()
   @IsNotEmpty()
-  RABBITMQ_IDEA_QUEUE: string;
+  EMAIL_USER: string;
 
   @IsString()
   @IsNotEmpty()
-  CLIENT_URL: string;
+  EMAIL_PASSWORD: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

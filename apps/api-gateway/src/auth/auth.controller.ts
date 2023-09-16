@@ -23,6 +23,7 @@ import { ResponseDto } from '../utils/Response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ProfileModel } from '../user/model/profile.model';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Auth')
 @ApiExtraModels(UserModel, ProfileModel)
@@ -95,14 +96,27 @@ export class AuthController {
     };
   }
 
+  @UseGuards(AuthGuard('jwt`'))
   @Get('confirmEmail')
-  async getConfirmEmailToken() {
-    return;
+  async getConfirmEmailToken(@Req() request: Request) {
+    const user = (request as any).user as UserModel;
+    await this.authService.generateConfirmAccountToken(user);
+    return {
+      success: true,
+      message: 'New Token generated, Please check your email',
+    };
   }
 
+  @UseGuards(AuthGuard('jwt`'))
   @Post('confirmEmail')
-  async confirmEmail() {
-    return;
+  async confirmEmail(@Req() request: Request, @Body() body) {
+    const user = (request as any).user as UserModel;
+    const data = await this.authService.confirmNewUser(user, body.token);
+    return {
+      success: true,
+      message: 'Email Confirmed',
+      data,
+    };
   }
 
   @Get('changePassword')

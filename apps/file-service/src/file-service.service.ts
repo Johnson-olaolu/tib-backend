@@ -80,7 +80,7 @@ export class FileServiceService {
     if (!file) {
       throw new RpcException(new NotFoundException('File Not Found'));
     }
-    return file;
+    return this.getFileRoute(file);
   }
 
   async updateFile(saveFileDto: SaveFileDto) {

@@ -1,10 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { UserModel } from '../user/model/user.model';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
+import { ConfirmUserDto } from '@app/shared/dto/user-service/confirm-user.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -61,63 +62,36 @@ export class AuthService {
     }
   }
 
-  // async generateConfirmAccountToken(email: string) {
-  //   const user = await this.userService.findUserByEmail(email);
-  //   const verificationToken = otpGenerator.generate(6, {
-  //     digits: true,
-  //     lowerCaseAlphabets: false,
-  //     specialChars: false,
-  //     upperCaseAlphabets: false,
-  //   });
+  async generateConfirmAccountToken(user: UserModel) {
+    try {
+      await firstValueFrom(
+        this.userClient.emit('generateConfirmEmailToken', user.id),
+      );
+    } catch (error) {
+      throw new RpcException(error.response);
+    }
+  }
 
-  //   const expire = moment().add(15, 'minutes');
+  async confirmNewUser(user: UserModel, token: string) {
+    const confirmUserDto: ConfirmUserDto = {
+      token,
+      userId: user.id,
+    };
+    const confirmedUser = await lastValueFrom(
+      this.userClient.send<UserModel>('confirmEmail', confirmUserDto),
+    );
+    return confirmedUser;
+  }
 
-  //   user.confirmUserToken = verificationToken;
-  //   user.tokenTimeToLive = moment(expire, true).toDate();
-  //   await user.save();
-  //   await this.mailService.sendUserConfirmationMail(user);
-  // }
-
-  // async confirmNewUser(confirmUsertDto: ConfimUserDto) {
-  //   const { email, token } = confirmUsertDto;
-  //   const user = await this.userService.findUserByEmail(email);
-  //   const currentDate = moment().valueOf();
-
-  //   console.log({
-  //     currentDate,
-  //     today: moment(),
-  //     time: user.tokenTimeToLive,
-  //     ttl: moment(user.tokenTimeToLive).valueOf(),
-  //   });
-  //   if (currentDate > moment(user.tokenTimeToLive).valueOf()) {
-  //     throw new HttpException('Token Expired', HttpStatus.UNAUTHORIZED);
-  //   }
-  //   if (token !== user.confirmUserToken) {
-  //     throw new HttpException('Token Doesnt Match', HttpStatus.UNAUTHORIZED);
-  //   }
-  //   user.isVerified = true;
-  //   user.confirmUserToken = null;
-  //   user.tokenTimeToLive = null;
-  //   await user.save();
-  // }
-
-  // async getPasswordResetLink(email: string) {
-  //   const user = await this.userService.findUserByEmail(email);
-  //   const resetPasswordToken = otpGenerator.generate(6, {
-  //     digits: true,
-  //     lowerCaseAlphabets: false,
-  //     specialChars: false,
-  //     upperCaseAlphabets: false,
-  //   });
-
-  //   const expire = moment().add(15, 'minutes').format('YYYY-MM-DD hh:mm:ss');
-
-  //   user.resetPasswordToken = resetPasswordToken;
-  //   user.tokenTimeToLive = new Date(expire);
-
-  //   await user.save();
-  //   await this.mailService.sendChangePasswordMail(user);
-  // }
+  async getPasswordResetLink(email: string) {
+    try {
+      await firstValueFrom(
+        this.userClient.emit('generateConfirmEmailToken', email),
+      );
+    } catch (error) {
+      throw new RpcException(error.response);
+    }
+  }
 
   // async confirmNewPassword(changePasswordDto: ChangePasswordDto) {
   //   const { email, token, password } = changePasswordDto;

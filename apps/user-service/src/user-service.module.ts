@@ -17,6 +17,7 @@ import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
   imports: [
     RmqModule,
     DatabaseModule,
+    RmqModule.register({ name: RABBITMQ_QUEUES.NOTIFICATION_SERVICE }),
     RmqModule.register({ name: RABBITMQ_QUEUES.FILE_SERVICE }),
     ConfigModule.forRoot({
       isGlobal: true,

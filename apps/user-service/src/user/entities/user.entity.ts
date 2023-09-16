@@ -46,7 +46,19 @@ export class User extends BaseEntity {
   @Column({
     nullable: true,
   })
-  passwordVerificationToken: string;
+  emailVerificationTokenTTL: Date;
+
+  @Exclude({ toPlainOnly: true })
+  @Column({
+    nullable: true,
+  })
+  passwordResetToken: string;
+
+  @Exclude({ toPlainOnly: true })
+  @Column({
+    nullable: true,
+  })
+  passwordResetTokenTTL: Date;
 
   @Column({
     default: false,
