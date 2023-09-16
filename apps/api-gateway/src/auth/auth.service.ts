@@ -74,21 +74,25 @@ export class AuthService {
     }
   }
 
-  async confirmNewUser(user: UserModel, token: string) {
-    const confirmUserDto: ConfirmUserDto = {
-      token,
-      userId: user.id,
-    };
-    const confirmedUser = await lastValueFrom(
-      this.userClient.send<UserModel>('confirmEmail', confirmUserDto),
-    );
-    return confirmedUser;
+  async confirmNewUserEmail(user: UserModel, token: string) {
+    try {
+      const confirmUserDto: ConfirmUserDto = {
+        token,
+        userId: user.id,
+      };
+      const confirmedUser = await lastValueFrom(
+        this.userClient.send<UserModel>('confirmEmail', confirmUserDto),
+      );
+      return confirmedUser;
+    } catch (error) {
+      throw new RpcException(error.response);
+    }
   }
 
   async getPasswordResetLink(email: string) {
     try {
       await firstValueFrom(
-        this.userClient.emit('generateConfirmEmailToken', email),
+        this.userClient.emit('generatePasswordResetToken', email),
       );
     } catch (error) {
       throw new RpcException(error.response);
@@ -97,8 +101,8 @@ export class AuthService {
 
   async changePassword(changePasswordDto: ChangePasswordDto) {
     try {
-      const user = await firstValueFrom(
-        this.userClient.emit<UserModel>('changePassword', changePasswordDto),
+      const user = await lastValueFrom(
+        this.userClient.send<UserModel>('changePassword', changePasswordDto),
       );
       return user;
     } catch (error) {

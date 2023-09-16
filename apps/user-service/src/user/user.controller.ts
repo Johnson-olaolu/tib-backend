@@ -19,12 +19,12 @@ export class UserController {
 
   @EventPattern('generateConfirmEmailToken')
   async generateConfirmEmailToken(@Payload() userId: string) {
-    await this.userService.generateNewConfirmAccountToken(userId);
+    await this.userService.generateNewConfirmUserEmailToken(userId);
   }
 
   @MessagePattern('confirmEmail')
-  confirmEmail(@Payload() confirmUserDto: ConfirmUserDto) {
-    return this.userService.confirmNewUser(confirmUserDto);
+  async confirmEmail(@Payload() confirmUserDto: ConfirmUserDto) {
+    return await this.userService.confirmUserEmail(confirmUserDto);
   }
 
   @EventPattern('generatePasswordResetToken')

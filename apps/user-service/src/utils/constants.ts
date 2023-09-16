@@ -70,6 +70,8 @@ export const defaultInterests: CreateInterestDto[] = [
 
 interface IDefaultSuperAdmin extends CreateUserDto {
   isEmailVerified: boolean;
+  role: string;
+  plan: string;
 }
 export const defaultSuperAdmin: IDefaultSuperAdmin = {
   email: 'super-admin@tib.com',

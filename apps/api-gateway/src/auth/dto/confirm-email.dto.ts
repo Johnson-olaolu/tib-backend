@@ -1,6 +1,5 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class ConfirmEmailDto {
-  @IsString() @IsNotEmpty() email: string;
+export class ConfirmEmailAPIDto {
   @IsString() @IsNotEmpty() token: string;
 }

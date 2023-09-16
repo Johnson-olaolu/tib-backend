@@ -42,6 +42,7 @@
     "ip-address": "^8.1.0",
     "mime-types": "^2.1.35",
     "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43",
     "nestjs-form-data": "^1.9.0",
     "nodemailer": "^6.9.5",
     "otp-generator": "^4.0.1",

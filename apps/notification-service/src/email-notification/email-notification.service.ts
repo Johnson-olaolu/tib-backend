@@ -104,8 +104,8 @@ export class EmailNotificationService implements OnApplicationBootstrap {
     await this.mailerService.sendMail({
       to: passwordResetNotificationData.recipientMail,
       // from: '"Support Team" <support@example.com>', // override default from
-      subject: 'Welcome to The Idea Hub! Confirm your Email',
-      template: 'registrationMail',
+      subject: 'Change your password',
+      template: 'passwordResetMail',
       context: {
         logo: this.logo,
         passwordResetLink: passwordResetNotificationData.url,

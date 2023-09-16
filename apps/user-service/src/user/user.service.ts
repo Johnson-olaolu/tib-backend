@@ -36,7 +36,7 @@ import {
   PasswordResetNotificationData,
   RegistrationNotificationData,
 } from '@app/shared/dto/notification/notificationTypes';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 import { ConfirmUserDto } from '@app/shared/dto/user-service/confirm-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { ChangePasswordDto } from '@app/shared/dto/user-service/change-password.dto';
@@ -60,8 +60,8 @@ export class UserService {
       createUserDto.password,
       BCRYPT_HASH_ROUND,
     );
-    const role = await this.roleService.findOneByName(createUserDto.role);
-    const plan = await this.planService.findOneByName(createUserDto.plan);
+    const role = await this.roleService.findOneByName('user');
+    const plan = await this.planService.findOneByName('Free');
     const profile = await this.profileRepository.save({});
     const newUserDetails = {
       ...createUserDto,
@@ -72,7 +72,7 @@ export class UserService {
     };
     try {
       const newUser = this.userRepository.create(newUserDetails);
-      await this.generateConfirmAccountToken(newUser);
+      await this.generateConfirmUserEmailToken(newUser);
       return newUser;
     } catch (error) {
       if (error?.code == POSTGRES_ERROR_CODES.unique_violation) {
@@ -83,7 +83,7 @@ export class UserService {
   }
 
   //Handle confirm account
-  async generateConfirmAccountToken(user: User) {
+  async generateConfirmUserEmailToken(user: User) {
     const verificationToken = otpGenerator.generate(6, {
       digits: true,
       lowerCaseAlphabets: false,
@@ -92,10 +92,8 @@ export class UserService {
     });
 
     const expire = moment().add(15, 'minutes');
-
     user.emailVerificationToken = verificationToken;
-    user.emailVerificationTokenTTL = moment(expire, true).toDate();
-
+    user.emailVerificationTokenTTL = expire.toDate();
     const registrationNotification: INotification<RegistrationNotificationData> =
       {
         type: ['email'],
@@ -112,16 +110,18 @@ export class UserService {
     await user.save();
   }
 
-  async generateNewConfirmAccountToken(userId: string) {
+  async generateNewConfirmUserEmailToken(userId: string) {
     const user = await this.findOne(userId);
-    this.generateConfirmAccountToken(user);
+    this.generateConfirmUserEmailToken(user);
   }
 
-  async confirmNewUser(confirmUserDto: ConfirmUserDto) {
+  async confirmUserEmail(confirmUserDto: ConfirmUserDto) {
     const user = await this.findOne(confirmUserDto.userId);
-    const currentDate = moment.now();
+    const currentDate = moment(moment.now()).toDate().valueOf();
 
-    if (currentDate > moment(user.emailVerificationTokenTTL).valueOf()) {
+    if (
+      currentDate > moment(user.emailVerificationTokenTTL).toDate().valueOf()
+    ) {
       throw new RpcException(new UnauthorizedException('Token Expired'));
     }
     if (confirmUserDto.token !== user.emailVerificationToken) {
@@ -151,7 +151,9 @@ export class UserService {
     const expire = moment().add(15, 'minutes');
 
     user.passwordResetToken = passwordResetToken;
-    user.passwordResetTokenTTL = moment(expire, true).toDate();
+    user.passwordResetTokenTTL = moment(expire, true)
+      .tz('Africa/Lagos')
+      .toDate();
 
     const passwordResetUrl = `${this.configService.get(
       'CLIENT_URL',
@@ -175,7 +177,7 @@ export class UserService {
 
   async changePassword(changePasswordDto: ChangePasswordDto) {
     const user = await this.findOneByEmailOrUserName(changePasswordDto.email);
-    const currentDate = moment.now();
+    const currentDate = moment(moment.now()).toDate().valueOf();
 
     if (currentDate > moment(user.passwordResetTokenTTL).valueOf()) {
       throw new RpcException(new UnauthorizedException('Token Expired'));
