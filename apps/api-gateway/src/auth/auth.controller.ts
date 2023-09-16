@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
+  ApiBearerAuth,
   ApiExtraModels,
   ApiResponse,
   ApiTags,
@@ -24,6 +25,8 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ProfileModel } from '../user/model/profile.model';
 import { AuthGuard } from '@nestjs/passport';
+import { GetPasswordResetLinkDto } from './dto/get-password-reset-link.dto';
+import { ChangePasswordDto } from '@app/shared/dto/user-service/change-password.dto';
 
 @ApiTags('Auth')
 @ApiExtraModels(UserModel, ProfileModel)
@@ -96,7 +99,8 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AuthGuard('jwt`'))
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Get('confirmEmail')
   async getConfirmEmailToken(@Req() request: Request) {
     const user = (request as any).user as UserModel;
@@ -107,7 +111,8 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AuthGuard('jwt`'))
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Post('confirmEmail')
   async confirmEmail(@Req() request: Request, @Body() body) {
     const user = (request as any).user as UserModel;
@@ -120,12 +125,23 @@ export class AuthController {
   }
 
   @Get('changePassword')
-  async getPasswordResetLink() {
-    return;
+  async getPasswordResetLink(
+    @Body() getPasswordResetLinkDto: GetPasswordResetLinkDto,
+  ) {
+    await this.authService.getPasswordResetLink(getPasswordResetLinkDto.email);
+    return {
+      success: true,
+      message: 'Password reset link sent to your mail',
+    };
   }
 
   @Post('changePassword')
-  async changePassword() {
-    return;
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
+    const data = await this.authService.changePassword(changePasswordDto);
+    return {
+      success: true,
+      message: 'Password changed Succesfully',
+      data,
+    };
   }
 }

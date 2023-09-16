@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { ConfirmUserDto } from '@app/shared/dto/user-service/confirm-user.dto';
+import { ChangePasswordDto } from '@app/shared/dto/user-service/change-password.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -31,6 +32,7 @@ export class AuthService {
   }
 
   async getUser(usernameOrEmail: string) {
+    console.log(usernameOrEmail);
     const user = await lastValueFrom(
       this.userClient.send<UserModel>(
         'findOneUserByEmailOrUserName',
@@ -93,25 +95,14 @@ export class AuthService {
     }
   }
 
-  // async confirmNewPassword(changePasswordDto: ChangePasswordDto) {
-  //   const { email, token, password } = changePasswordDto;
-  //   const user = await this.userService.findUserByEmail(email);
-  //   const currentDate = moment().valueOf();
-
-  //   if (currentDate > moment(user.tokenTimeToLive).valueOf()) {
-  //     throw new HttpException('Token Expired', HttpStatus.UNAUTHORIZED);
-  //   }
-  //   console.log({
-  //     token,
-  //     userToken: user.resetPasswordToken,
-  //   });
-  //   if (token !== user.resetPasswordToken) {
-  //     throw new HttpException('Token Doesnt Match', HttpStatus.UNAUTHORIZED);
-  //   }
-  //   const hashedPass = await bcrypt.hash(password, BCRYPT_HASH_ROUND);
-  //   user.password = hashedPass;
-  //   user.confirmUserToken = null;
-  //   user.tokenTimeToLive = null;
-  //   await user.save();
-  // }
+  async changePassword(changePasswordDto: ChangePasswordDto) {
+    try {
+      const user = await firstValueFrom(
+        this.userClient.emit<UserModel>('changePassword', changePasswordDto),
+      );
+      return user;
+    } catch (error) {
+      throw new RpcException(error.response);
+    }
+  }
 }

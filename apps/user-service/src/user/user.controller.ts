@@ -33,8 +33,8 @@ export class UserController {
   }
 
   @MessagePattern('changePassword')
-  changePassword(@Payload() changePasswordDto: ChangePasswordDto) {
-    return this.userService.changePassword(changePasswordDto);
+  async changePassword(@Payload() changePasswordDto: ChangePasswordDto) {
+    return await this.userService.changePassword(changePasswordDto);
   }
 
   @MessagePattern('createProfile')

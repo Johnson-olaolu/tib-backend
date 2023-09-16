@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsString,
+  IsUrl,
   validateSync,
 } from 'class-validator';
 
@@ -57,7 +58,9 @@ class EnvironmentVariables {
   @IsNotEmpty()
   RABBITMQ_IDEA_QUEUE: string;
 
-  @IsString()
+  @IsUrl({
+    require_tld: false,
+  })
   @IsNotEmpty()
   CLIENT_URL: string;
 }

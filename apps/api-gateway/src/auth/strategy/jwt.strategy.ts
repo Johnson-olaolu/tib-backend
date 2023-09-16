@@ -24,7 +24,7 @@ export class JWTStrategy extends PassportStrategy(Strategy) {
   }
   async validate(payload: JwtPayload): Promise<UserModel> {
     const { sub, username } = payload;
-
+    console.log(username);
     const user = await this.authService.getUser(username);
     return user;
   }

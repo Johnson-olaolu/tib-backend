@@ -134,6 +134,7 @@ export class UserService {
     return user;
   }
 
+  //Handle Password change
   async generatePasswordResetLink(email: string) {
     const user = await this.findOneByEmailOrUserName(email);
     await this.generatePasswordResetToken(user);
