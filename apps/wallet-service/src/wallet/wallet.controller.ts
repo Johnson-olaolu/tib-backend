@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { WalletService } from './wallet.service';
-import { CreateWalletDto } from './dto/create-wallet.dto';
+import { CreateWalletDto } from '../../../../libs/shared/src/dto/wallet/create-wallet.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
 
 @Controller()
@@ -18,18 +18,13 @@ export class WalletController {
     return this.walletService.findAll();
   }
 
-  @MessagePattern('findOneWallet')
-  findOne(@Payload() id: number) {
-    return this.walletService.findOne(id);
-  }
-
-  @MessagePattern('updateWallet')
-  update(@Payload() updateWalletDto: UpdateWalletDto) {
-    return this.walletService.update(updateWalletDto.id, updateWalletDto);
-  }
+  // @MessagePattern('getWalletDetails')
+  // getWalletDetails(@Payload() id: string) {
+  //   return this.walletService.findOne(id);
+  // }
 
   @MessagePattern('removeWallet')
-  remove(@Payload() id: number) {
+  remove(@Payload() id: string) {
     return this.walletService.remove(id);
   }
 }

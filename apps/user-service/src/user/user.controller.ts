@@ -98,11 +98,6 @@ export class UserController {
     return this.userService.validateUser(validateUserDto);
   }
 
-  @MessagePattern('updateUser')
-  update(@Payload() updateUserDto: UpdateUserDto) {
-    return this.userService.update(updateUserDto.id, updateUserDto);
-  }
-
   @MessagePattern('removeUser')
   remove(@Payload() id: string) {
     return this.userService.remove(id);

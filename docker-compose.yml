@@ -84,6 +84,35 @@ services:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=tib_file_db
 
+  wallet_service:
+    build:
+      context: .
+      dockerfile: ./apps/wallet-service/Dockerfile
+      target: development
+    env_file:
+      - ./apps/wallet-service/.env
+    networks:
+      - postgres
+      - rabbitmq
+    depends_on:
+      - file_db
+      - rabbitmq
+    volumes:
+      - .:/usr/src/app
+
+  wallet_db:
+    image: postgres:latest
+    networks:
+      - postgres
+    ports:
+      - 5434:5432
+    volumes:
+      - file_db:/data/postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=tib_wallet_db
+
   notification_service:
     build:
       context: .

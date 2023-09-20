@@ -40,6 +40,8 @@ import * as moment from 'moment-timezone';
 import { ConfirmUserDto } from '@app/shared/dto/user-service/confirm-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { ChangePasswordDto } from '@app/shared/dto/user-service/change-password.dto';
+import { WalletModel } from '@app/shared/model/wallet.model';
+import { CreateWalletDto } from '@app/shared/dto/wallet/create-wallet.dto';
 
 @Injectable()
 export class UserService {
@@ -53,6 +55,8 @@ export class UserService {
     @Inject(RABBITMQ_QUEUES.FILE_SERVICE) private fileClient: ClientProxy,
     @Inject(RABBITMQ_QUEUES.NOTIFICATION_SERVICE)
     private notificationClient: ClientProxy,
+    @Inject(RABBITMQ_QUEUES.WALLET_SERVICE)
+    private walletClient: ClientProxy,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -72,14 +76,47 @@ export class UserService {
     };
     try {
       const newUser = this.userRepository.create(newUserDetails);
+      const createWalletDto: CreateWalletDto = {
+        userId: newUser.id,
+      };
+
+      const wallet = await lastValueFrom(
+        this.walletClient.send<WalletModel>('createWallet', createWalletDto),
+      );
       await this.generateConfirmUserEmailToken(newUser);
-      return newUser;
+      return { ...newUser, wallet };
     } catch (error) {
       if (error?.code == POSTGRES_ERROR_CODES.unique_violation) {
         throw new RpcException(new BadRequestException(error.detail));
       }
       throw new RpcException(new InternalServerErrorException());
     }
+  }
+  async findOne(id: string) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new RpcException(
+        new NotFoundException('User not Found for this ID'),
+      );
+    }
+    return user;
+  }
+
+  async getUserDetails(id: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        profile: true,
+      },
+    });
+    if (!user) {
+      throw new RpcException(
+        new NotFoundException('User not Found for this ID'),
+      );
+    }
+    return user;
   }
 
   //Handle confirm account
@@ -202,33 +239,6 @@ export class UserService {
     return users;
   }
 
-  async findOne(id: string) {
-    const user = await this.userRepository.findOneBy({ id });
-    if (!user) {
-      throw new RpcException(
-        new NotFoundException('User not Found for this ID'),
-      );
-    }
-    return user;
-  }
-
-  async getUserDetails(id: string) {
-    const user = await this.userRepository.findOne({
-      where: {
-        id,
-      },
-      relations: {
-        profile: true,
-      },
-    });
-    if (!user) {
-      throw new RpcException(
-        new NotFoundException('User not Found for this ID'),
-      );
-    }
-    return user;
-  }
-
   async findOneByEmailOrUserName(userNameOrEmail: string) {
     const user = await this.userRepository.findOne({
       where: [{ userName: userNameOrEmail }, { email: userNameOrEmail }],
@@ -255,10 +265,6 @@ export class UserService {
         new BadRequestException('Wrong Password Provided'),
       );
     }
-  }
-
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
   }
 
   //handle profile updates
