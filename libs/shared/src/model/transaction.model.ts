@@ -5,7 +5,21 @@ export class TransactionModel {
 
   amount: number;
 
-  public createdAt: Date;
+  paymentMethod: string;
 
-  public updatedAt: Date;
+  type: string;
+
+  status: string;
+
+  progress: string;
+
+  reference: string;
+
+  paystackTransactionId: string;
+
+  paystackTransactionUrl: string;
+
+  createdAt: Date;
+
+  updatedAt: Date;
 }

@@ -29,8 +29,8 @@ class CardFields {
   cvv: string;
 }
 
-export function validateEnv(config: Record<string, unknown>) {
-  const validatedConfig = plainToInstance(CardFields, config, {
+export function validateCardFields(fields: Record<string, unknown>) {
+  const validatedConfig = plainToInstance(CardFields, fields, {
     enableImplicitConversion: true,
   });
   const errors = validateSync(validatedConfig, {
@@ -40,5 +40,5 @@ export function validateEnv(config: Record<string, unknown>) {
   if (errors.length > 0) {
     throw new Error(errors.toString());
   }
-  return validatedConfig;
+  return true;
 }

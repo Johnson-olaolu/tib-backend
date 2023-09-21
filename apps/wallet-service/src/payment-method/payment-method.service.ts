@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePaymentMethodDto } from '../../../../libs/shared/src/dto/wallet/create-payment-method.dto';
 import { UpdatePaymentMethodDto } from './dto/update-payment-method.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +14,7 @@ import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
 import { FileTypeEnum, RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { lastValueFrom } from 'rxjs';
 import { FileModel } from '@app/shared/model/file.model';
+import { validateCardFields } from './fields/card.fields';
 
 @Injectable()
 export class PaymentMethodService {
@@ -101,6 +107,19 @@ export class PaymentMethodService {
       throw new RpcException(
         new NotFoundException('Payment method not found for this ID'),
       );
+    }
+  }
+
+  async validateFields(name: string, fields: Record<string, unknown>) {
+    try {
+      switch (name) {
+        case 'Card':
+          return validateCardFields(fields);
+        default:
+          return true;
+      }
+    } catch (error) {
+      throw new RpcException(new BadRequestException(error.response));
     }
   }
 }

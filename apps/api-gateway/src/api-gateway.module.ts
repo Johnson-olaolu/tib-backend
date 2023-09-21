@@ -11,6 +11,8 @@ import { PlanModule } from './plan/plan.module';
 import { PlanPermissionModule } from './plan-permission/plan-permission.module';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
+import { WalletModule } from './wallet/wallet.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -20,11 +22,14 @@ import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
     }),
     NestjsFormDataModule.config({ storage: MemoryStoredFile, isGlobal: true }),
     RmqModule.register({ name: RABBITMQ_QUEUES.USER_SERVICE }),
+    RmqModule.register({ name: RABBITMQ_QUEUES.WALLET_SERVICE }),
     AuthModule,
     UserModule,
     InterestModule,
     PlanModule,
     PlanPermissionModule,
+    WalletModule,
+    TransactionModule,
   ],
   controllers: [ApiGatewayController],
   providers: [ApiGatewayService],

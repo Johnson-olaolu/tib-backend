@@ -1,4 +1,4 @@
-import { TransactionModel } from './transaction.model';
+import { WalletTransactionModel } from './wallet-transaction.model';
 
 export class WalletModel {
   id: string;
@@ -7,7 +7,7 @@ export class WalletModel {
 
   amount: number;
 
-  transactions: TransactionModel[];
+  transactions: WalletTransactionModel[];
 
   public createdAt: Date;
 

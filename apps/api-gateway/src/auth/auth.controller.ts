@@ -20,7 +20,7 @@ import {
   getSchemaPath,
 } from '@nestjs/swagger';
 import { LocalAuthGuard } from './guards/loginGuard.guard';
-import { UserModel } from '../user/model/user.model';
+import { UserModel } from '../../../../libs/shared/src/model/user.model';
 import { ResponseDto } from '../utils/Response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';

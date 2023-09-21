@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { UserModel } from '../user/model/user.model';
+import { UserModel } from '../../../../libs/shared/src/model/user.model';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';

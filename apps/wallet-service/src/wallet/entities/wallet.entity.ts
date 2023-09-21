@@ -7,8 +7,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Transaction } from '../../transaction/entities/transaction.entity';
 import { WalletPaymentMethod } from './wallet-payment-method.entity';
+import { WalletTransaction } from './wallet-transaction.entity';
 
 @Entity()
 export class Wallet extends BaseEntity {
@@ -26,8 +26,8 @@ export class Wallet extends BaseEntity {
   })
   amount: number;
 
-  @OneToMany(() => Transaction, (transaction) => transaction.wallet)
-  transactions: Transaction[];
+  @OneToMany(() => WalletTransaction, (transaction) => transaction.wallet)
+  transactions: WalletTransaction[];
 
   @OneToMany(() => WalletPaymentMethod, (paymentMethod) => paymentMethod.wallet)
   paymentMethods: WalletPaymentMethod[];

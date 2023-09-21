@@ -28,6 +28,11 @@ export class WalletPaymentMethod extends BaseEntity {
   })
   defaultFields: string;
 
+  @Column({
+    default: false,
+  })
+  isDefault: boolean;
+
   @CreateDateColumn()
   public createdAt: Date;
 

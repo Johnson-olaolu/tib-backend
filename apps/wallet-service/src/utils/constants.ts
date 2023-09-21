@@ -31,3 +31,21 @@ export const defaultPaymentMethods: IDefaultPaymentMethod[] = [
     disabled: true,
   },
 ];
+
+export enum WalletTransactionActionEnum {
+  DEPOSIT = 'DEPOSIT',
+  WITHDRAWAL = 'WITHDRAWAL',
+  TRANSFER = 'TRANSFER',
+  PAYMENT = 'PAYMENT',
+}
+
+export enum TransactionTypeEnum {
+  CREDIT = 'CREDIT',
+  DEBIT = 'DEBIT',
+}
+
+export enum TransactionProgressEnum {
+  STARTED = 'STARTED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+}

@@ -1,5 +1,5 @@
 import { Exclude, instanceToPlain } from 'class-transformer';
-import { ProfileModel } from './profile.model';
+import { ProfileModel } from '../../../../apps/api-gateway/src/user/model/profile.model';
 
 export class UserModel {
   id: string;

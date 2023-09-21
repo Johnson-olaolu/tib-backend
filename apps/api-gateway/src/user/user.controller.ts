@@ -26,17 +26,18 @@ import {
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { UserModel } from './model/user.model';
+import { UserModel } from '../../../../libs/shared/src/model/user.model';
 import { ProfileModel } from './model/profile.model';
 import { ResponseDto } from '../utils/Response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { UpdateProfileDto } from '@app/shared/dto/user-service/update-profile.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { WalletModel } from '@app/shared/model/wallet.model';
 
 @ApiBearerAuth()
 @ApiTags('User')
-@ApiExtraModels(UserModel, ProfileModel)
+@ApiExtraModels(UserModel, ProfileModel, WalletModel)
 @Controller('user')
 @UseGuards(AuthGuard('jwt'))
 export class UserController {
@@ -134,13 +135,55 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'User details fetched updated successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              $ref: getSchemaPath(UserModel),
+            },
+          },
+        },
+      ],
+    },
+  })
   @Get('me')
-  async GetUserDetails(@Req() request: Request) {
+  async getUserDetails(@Req() request: Request) {
     const user = (request as any).user as UserModel;
     const data = await this.userService.getUserDetails(user.id);
     return {
       success: true,
       message: 'user details fetched successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Wallet details fetched  successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              $ref: getSchemaPath(WalletModel),
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Get(':id/wallet')
+  async getWalletDetails(@Param('id') userId: string) {
+    const data = await this.userService.getUserWalletDetails(userId);
+    return {
+      success: true,
+      message: 'wallet fetched successfully',
       data: data,
     };
   }

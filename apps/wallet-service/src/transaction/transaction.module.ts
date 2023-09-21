@@ -9,5 +9,6 @@ import { PaystackModule } from '../paystack/paystack.module';
   imports: [TypeOrmModule.forFeature([Transaction]), PaystackModule],
   controllers: [TransactionController],
   providers: [TransactionService],
+  exports: [TransactionService],
 })
 export class TransactionModule {}

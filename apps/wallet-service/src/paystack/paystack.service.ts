@@ -39,7 +39,7 @@ export class PaystackService {
           '/transaction/initialize',
           {
             email,
-            amount,
+            amount: amount * 100,
             callback_url: this.callbackUrl,
             reference,
             currency,

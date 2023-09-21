@@ -40,6 +40,14 @@ class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   RABBITMQ_USER_QUEUE: string;
+
+  @IsString()
+  @IsNotEmpty()
+  RABBITMQ_WALLET_QUEUE: string;
+
+  @IsString()
+  @IsNotEmpty()
+  RABBITMQ_IDEA_QUEUE: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

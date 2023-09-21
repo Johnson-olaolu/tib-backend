@@ -10,7 +10,6 @@ import { DatabaseModule } from '@app/database';
 import { SeedService } from './seed/seed.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { validateEnv } from './utils/env.validate';
-import { HttpModule } from '@nestjs/axios';
 import { PaystackModule } from './paystack/paystack.module';
 
 @Module({
@@ -24,6 +23,7 @@ import { PaystackModule } from './paystack/paystack.module';
     TransactionModule,
     PaymentMethodModule,
     RmqModule.register({ name: RABBITMQ_QUEUES.FILE_SERVICE }),
+    RmqModule.register({ name: RABBITMQ_QUEUES.USER_SERVICE }),
     DatabaseModule,
     PaystackModule,
   ],
