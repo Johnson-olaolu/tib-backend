@@ -33,13 +33,11 @@ export class FileServiceService {
   ) {
     let directory = '';
     switch (type) {
-      case FileTypeEnum.APP:
-        directory = join(this.defaultPath, 'app');
-        break;
       case FileTypeEnum.PROFILE:
         directory = join(this.defaultPath, 'profile');
         break;
       default:
+        directory = join(this.defaultPath, 'app');
         break;
     }
     const path = join(directory, name + `.${mime.extension(mimeType)}`);

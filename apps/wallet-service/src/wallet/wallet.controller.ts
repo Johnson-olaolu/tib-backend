@@ -2,7 +2,6 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { WalletService } from './wallet.service';
 import { CreateWalletDto } from '../../../../libs/shared/src/dto/wallet/create-wallet.dto';
-import { UpdateWalletDto } from './dto/update-wallet.dto';
 
 @Controller()
 export class WalletController {

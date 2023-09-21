@@ -20,7 +20,7 @@ export class PaymentMethodService {
   async create(createPaymentMethodDto: CreatePaymentMethodDto) {
     const fileDetails: SaveFileDto = {
       author: 'SuperAdmin',
-      name: createPaymentMethodDto.name,
+      name: `${createPaymentMethodDto.name}Logo`,
       file: createPaymentMethodDto.image,
       mimetype: createPaymentMethodDto.image.mimetype,
       parent: 'SuperAdmin',
@@ -46,6 +46,20 @@ export class PaymentMethodService {
     const paymentMethod = await this.paymentMethodRepository.findOne({
       where: {
         id,
+      },
+    });
+    if (!paymentMethod) {
+      throw new RpcException(
+        new NotFoundException('Payment Method not found for this ID'),
+      );
+    }
+    return paymentMethod;
+  }
+
+  async findOneByName(name: string) {
+    const paymentMethod = await this.paymentMethodRepository.findOne({
+      where: {
+        name,
       },
     });
     if (!paymentMethod) {

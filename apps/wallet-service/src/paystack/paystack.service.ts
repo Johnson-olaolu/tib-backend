@@ -12,8 +12,8 @@ import {
   account_type,
   currency,
 } from './types';
-import queryString from 'query-string';
 import { ConfigService } from '@nestjs/config';
+import { stringify } from 'querystring';
 
 @Injectable()
 export class PaystackService {
@@ -90,12 +90,12 @@ export class PaystackService {
     to?: Date,
     amount?: number,
   ) {
-    const query = queryString.stringify({
+    const query = stringify({
       perPage,
       page,
       status,
-      from,
-      to,
+      from: from.toString(),
+      to: to.toString(),
       amount,
     });
     const { data } = await firstValueFrom(
@@ -158,7 +158,7 @@ export class PaystackService {
   }
 
   async resolveAccount(bank_code: string, account_number) {
-    const query = queryString.stringify({
+    const query = stringify({
       bank_code,
       account_number,
     });

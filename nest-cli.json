@@ -85,7 +85,14 @@
       "entryFile": "main",
       "sourceRoot": "apps/wallet-service/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/wallet-service/tsconfig.app.json"
+        "tsConfigPath": "apps/wallet-service/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "assets/**",
+            "outDir": "dist/apps/wallet-service",
+            "watchAssets": true
+          }
+        ]
       }
     },
     "file-service": {

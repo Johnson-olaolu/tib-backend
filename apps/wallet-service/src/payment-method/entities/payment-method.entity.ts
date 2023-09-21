@@ -20,13 +20,20 @@ export class PaymentMethod extends BaseEntity {
   @Column()
   image: string;
 
-  @Column()
-  fields: string;
+  @Column({
+    type: 'simple-array',
+  })
+  fields: string[];
 
   @Column({
     default: false,
   })
   disabled: boolean;
+
+  @Column({
+    default: false,
+  })
+  isDefault: boolean;
 
   @CreateDateColumn()
   public createdAt: Date;

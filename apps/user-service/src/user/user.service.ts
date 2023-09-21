@@ -76,14 +76,13 @@ export class UserService {
     };
     try {
       const newUser = this.userRepository.create(newUserDetails);
+      const savedUser = await this.generateConfirmUserEmailToken(newUser);
       const createWalletDto: CreateWalletDto = {
-        userId: newUser.id,
+        userId: savedUser.id,
       };
-
       const wallet = await lastValueFrom(
         this.walletClient.send<WalletModel>('createWallet', createWalletDto),
       );
-      await this.generateConfirmUserEmailToken(newUser);
       return { ...newUser, wallet };
     } catch (error) {
       if (error?.code == POSTGRES_ERROR_CODES.unique_violation) {
@@ -144,7 +143,7 @@ export class UserService {
     await firstValueFrom(
       this.notificationClient.emit('userRegistered', registrationNotification),
     );
-    await user.save();
+    return await user.save();
   }
 
   async generateNewConfirmUserEmailToken(userId: string) {

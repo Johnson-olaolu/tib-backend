@@ -1,4 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreatePaymentMethodDto {
   @IsString()
@@ -7,9 +13,8 @@ export class CreatePaymentMethodDto {
 
   image: Express.Multer.File;
 
-  @IsString()
-  @IsNotEmpty()
-  fields: string;
+  @IsArray()
+  fields: string[];
 
   @IsBoolean()
   @IsOptional()
