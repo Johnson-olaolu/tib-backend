@@ -12,6 +12,7 @@ import { WalletModel } from '@app/shared/model/wallet.model';
 import { CreditWalletDto } from './dto/credit-wallet.dto';
 import { TransactionModel } from '@app/shared/model/transaction.model';
 import { AuthGuard } from '@nestjs/passport';
+import { DebitWalletDto } from './dto/debit-wallet.dto';
 
 @ApiBearerAuth()
 @ApiTags('Wallet')
@@ -74,7 +75,39 @@ export class WalletController {
     );
     return {
       success: true,
-      message: 'Credit Wallet Initiated',
+      message: 'Credit wallet initiated',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Credit Wallet Initiated',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              $ref: getSchemaPath(TransactionModel),
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Post(':walletId/debitWallet')
+  async debitWallet(
+    @Param('walletId') walletId: string,
+    @Body() debitWalletDto: DebitWalletDto,
+  ) {
+    const data = await this.walletService.initiateDebit(
+      walletId,
+      debitWalletDto,
+    );
+    return {
+      success: true,
+      message: 'Debit wallet initiated',
       data: data,
     };
   }

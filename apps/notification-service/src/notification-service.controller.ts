@@ -6,6 +6,7 @@ import {
   PasswordResetNotificationData,
   RegistrationNotificationData,
   TransferCreditNotificationData,
+  TransferDebitNotificationData,
 } from '@app/shared/dto/notification/notificationTypes';
 import { EmailNotificationService } from './email-notification/email-notification.service';
 
@@ -41,6 +42,16 @@ export class NotificationServiceController {
     @Payload() notificationData: INotification<TransferCreditNotificationData>,
   ) {
     await this.emailNotificationService.sendCreditWalletMail(
+      notificationData.recipient,
+      notificationData.data,
+    );
+  }
+
+  @EventPattern('debitWallet')
+  async sendDebitWalletNotification(
+    @Payload() notificationData: INotification<TransferDebitNotificationData>,
+  ) {
+    await this.emailNotificationService.sendDebitWalletMail(
       notificationData.recipient,
       notificationData.data,
     );

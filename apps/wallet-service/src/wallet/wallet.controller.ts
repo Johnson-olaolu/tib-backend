@@ -6,6 +6,10 @@ import {
   ConfirmCreditWalletDto,
   InitiateCreditWalletDto,
 } from '@app/shared/dto/wallet/credit-wallet.dto';
+import {
+  ConfirmDebitWalletDto,
+  InitiateDebitWalletDto,
+} from '@app/shared/dto/wallet/debit-wallet.dto';
 
 @Controller()
 export class WalletController {
@@ -48,5 +52,17 @@ export class WalletController {
     @Payload() confirmCreditWalletDto: ConfirmCreditWalletDto,
   ) {
     return await this.walletService.confirmCredit(confirmCreditWalletDto);
+  }
+
+  @MessagePattern('initiateDebit')
+  async initiateDebit(
+    @Payload() initiateDebitWalletDto: InitiateDebitWalletDto,
+  ) {
+    return await this.walletService.initiateDebit(initiateDebitWalletDto);
+  }
+
+  @EventPattern('debitWallet')
+  async debitWallet(@Payload() confirmDebitWalletDto: ConfirmDebitWalletDto) {
+    return await this.walletService.confirmDebit(confirmDebitWalletDto);
   }
 }

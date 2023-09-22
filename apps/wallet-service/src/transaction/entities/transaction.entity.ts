@@ -35,7 +35,9 @@ export class Transaction extends BaseEntity {
   })
   currency: string;
 
-  @ManyToOne(() => PaymentMethod)
+  @ManyToOne(() => PaymentMethod, {
+    nullable: true,
+  })
   @JoinColumn({ referencedColumnName: 'name' })
   paymentMethod: PaymentMethod;
 
@@ -69,6 +71,11 @@ export class Transaction extends BaseEntity {
     nullable: true,
   })
   paystackTransactionUrl: string;
+
+  @Column({
+    nullable: true,
+  })
+  paystackRecipientCode: string;
 
   @CreateDateColumn()
   public createdAt: Date;

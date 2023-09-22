@@ -3,9 +3,11 @@ import {
   IsNotEmpty,
   IsNotEmptyObject,
   IsNumber,
+  IsNumberString,
   IsObject,
   IsOptional,
   IsString,
+  Length,
   Min,
 } from 'class-validator';
 import { Wallet } from '../../wallet/entities/wallet.entity';
@@ -31,4 +33,34 @@ export class CreateCreditTransactionDto {
   @IsObject()
   @IsNotEmptyObject()
   paymentMethod: PaymentMethod;
+}
+export class CreateDebitTransactionDto {
+  @IsNumber()
+  @Min(100)
+  amount: number;
+
+  @IsString()
+  @IsNotEmpty()
+  reference: string;
+
+  @IsObject()
+  @IsNotEmptyObject()
+  user: UserModel;
+
+  @IsObject()
+  @IsNotEmptyObject()
+  wallet: Wallet;
+
+  @IsNumberString()
+  @IsNotEmpty()
+  bankCode: string;
+
+  @IsNumberString()
+  @IsNotEmpty()
+  @Length(10, 10)
+  accountNumber: string;
+
+  @IsString()
+  @IsNotEmpty()
+  accountName: string;
 }

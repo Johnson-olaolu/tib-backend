@@ -46,11 +46,24 @@ export class WalletTransaction extends BaseEntity {
   @Column()
   public description: string;
 
-  @Column()
+  @Column({
+    type: 'decimal',
+    transformer: new ColumnNumericTransformer(),
+    default: 0,
+  })
   public prevBalance: number;
 
-  @Column()
+  @Column({
+    type: 'decimal',
+    transformer: new ColumnNumericTransformer(),
+    default: 0,
+  })
   public currBalance: number;
+
+  @Column({
+    nullable: true,
+  })
+  public recipeint: string;
 
   @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
   public wallet: Wallet;

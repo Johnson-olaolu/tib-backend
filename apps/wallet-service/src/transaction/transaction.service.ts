@@ -1,9 +1,13 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateCreditTransactionDto } from './dto/create-transaction.dto';
+import {
+  CreateCreditTransactionDto,
+  CreateDebitTransactionDto,
+} from './dto/create-transaction.dto';
 import { PaystackService } from '../paystack/paystack.service';
 import { RpcException } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +17,7 @@ import {
   TransactionProgressEnum,
   TransactionTypeEnum,
 } from '../utils/constants';
+import { ResolveAccountDto } from '@app/shared/dto/wallet/resolve-account.dto';
 
 @Injectable()
 export class TransactionService {
@@ -69,6 +74,53 @@ export class TransactionService {
     return transaction;
   }
 
+  async createDebitTransaction(
+    createDebitTransactionDto: CreateDebitTransactionDto,
+  ) {
+    try {
+      const recipient = await this.createRecipient(
+        createDebitTransactionDto.accountName,
+        createDebitTransactionDto.accountNumber,
+        createDebitTransactionDto.bankCode,
+      );
+      const response = await this.paystackService.initiateTransfer(
+        recipient.recipient_code,
+        createDebitTransactionDto.amount,
+        createDebitTransactionDto.reference,
+        'Transfer from TIB',
+      );
+      const transaction = this.transactionRepository.create({
+        amount: createDebitTransactionDto.amount,
+        wallet: createDebitTransactionDto.wallet,
+        reference: createDebitTransactionDto.reference,
+        type: TransactionTypeEnum.DEBIT,
+        paystackRecipientCode: recipient.recipient_code,
+      });
+      await transaction.save();
+      return transaction;
+    } catch (error) {
+      throw new RpcException(new InternalServerErrorException(error.response));
+    }
+  }
+
+  async verifyDebitTransactionPaystack(reference: string) {
+    const transaction = await this.transactionRepository.findOne({
+      where: {
+        reference: reference,
+      },
+      relations: {
+        wallet: true,
+      },
+    });
+    const response = await this.paystackService.verifyTransfer(reference);
+    transaction.progress = TransactionProgressEnum.COMPLETED;
+    transaction.status = response.status;
+    transaction.paystackTransactionId = response.id.toString();
+    transaction.currency = response.currency;
+    await transaction.save();
+    return transaction;
+  }
+
   findAll() {
     return `This action returns all transaction`;
   }
@@ -87,5 +139,30 @@ export class TransactionService {
 
   remove(id: number) {
     return `This action removes a #${id} transaction`;
+  }
+
+  //banks and validation
+  async getBanks() {
+    return await this.paystackService.getBanks();
+  }
+
+  async resolveAccount(resolveAccountDto: ResolveAccountDto) {
+    return await this.paystackService.resolveAccount(
+      resolveAccountDto.bankCode,
+      resolveAccountDto.accountNumber,
+    );
+  }
+
+  //recipient
+  async createRecipient(name, accountNumber, bankCode) {
+    return await this.paystackService.createRecipient(
+      name,
+      accountNumber,
+      bankCode,
+    );
+  }
+
+  async getRecipient(recipientCode: string) {
+    return this.paystackService.getRecipeint(recipientCode);
   }
 }

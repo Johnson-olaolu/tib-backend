@@ -1,4 +1,6 @@
 import { ConfirmCreditWalletDto } from '@app/shared/dto/wallet/credit-wallet.dto';
+import { ConfirmDebitWalletDto } from '@app/shared/dto/wallet/debit-wallet.dto';
+import { ResolveAccountDto } from '@app/shared/dto/wallet/resolve-account.dto';
 import { TransactionModel } from '@app/shared/model/transaction.model';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { Inject, Injectable } from '@nestjs/common';
@@ -24,12 +26,48 @@ export class TransactionService {
         transactionId: transaction.id,
         walletId: transaction.wallet.id,
       };
-      console.log(transaction);
       await firstValueFrom(
         this.walletClient.emit('creditWallet', confirmCreditWalletDto),
       );
       return 'transaction successfull';
     }
     return 'Transaction Processed';
+  }
+
+  async verifyDebitTransactionPaystack(reference: string) {
+    const transaction = await lastValueFrom(
+      this.walletClient.send<TransactionModel>(
+        'verifyDebitTransactionPaystack',
+        reference,
+      ),
+    );
+    if (transaction.status === 'success') {
+      const confirmDebitWalletDto: ConfirmDebitWalletDto = {
+        amount: transaction.amount,
+        transactionId: transaction.id,
+        walletId: transaction.wallet.id,
+      };
+      await firstValueFrom(
+        this.walletClient.emit('debitWallet', confirmDebitWalletDto),
+      );
+      return 'transaction successfull';
+    }
+  }
+
+  async getBanks() {
+    const banks = await lastValueFrom(
+      this.walletClient.send<TransactionModel>('getBanks', {}),
+    );
+    return banks;
+  }
+
+  async resolveAccount(resolveAccountDto: ResolveAccountDto) {
+    const accountInfo = await lastValueFrom(
+      this.walletClient.send<TransactionModel>(
+        'resolveAccount',
+        resolveAccountDto,
+      ),
+    );
+    return accountInfo;
   }
 }

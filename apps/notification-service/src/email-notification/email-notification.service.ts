@@ -2,6 +2,7 @@ import {
   PasswordResetNotificationData,
   RegistrationNotificationData,
   TransferCreditNotificationData,
+  TransferDebitNotificationData,
 } from '@app/shared/dto/notification/notificationTypes';
 import { FileModel } from '@app/shared/model/file.model';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
@@ -69,82 +70,6 @@ export class EmailNotificationService implements OnApplicationBootstrap {
     );
     this.emailIllustration1 = emailIllustration1File.path;
   }
-
-  async sendUserConfirmationMail(
-    recipeint: {
-      mail: string;
-      name: string;
-    },
-    registrationNotificationDto: RegistrationNotificationData,
-  ) {
-    const response = await this.sendMail({
-      recipientMail: recipeint.mail,
-      body: `
-        Please use this token 
-        <strong>${registrationNotificationDto.token}</strong>
-        to confirm your email
-      `,
-      subject: 'Welcome to TIB',
-      title: 'Welcome To The Idea Bank',
-      userName: recipeint.name,
-      extraInfo: registrationNotificationDto.date,
-    });
-    this.logger.log(
-      `Registration Mail Sent to : ${response?.accepted?.toString()}`,
-    );
-  }
-  async sendPasswordResetMail(
-    recipeint: {
-      mail: string;
-      name: string;
-    },
-    passwordResetNotificationData: PasswordResetNotificationData,
-  ) {
-    const response = await this.sendMail({
-      recipientMail: recipeint.mail,
-      body: `
-      <a
-      href='${passwordResetNotificationData.url}'
-      rel='noopener'
-      style='text-decoration: underline; color: #3e2d9c;'
-      target='_blank'
-    ><strong>click here</strong> </a>
-    to change your password
-      `,
-      subject: 'Password Reset',
-      title: 'Reset Your Password',
-      userName: recipeint.name,
-    });
-    this.logger.log(
-      `Password Reset Mail Sent to : ${response?.accepted?.toString()}`,
-    );
-  }
-  async sendCreditWalletMail(
-    recipeint: {
-      mail: string;
-      name: string;
-    },
-    transferCreditNotificationData: TransferCreditNotificationData,
-  ) {
-    const amount = Intl.NumberFormat('en-Gb', {
-      currency: 'NGN',
-      compactDisplay: 'short',
-    }).format(transferCreditNotificationData.amount);
-    const response = await this.sendMail({
-      recipientMail: recipeint.mail,
-      body: `
-      Your account has been credited with
-      <strong>${amount}</strong>
-      `,
-      subject: 'Credit Alert',
-      title: 'Credit Alert',
-      userName: recipeint.name,
-    });
-    this.logger.log(
-      `Credit Wallet Mail Sent to : ${response?.accepted?.toString()}`,
-    );
-  }
-
   async sendMail({
     recipientMail,
     subject,
@@ -183,5 +108,108 @@ export class EmailNotificationService implements OnApplicationBootstrap {
       },
     });
     return response;
+  }
+
+  async sendUserConfirmationMail(
+    recipeint: {
+      mail: string;
+      name: string;
+    },
+    registrationNotificationDto: RegistrationNotificationData,
+  ) {
+    const response = await this.sendMail({
+      recipientMail: recipeint.mail,
+      body: `
+        Please use this token 
+        <strong>${registrationNotificationDto.token}</strong>
+        to confirm your email
+      `,
+      subject: 'Welcome to TIB',
+      title: 'Welcome To The Idea Bank',
+      userName: recipeint.name,
+      extraInfo: registrationNotificationDto.date,
+    });
+    this.logger.log(
+      `Registration Mail Sent to : ${response?.accepted?.toString()}`,
+    );
+  }
+
+  async sendPasswordResetMail(
+    recipeint: {
+      mail: string;
+      name: string;
+    },
+    passwordResetNotificationData: PasswordResetNotificationData,
+  ) {
+    const response = await this.sendMail({
+      recipientMail: recipeint.mail,
+      body: `
+      <a
+      href='${passwordResetNotificationData.url}'
+      rel='noopener'
+      style='text-decoration: underline; color: #3e2d9c;'
+      target='_blank'
+    ><strong>click here</strong> </a>
+    to change your password
+      `,
+      subject: 'Password Reset',
+      title: 'Reset Your Password',
+      userName: recipeint.name,
+    });
+    this.logger.log(
+      `Password Reset Mail Sent to : ${response?.accepted?.toString()}`,
+    );
+  }
+
+  async sendCreditWalletMail(
+    recipeint: {
+      mail: string;
+      name: string;
+    },
+    transferCreditNotificationData: TransferCreditNotificationData,
+  ) {
+    const amount = Intl.NumberFormat('en-Gb', {
+      currency: 'NGN',
+      compactDisplay: 'short',
+    }).format(transferCreditNotificationData.amount);
+    const response = await this.sendMail({
+      recipientMail: recipeint.mail,
+      body: `
+      Your account has been credited with
+      <strong>${amount}</strong>
+      `,
+      subject: 'Credit Alert',
+      title: 'Credit Alert',
+      userName: recipeint.name,
+    });
+    this.logger.log(
+      `Credit Wallet Mail Sent to : ${response?.accepted?.toString()}`,
+    );
+  }
+
+  async sendDebitWalletMail(
+    recipeint: {
+      mail: string;
+      name: string;
+    },
+    transferCreditNotificationData: TransferDebitNotificationData,
+  ) {
+    const amount = Intl.NumberFormat('en-Gb', {
+      currency: 'NGN',
+      compactDisplay: 'short',
+    }).format(transferCreditNotificationData.amount);
+    const response = await this.sendMail({
+      recipientMail: recipeint.mail,
+      body: `
+      <p>Your Account has been debited ${amount}</p>
+      <p> Transfer to ${transferCreditNotificationData.accountName}  ${transferCreditNotificationData.bankName} - ${transferCreditNotificationData.accountNumber}</p>
+      `,
+      subject: 'Debit Alert',
+      title: 'Debit Alert',
+      userName: recipeint.name,
+    });
+    this.logger.log(
+      `Debit Wallet Mail Sent to : ${response?.accepted?.toString()}`,
+    );
   }
 }

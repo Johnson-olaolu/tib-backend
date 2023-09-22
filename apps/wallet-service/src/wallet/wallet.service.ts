@@ -1,4 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateWalletDto } from '../../../../libs/shared/src/dto/wallet/create-wallet.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -30,7 +36,12 @@ import { WalletTransaction } from './entities/wallet-transaction.entity';
 import {
   INotification,
   TransferCreditNotificationData,
+  TransferDebitNotificationData,
 } from '@app/shared/dto/notification/notificationTypes';
+import {
+  ConfirmDebitWalletDto,
+  InitiateDebitWalletDto,
+} from '@app/shared/dto/wallet/debit-wallet.dto';
 
 @Injectable()
 export class WalletService {
@@ -209,7 +220,6 @@ export class WalletService {
     const user = await lastValueFrom(
       this.userClient.send<UserModel>('findOneUser', wallet.userId),
     );
-    console.log(user);
     const transactionRef = generateReference(
       WalletTransactionActionEnum.DEPOSIT,
     );
@@ -262,7 +272,79 @@ export class WalletService {
     return true;
   }
 
-  async debitAccount() {
-    return 'debit account';
+  async initiateDebit(initiateDebitWalletDto: InitiateDebitWalletDto) {
+    const wallet = await this.findOne(initiateDebitWalletDto.walletId);
+    if (wallet.balance < initiateDebitWalletDto.amount) {
+      throw new RpcException(
+        new BadRequestException('Wallet Balance Is Too Low'),
+      );
+    }
+    const user = await lastValueFrom(
+      this.userClient.send<UserModel>('findOneUser', wallet.userId),
+    );
+    const transactionRef = generateReference(
+      WalletTransactionActionEnum.WITHDRAWAL,
+    );
+    const transaction = await this.transactionService.createDebitTransaction({
+      accountName: initiateDebitWalletDto.accountName,
+      accountNumber: initiateDebitWalletDto.accountNumber,
+      amount: initiateDebitWalletDto.amount,
+      bankCode: initiateDebitWalletDto.bankCode,
+      reference: transactionRef,
+      user: user,
+      wallet: wallet,
+    });
+
+    return transaction;
+  }
+
+  async confirmDebit(confirmDebitWalletDto: ConfirmDebitWalletDto) {
+    const wallet = await this.findOne(confirmDebitWalletDto.walletId);
+    const user = await lastValueFrom(
+      this.userClient.send<UserModel>('findOneUser', wallet.userId),
+    );
+    const transaction = await this.transactionService.findOne(
+      confirmDebitWalletDto.transactionId,
+    );
+    const recipient = await this.transactionService.getRecipient(
+      transaction.paystackRecipientCode,
+    );
+    await this.walletTransactionRepository.save({
+      action: WalletTransactionActionEnum.WITHDRAWAL,
+      amount: confirmDebitWalletDto.amount,
+      currBalance: wallet.balance - confirmDebitWalletDto.amount,
+      prevBalance: wallet.balance,
+      transactionReference: transaction.reference,
+      currency: transaction.currency,
+      type: TransactionTypeEnum.DEBIT,
+      transaction: transaction,
+      wallet: wallet,
+      description: 'Withdrawal',
+      recipeint: JSON.stringify({
+        accountName: recipient.details.account_name,
+        accountNumber: recipient.details.account_number,
+        bankName: recipient.details.bank_name,
+      }),
+    });
+    wallet.balance = wallet.balance - confirmDebitWalletDto.amount;
+    await wallet.save();
+    const transferDebitNotification: INotification<TransferDebitNotificationData> =
+      {
+        type: ['email', 'push'],
+        recipient: {
+          name: user.userName,
+          mail: user.email,
+        },
+        data: {
+          amount: confirmDebitWalletDto.amount,
+          accountName: recipient.details.account_name,
+          accountNumber: recipient.details.account_number,
+          bankName: recipient.details.bank_name,
+        },
+      };
+    await firstValueFrom(
+      this.notificationClient.emit('debitWallet', transferDebitNotification),
+    );
+    return true;
   }
 }

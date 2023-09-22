@@ -68,7 +68,7 @@ export interface IBankDetails {
   country: string;
   currency: currency;
   type: string;
-  id: 174;
+  id: number;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -237,7 +237,7 @@ export class PaystackService {
     account_number: string,
     bank_code: string,
     currency: currency = 'NGN',
-    type: 'nuban' | 'mobile_money' | 'basa',
+    type: 'nuban' | 'mobile_money' | 'basa' = 'nuban',
   ) {
     const { data } = await firstValueFrom(
       this.httpService
@@ -263,11 +263,11 @@ export class PaystackService {
     }
   }
 
-  async getRecipeint(recipientId: string) {
+  async getRecipeint(recipientCode: string) {
     const { data } = await firstValueFrom(
       this.httpService
         .get<IPaystackResponse<IRecipientDetails>>(
-          `/transferrecipient/${recipientId}`,
+          `/transferrecipient/${recipientCode}`,
         )
         .pipe(
           catchError((error: AxiosError) => {
@@ -338,20 +338,42 @@ export class PaystackService {
     }
   }
 
-  async initiateTransfer(recipient: string, amount: number, reason: string) {
+  async initiateTransfer(
+    recipient: string,
+    amount: number,
+    reference: string,
+    reason: string,
+  ) {
     const { data } = await firstValueFrom(
       this.httpService
-        .post<
-          IPaystackResponse<{
-            verified: boolean;
-            verificationMessage: string;
-          }>
-        >('/transfer', {
+        .post<IPaystackResponse<ITransactionDetails>>('/transfer', {
           source: 'balance',
           reason,
-          amount,
+          amount: amount * 100,
           recipient,
+          reference,
         })
+        .pipe(
+          catchError((error: AxiosError) => {
+            throw new RpcException(
+              new InternalServerErrorException(error.message),
+            );
+          }),
+        ),
+    );
+    if (data.status) {
+      return data.data;
+    } else {
+      throw new RpcException(new InternalServerErrorException(data.message));
+    }
+  }
+
+  async verifyTransfer(reference: string) {
+    const { data } = await firstValueFrom(
+      this.httpService
+        .get<IPaystackResponse<ITransactionDetails>>(
+          `/transfer/verify/${reference}`,
+        )
         .pipe(
           catchError((error: AxiosError) => {
             throw new RpcException(
@@ -360,6 +382,7 @@ export class PaystackService {
           }),
         ),
     );
+
     if (data.status) {
       return data.data;
     } else {

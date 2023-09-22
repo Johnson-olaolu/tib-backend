@@ -6,6 +6,8 @@ import { InitiateCreditWalletDto } from '@app/shared/dto/wallet/credit-wallet.dt
 import { lastValueFrom } from 'rxjs';
 import { TransactionModel } from '@app/shared/model/transaction.model';
 import { WalletModel } from '@app/shared/model/wallet.model';
+import { DebitWalletDto } from './dto/debit-wallet.dto';
+import { InitiateDebitWalletDto } from '@app/shared/dto/wallet/debit-wallet.dto';
 
 @Injectable()
 export class WalletService {
@@ -25,7 +27,6 @@ export class WalletService {
   }
 
   async initiateCredit(walletId: string, creditWalletDto: CreditWalletDto) {
-    console.log({ walletId });
     try {
       const initiateCreditWalletDto: InitiateCreditWalletDto = {
         walletId,
@@ -35,6 +36,24 @@ export class WalletService {
         this.walletClient.send<TransactionModel>(
           'initiateCredit',
           initiateCreditWalletDto,
+        ),
+      );
+      return response;
+    } catch (error) {
+      throw new RpcException(error.response);
+    }
+  }
+
+  async initiateDebit(walletId: string, debitWalletDto: DebitWalletDto) {
+    try {
+      const initiateDebitWalletDto: InitiateDebitWalletDto = {
+        walletId,
+        ...debitWalletDto,
+      };
+      const response = await lastValueFrom(
+        this.walletClient.send<TransactionModel>(
+          'initiateDebit',
+          initiateDebitWalletDto,
         ),
       );
       return response;

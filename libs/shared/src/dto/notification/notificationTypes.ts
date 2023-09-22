@@ -21,3 +21,10 @@ export interface PasswordResetNotificationData {
 export interface TransferCreditNotificationData {
   amount: number;
 }
+
+export interface TransferDebitNotificationData {
+  amount: number;
+  accountName: string;
+  accountNumber: string;
+  bankName: string;
+}
