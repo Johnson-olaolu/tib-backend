@@ -5,6 +5,8 @@ export class TransactionModel {
 
   amount: number;
 
+  currency: string;
+
   paymentMethod: string;
 
   type: string;

@@ -29,6 +29,11 @@ export class Transaction extends BaseEntity {
   @Column({ type: 'decimal' })
   amount: number;
 
+  @Column({
+    nullable: true,
+  })
+  currency: string;
+
   @ManyToOne(() => PaymentMethod)
   @JoinColumn({ referencedColumnName: 'name' })
   paymentMethod: PaymentMethod;

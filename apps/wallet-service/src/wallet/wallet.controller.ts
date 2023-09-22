@@ -1,8 +1,11 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { WalletService } from './wallet.service';
 import { CreateWalletDto } from '../../../../libs/shared/src/dto/wallet/create-wallet.dto';
-import { InitiateCreditWalletDto } from '@app/shared/dto/wallet/credit-wallet.dto';
+import {
+  ConfirmCreditWalletDto,
+  InitiateCreditWalletDto,
+} from '@app/shared/dto/wallet/credit-wallet.dto';
 
 @Controller()
 export class WalletController {
@@ -34,7 +37,16 @@ export class WalletController {
   }
 
   @MessagePattern('initiateCredit')
-  async initiateCredit(initiateCreditWalletDto: InitiateCreditWalletDto) {
+  async initiateCredit(
+    @Payload() initiateCreditWalletDto: InitiateCreditWalletDto,
+  ) {
     return await this.walletService.initiateCredit(initiateCreditWalletDto);
+  }
+
+  @EventPattern('creditWallet')
+  async creditWallet(
+    @Payload() confirmCreditWalletDto: ConfirmCreditWalletDto,
+  ) {
+    return await this.walletService.confirmCredit(confirmCreditWalletDto);
   }
 }

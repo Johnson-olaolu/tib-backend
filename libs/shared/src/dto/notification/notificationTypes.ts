@@ -16,3 +16,7 @@ export interface PasswordResetNotificationData {
   recipientMail: string;
   url: string;
 }
+export interface TransferCreditNotificationData {
+  recipientMail: string;
+  amount: number;
+}

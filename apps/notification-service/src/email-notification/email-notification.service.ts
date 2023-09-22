@@ -1,6 +1,7 @@
 import {
   PasswordResetNotificationData,
   RegistrationNotificationData,
+  TransferCreditNotificationData,
 } from '@app/shared/dto/notification/notificationTypes';
 import { FileModel } from '@app/shared/model/file.model';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
@@ -67,7 +68,6 @@ export class EmailNotificationService implements OnApplicationBootstrap {
       }),
     );
     this.emailIllustration1 = emailIllustration1File.path;
-    // console.log(emailIllustration1File.path);
   }
 
   async sendUserConfirmationMail(
@@ -122,6 +122,35 @@ export class EmailNotificationService implements OnApplicationBootstrap {
     });
     this.logger.log(
       `Password Reset Mail Sent to : ${passwordResetNotificationData.recipientMail}`,
+    );
+  }
+  async sendCreditWalletMail(
+    transferCreditNotificationData: TransferCreditNotificationData,
+  ) {
+    await this.mailerService.sendMail({
+      to: transferCreditNotificationData.recipientMail,
+      // from: '"Support Team" <support@example.com>', // override default from
+      subject: 'Wallet Credit',
+      template: 'creditWalletMail',
+      context: {
+        logo: this.logo,
+        amount: Intl.NumberFormat('en-GB', {
+          style: 'currency',
+          currency: 'NGN',
+        }).format(transferCreditNotificationData.amount),
+        twitterLogo: this.twitterLogo,
+        twitterLink: this.configService.get('TWITTER_LINK'),
+        instagramLogo: this.instagramLogo,
+        instagramLink: this.configService.get('INSTAGRAM_LINK'),
+        facebookLogo: this.facebookLogo,
+        facebookLink: this.configService.get('FACEBOOK_LINK'),
+        linkedinLogo: this.linkedinLogo,
+        linkedinLink: this.configService.get('LINKEDIN_LINK'),
+        emailIllustration: this.emailIllustration1,
+      },
+    });
+    this.logger.log(
+      `Credit Wallet Mail Sent to : ${transferCreditNotificationData.recipientMail}`,
     );
   }
 }

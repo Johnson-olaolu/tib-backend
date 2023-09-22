@@ -1,11 +1,18 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCreditTransactionDto } from './dto/create-transaction.dto';
 import { PaystackService } from '../paystack/paystack.service';
 import { RpcException } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from './entities/transaction.entity';
 import { Repository } from 'typeorm';
-import { TransactionTypeEnum } from '../utils/constants';
+import {
+  TransactionProgressEnum,
+  TransactionTypeEnum,
+} from '../utils/constants';
 
 @Injectable()
 export class TransactionService {
@@ -45,12 +52,35 @@ export class TransactionService {
     return 'This action adds a new transaction';
   }
 
+  async verifyCreditTransactionPaystack(reference: string) {
+    const transaction = await this.transactionRepository.findOne({
+      where: {
+        reference: reference,
+      },
+    });
+    const response = await this.paystackService.verifyTransaction(reference);
+    transaction.progress = TransactionProgressEnum.COMPLETED;
+    transaction.status = response.status;
+    transaction.paystackTransactionId = response.id.toString();
+    transaction.currency = response.currency;
+    await transaction.save();
+    return transaction;
+  }
+
   findAll() {
     return `This action returns all transaction`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} transaction`;
+  async findOne(id: string) {
+    const transaction = await this.transactionRepository.findOneBy({
+      id,
+    });
+    if (!transaction) {
+      throw new RpcException(
+        new NotFoundException('Transaction not found for this ID'),
+      );
+    }
+    return transaction;
   }
 
   remove(id: number) {

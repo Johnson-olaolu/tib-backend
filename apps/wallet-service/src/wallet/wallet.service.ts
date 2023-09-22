@@ -13,13 +13,24 @@ import {
   UpdateWalletPaymentMethodFieldDto,
   UpdateWalletPaymentMethodDefaultDto,
 } from './dto/update-payment-method.dto';
-import { InitiateCreditWalletDto } from '@app/shared/dto/wallet/credit-wallet.dto';
-import { lastValueFrom } from 'rxjs';
+import {
+  ConfirmCreditWalletDto,
+  InitiateCreditWalletDto,
+} from '@app/shared/dto/wallet/credit-wallet.dto';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { UserModel } from '@app/shared/model/user.model';
 import { TransactionService } from '../transaction/transaction.service';
 import { generateReference } from '../utils/misc';
-import { WalletTransactionActionEnum } from '../utils/constants';
+import {
+  TransactionTypeEnum,
+  WalletTransactionActionEnum,
+} from '../utils/constants';
+import { WalletTransaction } from './entities/wallet-transaction.entity';
+import {
+  INotification,
+  TransferCreditNotificationData,
+} from '@app/shared/dto/notification/notificationTypes';
 
 @Injectable()
 export class WalletService {
@@ -27,9 +38,13 @@ export class WalletService {
     @InjectRepository(Wallet) private walletRepository: Repository<Wallet>,
     @InjectRepository(WalletPaymentMethod)
     private walletPaymentMethodRepository: Repository<WalletPaymentMethod>,
+    @InjectRepository(WalletTransaction)
+    private walletTransactionRepository: Repository<WalletTransaction>,
     private paymentMethodService: PaymentMethodService,
     private transactionService: TransactionService,
     @Inject(RABBITMQ_QUEUES.USER_SERVICE) private userClient: ClientProxy,
+    @Inject(RABBITMQ_QUEUES.NOTIFICATION_SERVICE)
+    private notificationClient: ClientProxy,
   ) {}
   async create(createWalletDto: CreateWalletDto) {
     const newWallet = await this.walletRepository.save(createWalletDto);
@@ -207,8 +222,40 @@ export class WalletService {
     return response;
   }
 
-  async confirmCredit() {
-    return 'confirm credit';
+  async confirmCredit(confirmCreditWalletDto: ConfirmCreditWalletDto) {
+    const wallet = await this.findOne(confirmCreditWalletDto.walletId);
+    const user = await lastValueFrom(
+      this.userClient.send<UserModel>('findOneUser', wallet.userId),
+    );
+    const transaction = await this.transactionService.findOne(
+      confirmCreditWalletDto.transactionId,
+    );
+    await this.walletTransactionRepository.save({
+      action: WalletTransactionActionEnum.DEPOSIT,
+      amount: confirmCreditWalletDto.amount,
+      currBalance: wallet.amount + confirmCreditWalletDto.amount,
+      prevBalance: wallet.amount,
+      transactionReference: transaction.reference,
+      currency: transaction.currency,
+      type: TransactionTypeEnum.CREDIT,
+      transaction: transaction,
+      wallet: wallet,
+      description: 'Deposit',
+    });
+    wallet.amount = wallet.amount + confirmCreditWalletDto.amount;
+    await wallet.save();
+    const transferCreditNotification: INotification<TransferCreditNotificationData> =
+      {
+        type: ['email', 'push'],
+        data: {
+          recipientMail: user.email,
+          amount: confirmCreditWalletDto.amount,
+        },
+      };
+    await firstValueFrom(
+      this.notificationClient.emit('creditWallet', transferCreditNotification),
+    );
+    return true;
   }
 
   async debitAccount() {

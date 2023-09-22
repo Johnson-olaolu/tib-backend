@@ -32,7 +32,6 @@ export class AuthService {
   }
 
   async getUser(usernameOrEmail: string) {
-    console.log(usernameOrEmail);
     const user = await lastValueFrom(
       this.userClient.send<UserModel>(
         'findOneUserByEmailOrUserName',

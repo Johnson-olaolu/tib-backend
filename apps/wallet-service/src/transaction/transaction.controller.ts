@@ -6,13 +6,15 @@ import { TransactionService } from './transaction.service';
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
-  @MessagePattern('findAllTransaction')
-  findAll() {
-    return this.transactionService.findAll();
+  @MessagePattern('verifyCreditTransactionPaystack')
+  async verifyCreditTransactionPaystack(@Payload() reference: string) {
+    return await this.transactionService.verifyCreditTransactionPaystack(
+      reference,
+    );
   }
 
   @MessagePattern('findOneTransaction')
-  findOne(@Payload() id: number) {
+  findOne(@Payload() id: string) {
     return this.transactionService.findOne(id);
   }
 

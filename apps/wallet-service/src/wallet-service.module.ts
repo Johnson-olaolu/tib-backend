@@ -24,6 +24,7 @@ import { PaystackModule } from './paystack/paystack.module';
     PaymentMethodModule,
     RmqModule.register({ name: RABBITMQ_QUEUES.FILE_SERVICE }),
     RmqModule.register({ name: RABBITMQ_QUEUES.USER_SERVICE }),
+    RmqModule.register({ name: RABBITMQ_QUEUES.NOTIFICATION_SERVICE }),
     DatabaseModule,
     PaystackModule,
   ],
