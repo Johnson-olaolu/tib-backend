@@ -1,7 +1,9 @@
+import { WalletModel } from './wallet.model';
+
 export class TransactionModel {
   id: string;
 
-  wallet: string;
+  wallet: WalletModel;
 
   amount: number;
 

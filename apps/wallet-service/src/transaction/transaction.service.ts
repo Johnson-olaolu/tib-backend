@@ -49,13 +49,15 @@ export class TransactionService {
         new BadRequestException('Payment method Not currently supported'),
       );
     }
-    return 'This action adds a new transaction';
   }
 
   async verifyCreditTransactionPaystack(reference: string) {
     const transaction = await this.transactionRepository.findOne({
       where: {
         reference: reference,
+      },
+      relations: {
+        wallet: true,
       },
     });
     const response = await this.paystackService.verifyTransaction(reference);

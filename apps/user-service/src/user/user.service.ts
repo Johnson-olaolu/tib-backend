@@ -98,6 +98,8 @@ export class UserService {
         new NotFoundException('User not Found for this ID'),
       );
     }
+    console.log(user);
+    console.log(id);
     return user;
   }
 
@@ -115,6 +117,7 @@ export class UserService {
         new NotFoundException('User not Found for this ID'),
       );
     }
+    console.log(user);
     return user;
   }
 
@@ -133,10 +136,13 @@ export class UserService {
     const registrationNotification: INotification<RegistrationNotificationData> =
       {
         type: ['email'],
+        recipient: {
+          mail: user.email,
+          name: user.userName,
+        },
         data: {
           date: moment().toString(),
           name: user.userName,
-          recipientMail: user.email,
           token: verificationToken,
         },
       };
@@ -200,8 +206,11 @@ export class UserService {
     const passwordResetNotification: INotification<PasswordResetNotificationData> =
       {
         type: ['email'],
+        recipient: {
+          mail: user.email,
+          name: user.userName,
+        },
         data: {
-          recipientMail: user.email,
           url: passwordResetUrl,
         },
       };

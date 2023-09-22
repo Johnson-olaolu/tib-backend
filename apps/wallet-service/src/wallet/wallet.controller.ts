@@ -23,7 +23,7 @@ export class WalletController {
 
   @MessagePattern('getWalletDetails')
   async getWalletDetails(@Payload() id: string) {
-    return await this.walletService.findOne(id);
+    return await this.walletService.getWalletDetails(id);
   }
 
   @MessagePattern('getUserWalletDetails')

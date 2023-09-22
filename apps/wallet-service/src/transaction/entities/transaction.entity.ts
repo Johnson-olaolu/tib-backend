@@ -15,18 +15,19 @@ import {
   TransactionProgressEnum,
   TransactionTypeEnum,
 } from '../../utils/constants';
+import { ColumnNumericTransformer } from '@app/shared/utils/misc';
+import { Wallet } from '../../wallet/entities/wallet.entity';
 
 @Entity()
 export class Transaction extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => WalletTransaction, {
-    nullable: true,
-  })
-  wallet: WalletTransaction;
+  @ManyToOne(() => Wallet)
+  @JoinColumn()
+  wallet: Wallet;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'decimal', transformer: new ColumnNumericTransformer() })
   amount: number;
 
   @Column({

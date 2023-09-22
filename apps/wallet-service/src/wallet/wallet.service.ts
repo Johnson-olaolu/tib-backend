@@ -209,6 +209,7 @@ export class WalletService {
     const user = await lastValueFrom(
       this.userClient.send<UserModel>('findOneUser', wallet.userId),
     );
+    console.log(user);
     const transactionRef = generateReference(
       WalletTransactionActionEnum.DEPOSIT,
     );
@@ -233,8 +234,8 @@ export class WalletService {
     await this.walletTransactionRepository.save({
       action: WalletTransactionActionEnum.DEPOSIT,
       amount: confirmCreditWalletDto.amount,
-      currBalance: wallet.amount + confirmCreditWalletDto.amount,
-      prevBalance: wallet.amount,
+      currBalance: wallet.balance + confirmCreditWalletDto.amount,
+      prevBalance: wallet.balance,
       transactionReference: transaction.reference,
       currency: transaction.currency,
       type: TransactionTypeEnum.CREDIT,
@@ -242,13 +243,16 @@ export class WalletService {
       wallet: wallet,
       description: 'Deposit',
     });
-    wallet.amount = wallet.amount + confirmCreditWalletDto.amount;
+    wallet.balance = wallet.balance + confirmCreditWalletDto.amount;
     await wallet.save();
     const transferCreditNotification: INotification<TransferCreditNotificationData> =
       {
         type: ['email', 'push'],
+        recipient: {
+          name: user.userName,
+          mail: user.email,
+        },
         data: {
-          recipientMail: user.email,
           amount: confirmCreditWalletDto.amount,
         },
       };

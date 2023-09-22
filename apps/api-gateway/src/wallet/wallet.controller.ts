@@ -63,9 +63,9 @@ export class WalletController {
       ],
     },
   })
-  @Post('creditWallet')
+  @Post(':walletId/creditWallet')
   async creditWallet(
-    @Param('id') walletId: string,
+    @Param('walletId') walletId: string,
     @Body() creditWalletDto: CreditWalletDto,
   ) {
     const data = await this.walletService.initiateCredit(

@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { WalletPaymentMethod } from './wallet-payment-method.entity';
 import { WalletTransaction } from './wallet-transaction.entity';
+import { ColumnNumericTransformer } from '@app/shared/utils/misc';
 
 @Entity()
 export class Wallet extends BaseEntity {
@@ -23,8 +24,9 @@ export class Wallet extends BaseEntity {
   @Column({
     type: 'decimal',
     default: 0,
+    transformer: new ColumnNumericTransformer(),
   })
-  amount: number;
+  balance: number;
 
   @OneToMany(() => WalletTransaction, (transaction) => transaction.wallet)
   transactions: WalletTransaction[];

@@ -3,5 +3,7 @@ import { EmailNotificationService } from './email-notification.service';
 
 @Controller()
 export class EmailNotificationController {
-  constructor(private readonly emailNotificationService: EmailNotificationService) {}
+  constructor(
+    private readonly emailNotificationService: EmailNotificationService,
+  ) {}
 }

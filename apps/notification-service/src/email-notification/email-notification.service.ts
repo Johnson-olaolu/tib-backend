@@ -71,73 +71,106 @@ export class EmailNotificationService implements OnApplicationBootstrap {
   }
 
   async sendUserConfirmationMail(
+    recipeint: {
+      mail: string;
+      name: string;
+    },
     registrationNotificationDto: RegistrationNotificationData,
   ) {
-    await this.mailerService.sendMail({
-      to: registrationNotificationDto.recipientMail,
-      // from: '"Support Team" <support@example.com>', // override default from
-      subject: 'Welcome to The Idea Hub! Confirm your Email',
-      template: 'registrationMail',
-      context: {
-        logo: this.logo,
-        name: registrationNotificationDto.name,
-        token: registrationNotificationDto.token,
-        date: registrationNotificationDto.date,
-        twitterLogo: this.twitterLogo,
-        twitterLink: this.configService.get('TWITTER_LINK'),
-        instagramLogo: this.instagramLogo,
-        instagramLink: this.configService.get('INSTAGRAM_LINK'),
-        facebookLogo: this.facebookLogo,
-        facebookLink: this.configService.get('FACEBOOK_LINK'),
-        linkedinLogo: this.linkedinLogo,
-        linkedinLink: this.configService.get('LINKEDIN_LINK'),
-        emailIllustration: this.emailIllustration1,
-      },
+    const response = await this.sendMail({
+      recipientMail: recipeint.mail,
+      body: `
+        Please use this token 
+        <strong>${registrationNotificationDto.token}</strong>
+        to confirm your email
+      `,
+      subject: 'Welcome to TIB',
+      title: 'Welcome To The Idea Bank',
+      userName: recipeint.name,
+      extraInfo: registrationNotificationDto.date,
     });
     this.logger.log(
-      `Registration Mail Sent to : ${registrationNotificationDto.recipientMail}`,
+      `Registration Mail Sent to : ${response?.accepted?.toString()}`,
     );
   }
   async sendPasswordResetMail(
+    recipeint: {
+      mail: string;
+      name: string;
+    },
     passwordResetNotificationData: PasswordResetNotificationData,
   ) {
-    await this.mailerService.sendMail({
-      to: passwordResetNotificationData.recipientMail,
-      // from: '"Support Team" <support@example.com>', // override default from
-      subject: 'Change your password',
-      template: 'passwordResetMail',
-      context: {
-        logo: this.logo,
-        passwordResetLink: passwordResetNotificationData.url,
-        twitterLogo: this.twitterLogo,
-        twitterLink: this.configService.get('TWITTER_LINK'),
-        instagramLogo: this.instagramLogo,
-        instagramLink: this.configService.get('INSTAGRAM_LINK'),
-        facebookLogo: this.facebookLogo,
-        facebookLink: this.configService.get('FACEBOOK_LINK'),
-        linkedinLogo: this.linkedinLogo,
-        linkedinLink: this.configService.get('LINKEDIN_LINK'),
-        emailIllustration: this.emailIllustration1,
-      },
+    const response = await this.sendMail({
+      recipientMail: recipeint.mail,
+      body: `
+      <a
+      href='${passwordResetNotificationData.url}'
+      rel='noopener'
+      style='text-decoration: underline; color: #3e2d9c;'
+      target='_blank'
+    ><strong>click here</strong> </a>
+    to change your password
+      `,
+      subject: 'Password Reset',
+      title: 'Reset Your Password',
+      userName: recipeint.name,
     });
     this.logger.log(
-      `Password Reset Mail Sent to : ${passwordResetNotificationData.recipientMail}`,
+      `Password Reset Mail Sent to : ${response?.accepted?.toString()}`,
     );
   }
   async sendCreditWalletMail(
+    recipeint: {
+      mail: string;
+      name: string;
+    },
     transferCreditNotificationData: TransferCreditNotificationData,
   ) {
-    await this.mailerService.sendMail({
-      to: transferCreditNotificationData.recipientMail,
+    const amount = Intl.NumberFormat('en-Gb', {
+      currency: 'NGN',
+      compactDisplay: 'short',
+    }).format(transferCreditNotificationData.amount);
+    const response = await this.sendMail({
+      recipientMail: recipeint.mail,
+      body: `
+      Your account has been credited with
+      <strong>${amount}</strong>
+      `,
+      subject: 'Credit Alert',
+      title: 'Credit Alert',
+      userName: recipeint.name,
+    });
+    this.logger.log(
+      `Credit Wallet Mail Sent to : ${response?.accepted?.toString()}`,
+    );
+  }
+
+  async sendMail({
+    recipientMail,
+    subject,
+    userName,
+    title,
+    body,
+    extraInfo,
+  }: {
+    recipientMail: string;
+    subject: string;
+    userName: string;
+    title: string;
+    body: string;
+    extraInfo?: string;
+  }) {
+    const response = await this.mailerService.sendMail({
+      to: recipientMail,
       // from: '"Support Team" <support@example.com>', // override default from
-      subject: 'Wallet Credit',
-      template: 'creditWalletMail',
+      subject,
+      template: 'defaultMail',
       context: {
         logo: this.logo,
-        amount: Intl.NumberFormat('en-GB', {
-          style: 'currency',
-          currency: 'NGN',
-        }).format(transferCreditNotificationData.amount),
+        title,
+        userName,
+        body,
+        extraInfo: extraInfo || false,
         twitterLogo: this.twitterLogo,
         twitterLink: this.configService.get('TWITTER_LINK'),
         instagramLogo: this.instagramLogo,
@@ -149,8 +182,6 @@ export class EmailNotificationService implements OnApplicationBootstrap {
         emailIllustration: this.emailIllustration1,
       },
     });
-    this.logger.log(
-      `Credit Wallet Mail Sent to : ${transferCreditNotificationData.recipientMail}`,
-    );
+    return response;
   }
 }

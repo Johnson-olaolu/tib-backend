@@ -25,6 +25,7 @@ export class WalletService {
   }
 
   async initiateCredit(walletId: string, creditWalletDto: CreditWalletDto) {
+    console.log({ walletId });
     try {
       const initiateCreditWalletDto: InitiateCreditWalletDto = {
         walletId,

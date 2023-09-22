@@ -22,8 +22,9 @@ export class TransactionService {
       const confirmCreditWalletDto: ConfirmCreditWalletDto = {
         amount: transaction.amount,
         transactionId: transaction.id,
-        walletId: transaction.wallet,
+        walletId: transaction.wallet.id,
       };
+      console.log(transaction);
       await firstValueFrom(
         this.walletClient.emit('creditWallet', confirmCreditWalletDto),
       );

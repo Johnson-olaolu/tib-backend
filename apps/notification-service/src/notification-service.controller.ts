@@ -21,6 +21,7 @@ export class NotificationServiceController {
     @Payload() notificationData: INotification<RegistrationNotificationData>,
   ) {
     await this.emailNotificationService.sendUserConfirmationMail(
+      notificationData.recipient,
       notificationData.data,
     );
   }
@@ -30,6 +31,7 @@ export class NotificationServiceController {
     @Payload() notificationData: INotification<PasswordResetNotificationData>,
   ) {
     await this.emailNotificationService.sendPasswordResetMail(
+      notificationData.recipient,
       notificationData.data,
     );
   }
@@ -39,6 +41,7 @@ export class NotificationServiceController {
     @Payload() notificationData: INotification<TransferCreditNotificationData>,
   ) {
     await this.emailNotificationService.sendCreditWalletMail(
+      notificationData.recipient,
       notificationData.data,
     );
   }

@@ -31,6 +31,14 @@ import { join } from 'path';
             strict: true,
           },
         },
+        options: {
+          partials: {
+            dir: join(__dirname, 'templates/mail', 'partials'),
+            options: {
+              strict: true,
+            },
+          },
+        },
       }),
       imports: [ConfigModule],
       inject: [ConfigService],

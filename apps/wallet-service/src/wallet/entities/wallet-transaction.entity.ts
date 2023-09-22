@@ -15,6 +15,7 @@ import {
   WalletTransactionActionEnum,
 } from '../../utils/constants';
 import { Transaction } from '../../transaction/entities/transaction.entity';
+import { ColumnNumericTransformer } from '@app/shared/utils/misc';
 
 @Entity()
 export class WalletTransaction extends BaseEntity {
@@ -35,6 +36,7 @@ export class WalletTransaction extends BaseEntity {
 
   @Column({
     type: 'decimal',
+    transformer: new ColumnNumericTransformer(),
   })
   public amount: number;
 
