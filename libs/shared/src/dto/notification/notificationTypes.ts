@@ -28,3 +28,8 @@ export interface TransferDebitNotificationData {
   accountNumber: string;
   bankName: string;
 }
+
+export interface TransferInternalNotificationData {
+  amount: number;
+  userName: string;
+}

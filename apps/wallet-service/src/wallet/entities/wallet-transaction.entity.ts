@@ -40,7 +40,9 @@ export class WalletTransaction extends BaseEntity {
   })
   public amount: number;
 
-  @Column()
+  @Column({
+    default: 'NGN',
+  })
   public currency: string;
 
   @Column()
@@ -63,14 +65,12 @@ export class WalletTransaction extends BaseEntity {
   @Column({
     nullable: true,
   })
-  public recipeint: string;
+  public recipient: string;
 
   @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
   public wallet: Wallet;
 
-  @Column({
-    unique: true,
-  })
+  @Column()
   public transactionReference: string;
 
   @OneToOne(() => Transaction, {

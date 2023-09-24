@@ -98,8 +98,6 @@ export class UserService {
         new NotFoundException('User not Found for this ID'),
       );
     }
-    console.log(user);
-    console.log(id);
     return user;
   }
 

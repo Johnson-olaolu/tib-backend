@@ -3,6 +3,7 @@ import {
   RegistrationNotificationData,
   TransferCreditNotificationData,
   TransferDebitNotificationData,
+  TransferInternalNotificationData,
 } from '@app/shared/dto/notification/notificationTypes';
 import { FileModel } from '@app/shared/model/file.model';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
@@ -210,6 +211,56 @@ export class EmailNotificationService implements OnApplicationBootstrap {
     });
     this.logger.log(
       `Debit Wallet Mail Sent to : ${response?.accepted?.toString()}`,
+    );
+  }
+  async sendSendMoneyMail(
+    recipeint: {
+      mail: string;
+      name: string;
+    },
+    transferInternalNotificationData: TransferInternalNotificationData,
+  ) {
+    const amount = Intl.NumberFormat('en-Gb', {
+      currency: 'NGN',
+      compactDisplay: 'short',
+    }).format(transferInternalNotificationData.amount);
+    const response = await this.sendMail({
+      recipientMail: recipeint.mail,
+      body: `
+      <p>Your Account has been debited ${amount}</p>
+      <p> Transfer to ${transferInternalNotificationData.userName}</p>
+      `,
+      subject: 'Debit Alert',
+      title: 'Debit Alert',
+      userName: recipeint.name,
+    });
+    this.logger.log(
+      `Debit Wallet Mail Sent to : ${response?.accepted?.toString()}`,
+    );
+  }
+  async sendRecieveMoneyMail(
+    recipeint: {
+      mail: string;
+      name: string;
+    },
+    transferInternalNotificationData: TransferInternalNotificationData,
+  ) {
+    const amount = Intl.NumberFormat('en-Gb', {
+      currency: 'NGN',
+      compactDisplay: 'short',
+    }).format(transferInternalNotificationData.amount);
+    const response = await this.sendMail({
+      recipientMail: recipeint.mail,
+      body: `
+      <p>Your Account has been credited ${amount}</p>
+      <p> Transfer from ${transferInternalNotificationData.userName}</p>
+      `,
+      subject: 'Credit Alert',
+      title: 'Credit Alert',
+      userName: recipeint.name,
+    });
+    this.logger.log(
+      `Credit Wallet Mail Sent to : ${response?.accepted?.toString()}`,
     );
   }
 }

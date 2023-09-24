@@ -36,6 +36,7 @@ export enum WalletTransactionActionEnum {
   DEPOSIT = 'DEPOSIT',
   WITHDRAWAL = 'WITHDRAWAL',
   TRANSFER = 'TRANSFER',
+  RECIEVE = 'RECIEVE',
   PAYMENT = 'PAYMENT',
 }
 

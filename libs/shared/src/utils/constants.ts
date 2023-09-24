@@ -16,3 +16,11 @@ export enum FileTypeEnum {
 }
 
 export type notificationTypes = 'email' | 'push';
+
+export enum TransferTypesEnum {
+  BASIC = 'BASIC',
+  IDEA_FUNDING = 'IDEA_FUNDING',
+  IDEA_BUYING = 'IDEA_BUYING',
+}
+
+export const currencies = ['NGN', 'USD'] as const;
