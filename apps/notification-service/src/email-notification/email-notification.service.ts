@@ -1,9 +1,7 @@
 import {
   PasswordResetNotificationData,
   RegistrationNotificationData,
-  TransferCreditNotificationData,
-  TransferDebitNotificationData,
-  TransferInternalNotificationData,
+  TransferNotificationData,
 } from '@app/shared/dto/notification/notificationTypes';
 import { FileModel } from '@app/shared/model/file.model';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
@@ -167,17 +165,17 @@ export class EmailNotificationService implements OnApplicationBootstrap {
       mail: string;
       name: string;
     },
-    transferCreditNotificationData: TransferCreditNotificationData,
+    transferNotificationData: TransferNotificationData,
   ) {
     const amount = Intl.NumberFormat('en-Gb', {
       currency: 'NGN',
       compactDisplay: 'short',
-    }).format(transferCreditNotificationData.amount);
+    }).format(transferNotificationData.amount);
     const response = await this.sendMail({
       recipientMail: recipeint.mail,
       body: `
-      Your account has been credited with
-      <strong>${amount}</strong>
+      <p>Your Account has been credited with <p>${amount}</p></p>
+      <p> ${transferNotificationData.description}</p>
       `,
       subject: 'Credit Alert',
       title: 'Credit Alert',
@@ -193,17 +191,17 @@ export class EmailNotificationService implements OnApplicationBootstrap {
       mail: string;
       name: string;
     },
-    transferCreditNotificationData: TransferDebitNotificationData,
+    transferNotificationData: TransferNotificationData,
   ) {
     const amount = Intl.NumberFormat('en-Gb', {
       currency: 'NGN',
       compactDisplay: 'short',
-    }).format(transferCreditNotificationData.amount);
+    }).format(transferNotificationData.amount);
     const response = await this.sendMail({
       recipientMail: recipeint.mail,
       body: `
       <p>Your Account has been debited ${amount}</p>
-      <p> Transfer to ${transferCreditNotificationData.accountName}  ${transferCreditNotificationData.bankName} - ${transferCreditNotificationData.accountNumber}</p>
+      <p> ${transferNotificationData.description}</p>
       `,
       subject: 'Debit Alert',
       title: 'Debit Alert',
@@ -211,56 +209,6 @@ export class EmailNotificationService implements OnApplicationBootstrap {
     });
     this.logger.log(
       `Debit Wallet Mail Sent to : ${response?.accepted?.toString()}`,
-    );
-  }
-  async sendSendMoneyMail(
-    recipeint: {
-      mail: string;
-      name: string;
-    },
-    transferInternalNotificationData: TransferInternalNotificationData,
-  ) {
-    const amount = Intl.NumberFormat('en-Gb', {
-      currency: 'NGN',
-      compactDisplay: 'short',
-    }).format(transferInternalNotificationData.amount);
-    const response = await this.sendMail({
-      recipientMail: recipeint.mail,
-      body: `
-      <p>Your Account has been debited ${amount}</p>
-      <p> Transfer to ${transferInternalNotificationData.userName}</p>
-      `,
-      subject: 'Debit Alert',
-      title: 'Debit Alert',
-      userName: recipeint.name,
-    });
-    this.logger.log(
-      `Debit Wallet Mail Sent to : ${response?.accepted?.toString()}`,
-    );
-  }
-  async sendRecieveMoneyMail(
-    recipeint: {
-      mail: string;
-      name: string;
-    },
-    transferInternalNotificationData: TransferInternalNotificationData,
-  ) {
-    const amount = Intl.NumberFormat('en-Gb', {
-      currency: 'NGN',
-      compactDisplay: 'short',
-    }).format(transferInternalNotificationData.amount);
-    const response = await this.sendMail({
-      recipientMail: recipeint.mail,
-      body: `
-      <p>Your Account has been credited ${amount}</p>
-      <p> Transfer from ${transferInternalNotificationData.userName}</p>
-      `,
-      subject: 'Credit Alert',
-      title: 'Credit Alert',
-      userName: recipeint.name,
-    });
-    this.logger.log(
-      `Credit Wallet Mail Sent to : ${response?.accepted?.toString()}`,
     );
   }
 }

@@ -42,6 +42,10 @@ import { ConfigService } from '@nestjs/config';
 import { ChangePasswordDto } from '@app/shared/dto/user-service/change-password.dto';
 import { WalletModel } from '@app/shared/model/wallet.model';
 import { CreateWalletDto } from '@app/shared/dto/wallet/create-wallet.dto';
+import { Role } from '../role/entities/role.entity';
+import { Plan } from '../plan/entities/plan.entity';
+import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
+import { ServicePaymentDto } from '@app/shared/dto/wallet/service-payment.dto';
 
 @Injectable()
 export class UserService {
@@ -64,8 +68,19 @@ export class UserService {
       createUserDto.password,
       BCRYPT_HASH_ROUND,
     );
-    const role = await this.roleService.findOneByName('user');
-    const plan = await this.planService.findOneByName('Free');
+    let role: Role;
+    let plan: Plan;
+    if (createUserDto.role) {
+      role = await this.roleService.findOneByName(createUserDto.role);
+    } else {
+      role = await this.roleService.findOneByName('user');
+    }
+
+    if (createUserDto.plan) {
+      plan = await this.planService.findOneByName(createUserDto.plan);
+    } else {
+      plan = await this.planService.findOneByName('Free');
+    }
     const profile = await this.profileRepository.save({});
     const newUserDetails = {
       ...createUserDto,
@@ -337,6 +352,28 @@ export class UserService {
     profile.profilePicture = savedFile.path;
     await profile.save();
     return profile;
+  }
+
+  //handle plans
+  async upgradeUserPlan(upgradePlanDto: UpgradePlanDto) {
+    const user = await this.findOne(upgradePlanDto.userId);
+    if (user.planName === upgradePlanDto.plan) {
+      throw new RpcException(
+        new BadRequestException('User Already subscribed to plan'),
+      );
+    }
+    const plan = await this.planService.findOneByName(upgradePlanDto.plan);
+    const servicePaymentDto: ServicePaymentDto = {
+      amount: plan.price,
+      plan: upgradePlanDto.plan,
+      userId: user.id,
+    };
+    await lastValueFrom(
+      this.walletClient.send<WalletModel>('servicePayment', servicePaymentDto),
+    );
+    user.plan = plan;
+    await user.save();
+    return user;
   }
 
   async remove(id: string) {

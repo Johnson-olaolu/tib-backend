@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -23,6 +24,10 @@ export class CreatePlanDto {
   @IsNumber()
   @IsOptional()
   price?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  active?: boolean;
 
   @IsArray()
   planPermissions: string[];

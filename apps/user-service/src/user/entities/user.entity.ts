@@ -72,12 +72,18 @@ export class User extends BaseEntity {
   profile: Profile;
 
   @ManyToOne(() => Role)
-  @JoinColumn({ name: 'role', referencedColumnName: 'name' })
+  @JoinColumn({ name: 'roleName', referencedColumnName: 'name' })
   role: Role;
 
+  @Column()
+  roleName: string;
+
   @ManyToOne(() => Plan)
-  @JoinColumn({ name: 'plan', referencedColumnName: 'name' })
+  @JoinColumn({ name: 'planName', referencedColumnName: 'name' })
   plan: Plan;
+
+  @Column()
+  planName: string;
 
   @CreateDateColumn()
   public createdAt: Date;

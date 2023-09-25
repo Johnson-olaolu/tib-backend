@@ -14,9 +14,9 @@ export class UserModel {
 
   profile?: ProfileModel;
 
-  role: string;
+  roleName: string;
 
-  plan: string;
+  planName: string;
 
   createdAt: Date;
 

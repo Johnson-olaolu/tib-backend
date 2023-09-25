@@ -41,6 +41,11 @@ export class Plan extends BaseEntity {
   })
   price: number;
 
+  @Column({
+    default: true,
+  })
+  active: boolean;
+
   @CreateDateColumn()
   public createdAt: Date;
 

@@ -7,6 +7,8 @@ import { ProfileModel } from './model/profile.model';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
 import { WalletModel } from '@app/shared/model/wallet.model';
+import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
+import { UserModel } from '@app/shared/model/user.model';
 
 @Injectable()
 export class UserService {
@@ -55,14 +57,36 @@ export class UserService {
   }
 
   async getUserDetails(id: string) {
-    const user = await lastValueFrom(
-      this.userClient.send('getUserDetails', id),
-    );
-    return user;
+    try {
+      const user = await lastValueFrom(
+        this.userClient.send('getUserDetails', id),
+      );
+      return user;
+    } catch (error) {
+      throw new RpcException(error.response);
+    }
   }
 
   update(userId: string, updateUserDto: UpdateUserDto) {
     return `This action updates a #${userId} user`;
+  }
+
+  async upgradeUserPlan(
+    userId: string,
+    upgradeUserPlanDto: Omit<UpgradePlanDto, 'userId'>,
+  ) {
+    try {
+      const upgradePlanDto: UpgradePlanDto = {
+        plan: upgradeUserPlanDto.plan,
+        userId,
+      };
+      const user = await lastValueFrom(
+        this.userClient.send<UserModel>('upgradeUserPlan', upgradePlanDto),
+      );
+      return user;
+    } catch (error) {
+      throw new RpcException(error.response);
+    }
   }
 
   remove(id: number) {

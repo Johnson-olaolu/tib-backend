@@ -51,6 +51,7 @@ export const defaultPlans: CreatePlanDto[] = [
     name: 'Enterprise',
     description: 'Enterprise Plan',
     type: PlanTypeEnum.PAID,
+    active: false,
     planPermissions: [
       'Buy Idea',
       'Sell Idea',

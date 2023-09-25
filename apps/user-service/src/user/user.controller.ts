@@ -7,6 +7,7 @@ import { ValidateUserDto } from '@app/shared/dto/user-service/validate-user.dto'
 import { UpdateProfileDto } from '@app/shared/dto/user-service/update-profile.dto';
 import { ConfirmUserDto } from '@app/shared/dto/user-service/confirm-user.dto';
 import { ChangePasswordDto } from '@app/shared/dto/user-service/change-password.dto';
+import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
 
 @Controller()
 export class UserController {
@@ -86,6 +87,11 @@ export class UserController {
     },
   ) {
     return this.userService.updateProfile(id, updateProfileDto);
+  }
+
+  @MessagePattern('upgradeUserPlan')
+  upgradeUserPlan(@Payload() upgradePlanDto: UpgradePlanDto) {
+    return this.userService.upgradeUserPlan(upgradePlanDto);
   }
 
   @MessagePattern('findOneUserByEmailOrUserName')

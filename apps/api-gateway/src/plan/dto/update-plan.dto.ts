@@ -1,4 +1,4 @@
+import { CreatePlanDto } from '@app/shared/dto/user-service/create-plan.dto';
 import { PartialType } from '@nestjs/swagger';
-import { CreatePlanDto } from './create-plan.dto';
 
 export class UpdatePlanDto extends PartialType(CreatePlanDto) {}

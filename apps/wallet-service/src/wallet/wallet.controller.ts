@@ -10,6 +10,8 @@ import {
   ConfirmDebitWalletDto,
   InitiateDebitWalletDto,
 } from '@app/shared/dto/wallet/debit-wallet.dto';
+import { TransferMoneyDto } from '@app/shared/dto/wallet/transfer-money.dto';
+import { ServicePaymentDto } from '@app/shared/dto/wallet/service-payment.dto';
 
 @Controller()
 export class WalletController {
@@ -64,5 +66,15 @@ export class WalletController {
   @EventPattern('debitWallet')
   async debitWallet(@Payload() confirmDebitWalletDto: ConfirmDebitWalletDto) {
     return await this.walletService.confirmDebit(confirmDebitWalletDto);
+  }
+
+  @EventPattern('transferMoney')
+  async transferMoney(@Payload() transferMoneyDto: TransferMoneyDto) {
+    return await this.walletService.transferMoney(transferMoneyDto);
+  }
+
+  @EventPattern('servicePayment')
+  async servicePayment(@Payload() servicePaymentDto: ServicePaymentDto) {
+    return await this.walletService.servicePayment(servicePaymentDto);
   }
 }

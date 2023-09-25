@@ -19,7 +19,6 @@ import {
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { LocalAuthGuard } from './guards/loginGuard.guard';
 import { UserModel } from '../../../../libs/shared/src/model/user.model';
 import { ResponseDto } from '../utils/Response.dto';
 import { LoginDto } from './dto/login.dto';
@@ -29,6 +28,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetPasswordResetLinkDto } from './dto/get-password-reset-link.dto';
 import { ChangePasswordDto } from '@app/shared/dto/user-service/change-password.dto';
 import { ConfirmEmailAPIDto } from './dto/confirm-email.dto';
+import { LocalAuthGuard } from '../guards/loginGuard.guard';
 
 @ApiTags('Auth')
 @ApiExtraModels(UserModel, ProfileModel)

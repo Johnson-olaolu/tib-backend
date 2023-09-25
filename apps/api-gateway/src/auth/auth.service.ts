@@ -21,11 +21,7 @@ export class AuthService {
         this.userClient.send<UserModel>('createUser', registerUserDto),
       );
       // await this.generateConfirmAccountToken(newUser.email);
-      return this.loginUser({
-        ...newUser,
-        role: (newUser.role as any)?.name,
-        plan: (newUser.plan as any)?.name,
-      });
+      return this.loginUser(newUser);
     } catch (error) {
       throw new RpcException(error.response);
     }

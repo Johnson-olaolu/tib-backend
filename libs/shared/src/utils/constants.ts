@@ -21,6 +21,7 @@ export enum TransferTypesEnum {
   BASIC = 'BASIC',
   IDEA_FUNDING = 'IDEA_FUNDING',
   IDEA_BUYING = 'IDEA_BUYING',
+  PLAN_SUBSCRIPTION = 'PLAN_SUBSCRIPTION',
 }
 
 export const currencies = ['NGN', 'USD'] as const;

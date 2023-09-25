@@ -55,7 +55,6 @@ export class PlanService {
 
   async update(id: string, updatePlanDto: UpdatePlanDto) {
     const plan = await this.findOne(id);
-
     let updatePlanDetails: any = updatePlanDto;
     if (updatePlanDto.planPermissions) {
       const planPermissions: PlanPermision[] = [];

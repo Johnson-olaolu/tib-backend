@@ -18,18 +18,7 @@ export interface RegistrationNotificationData {
 export interface PasswordResetNotificationData {
   url: string;
 }
-export interface TransferCreditNotificationData {
+export interface TransferNotificationData {
   amount: number;
-}
-
-export interface TransferDebitNotificationData {
-  amount: number;
-  accountName: string;
-  accountNumber: string;
-  bankName: string;
-}
-
-export interface TransferInternalNotificationData {
-  amount: number;
-  userName: string;
+  description: string;
 }

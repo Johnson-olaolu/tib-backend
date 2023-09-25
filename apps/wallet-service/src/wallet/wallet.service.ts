@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  OnApplicationBootstrap,
 } from '@nestjs/common';
 import { CreateWalletDto } from '../../../../libs/shared/src/dto/wallet/create-wallet.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
@@ -35,18 +36,18 @@ import {
 import { WalletTransaction } from './entities/wallet-transaction.entity';
 import {
   INotification,
-  TransferCreditNotificationData,
-  TransferDebitNotificationData,
-  TransferInternalNotificationData,
+  TransferNotificationData,
 } from '@app/shared/dto/notification/notificationTypes';
 import {
   ConfirmDebitWalletDto,
   InitiateDebitWalletDto,
 } from '@app/shared/dto/wallet/debit-wallet.dto';
 import { TransferMoneyDto } from '@app/shared/dto/wallet/transfer-money.dto';
+import { ServicePaymentDto } from '@app/shared/dto/wallet/service-payment.dto';
 
 @Injectable()
-export class WalletService {
+export class WalletService implements OnApplicationBootstrap {
+  private adminWallet: Wallet;
   constructor(
     @InjectRepository(Wallet) private walletRepository: Repository<Wallet>,
     @InjectRepository(WalletPaymentMethod)
@@ -59,6 +60,17 @@ export class WalletService {
     @Inject(RABBITMQ_QUEUES.NOTIFICATION_SERVICE)
     private notificationClient: ClientProxy,
   ) {}
+
+  async onApplicationBootstrap() {
+    const user = await lastValueFrom(
+      this.userClient.send<UserModel>(
+        'findOneUserByEmailOrUserName',
+        'SuperAdmin',
+      ),
+    );
+    this.adminWallet = await this.getUserWalletDetails(user.id);
+  }
+
   async create(createWalletDto: CreateWalletDto) {
     const newWallet = await this.walletRepository.save(createWalletDto);
     return newWallet;
@@ -243,7 +255,7 @@ export class WalletService {
     const transaction = await this.transactionService.findOne(
       confirmCreditWalletDto.transactionId,
     );
-    await this.walletTransactionRepository.save({
+    const walletTransaction = await this.walletTransactionRepository.save({
       action: WalletTransactionActionEnum.DEPOSIT,
       amount: confirmCreditWalletDto.amount,
       currBalance: wallet.balance + confirmCreditWalletDto.amount,
@@ -257,7 +269,7 @@ export class WalletService {
     });
     wallet.balance = wallet.balance + confirmCreditWalletDto.amount;
     await wallet.save();
-    const transferCreditNotification: INotification<TransferCreditNotificationData> =
+    const transferCreditNotification: INotification<TransferNotificationData> =
       {
         type: ['email', 'push'],
         recipient: {
@@ -266,6 +278,7 @@ export class WalletService {
         },
         data: {
           amount: confirmCreditWalletDto.amount,
+          description: walletTransaction.description,
         },
       };
     await firstValueFrom(
@@ -311,7 +324,7 @@ export class WalletService {
     const recipient = await this.transactionService.getRecipient(
       transaction.paystackRecipientCode,
     );
-    await this.walletTransactionRepository.save({
+    const walletTransaction = await this.walletTransactionRepository.save({
       action: WalletTransactionActionEnum.WITHDRAWAL,
       amount: confirmDebitWalletDto.amount,
       currBalance: wallet.balance - confirmDebitWalletDto.amount,
@@ -321,7 +334,7 @@ export class WalletService {
       type: TransactionTypeEnum.DEBIT,
       transaction: transaction,
       wallet: wallet,
-      description: 'Withdrawal',
+      description: `Transfer to ${recipient.details.account_name}  ${recipient.details.bank_name} - ${recipient.details.bank_name}`,
       recipeint: JSON.stringify({
         accountName: recipient.details.account_name,
         accountNumber: recipient.details.account_number,
@@ -330,20 +343,17 @@ export class WalletService {
     });
     wallet.balance = wallet.balance - confirmDebitWalletDto.amount;
     await wallet.save();
-    const transferDebitNotification: INotification<TransferDebitNotificationData> =
-      {
-        type: ['email', 'push'],
-        recipient: {
-          name: user.userName,
-          mail: user.email,
-        },
-        data: {
-          amount: confirmDebitWalletDto.amount,
-          accountName: recipient.details.account_name,
-          accountNumber: recipient.details.account_number,
-          bankName: recipient.details.bank_name,
-        },
-      };
+    const transferDebitNotification: INotification<TransferNotificationData> = {
+      type: ['email', 'push'],
+      recipient: {
+        name: user.userName,
+        mail: user.email,
+      },
+      data: {
+        amount: confirmDebitWalletDto.amount,
+        description: walletTransaction.description,
+      },
+    };
     await firstValueFrom(
       this.notificationClient.emit('debitWallet', transferDebitNotification),
     );
@@ -352,6 +362,11 @@ export class WalletService {
 
   async transferMoney(transferMoneyDto: TransferMoneyDto) {
     const wallet = await this.findOne(transferMoneyDto.walletId);
+    if (wallet.balance < transferMoneyDto.amount) {
+      throw new RpcException(
+        new BadRequestException('Wallet Balance Is Too Low'),
+      );
+    }
     const recieverWallet = await this.getUserWalletDetails(
       transferMoneyDto.recieverId,
     );
@@ -387,55 +402,101 @@ export class WalletService {
     });
     wallet.balance = wallet.balance - transferMoneyDto.amount;
     await wallet.save();
-    const sendMoneyNotification: INotification<TransferInternalNotificationData> =
-      {
-        type: ['email', 'push'],
-        recipient: {
-          name: user.userName,
-          mail: user.email,
-        },
-        data: {
-          amount: transferMoneyDto.amount,
-          userName: recieverUser.userName,
-        },
-      };
+    const debitWalletNotification: INotification<TransferNotificationData> = {
+      type: ['email', 'push'],
+      recipient: {
+        name: user.userName,
+        mail: user.email,
+      },
+      data: {
+        amount: transferMoneyDto.amount,
+        description: walletTransaction.description,
+      },
+    };
     await firstValueFrom(
-      this.notificationClient.emit('sendMoney', sendMoneyNotification),
+      this.notificationClient.emit('debitWallet', debitWalletNotification),
     );
 
     //trasaction for reciever
-    await this.walletTransactionRepository.save({
-      action: WalletTransactionActionEnum.WITHDRAWAL,
-      amount: transferMoneyDto.amount,
-      currBalance: recieverWallet.balance + transferMoneyDto.amount,
-      prevBalance: recieverWallet.balance,
-      transactionReference: transactionRef,
-      currency: transferMoneyDto.currency,
-      type: TransactionTypeEnum.CREDIT,
-      wallet: wallet,
-      description: `Transfer from ${user.userName}`,
-      recipeint: JSON.stringify({
-        walletId: wallet.id,
-        userName: user.userName,
-        senderId: user.id,
-      }),
-    });
+    const recieverWalletTransaction =
+      await this.walletTransactionRepository.save({
+        action: WalletTransactionActionEnum.RECIEVE,
+        amount: transferMoneyDto.amount,
+        currBalance: recieverWallet.balance + transferMoneyDto.amount,
+        prevBalance: recieverWallet.balance,
+        transactionReference: transactionRef,
+        currency: transferMoneyDto.currency,
+        type: TransactionTypeEnum.CREDIT,
+        wallet: wallet,
+        description: `Transfer from ${user.userName}`,
+        recipeint: JSON.stringify({
+          walletId: wallet.id,
+          userName: user.userName,
+          senderId: user.id,
+        }),
+      });
     recieverWallet.balance = recieverWallet.balance + transferMoneyDto.amount;
     await recieverWallet.save();
-    const recieveMoneyNotification: INotification<TransferInternalNotificationData> =
-      {
-        type: ['email', 'push'],
-        recipient: {
-          name: user.userName,
-          mail: user.email,
-        },
-        data: {
-          amount: transferMoneyDto.amount,
-          userName: user.userName,
-        },
-      };
+    const creditWalletNotification: INotification<TransferNotificationData> = {
+      type: ['email', 'push'],
+      recipient: {
+        name: user.userName,
+        mail: user.email,
+      },
+      data: {
+        amount: transferMoneyDto.amount,
+        description: recieverWalletTransaction.description,
+      },
+    };
     await firstValueFrom(
-      this.notificationClient.emit('recieveMoney', recieveMoneyNotification),
+      this.notificationClient.emit('creditWallet', creditWalletNotification),
+    );
+    return walletTransaction;
+  }
+
+  async servicePayment(servicePaymentDto: ServicePaymentDto) {
+    const wallet = await this.getUserWalletDetails(servicePaymentDto.userId);
+    if (wallet.balance < servicePaymentDto.amount) {
+      throw new RpcException(
+        new BadRequestException('Wallet Balance Is Too Low'),
+      );
+    }
+    const user = await lastValueFrom(
+      this.userClient.send<UserModel>('findOneUser', wallet.userId),
+    );
+    const transactionRef = generateReference(
+      WalletTransactionActionEnum.PAYMENT,
+    );
+    const walletTransaction = await this.walletTransactionRepository.save({
+      action: WalletTransactionActionEnum.PAYMENT,
+      amount: servicePaymentDto.amount,
+      wallet: wallet,
+      recipient: JSON.stringify({
+        walletId: this.adminWallet.id,
+        userName: 'The Idea Bank',
+      }),
+      transactionReference: transactionRef,
+      currBalance: wallet.balance - servicePaymentDto.amount,
+      prevBalance: wallet.balance,
+      description: `Payment for ${servicePaymentDto.plan} plan`,
+      type: TransactionTypeEnum.DEBIT,
+    });
+    wallet.balance = wallet.balance - servicePaymentDto.amount;
+    await wallet.save();
+
+    const debitWalletNotification: INotification<TransferNotificationData> = {
+      type: ['email', 'push'],
+      recipient: {
+        name: user.userName,
+        mail: user.email,
+      },
+      data: {
+        amount: servicePaymentDto.amount,
+        description: walletTransaction.description,
+      },
+    };
+    await firstValueFrom(
+      this.notificationClient.emit('debitWallet', debitWalletNotification),
     );
     return walletTransaction;
   }

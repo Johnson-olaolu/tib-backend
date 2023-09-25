@@ -34,6 +34,7 @@ import { Request } from 'express';
 import { UpdateProfileDto } from '@app/shared/dto/user-service/update-profile.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { WalletModel } from '@app/shared/model/wallet.model';
+import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
 
 @ApiBearerAuth()
 @ApiTags('User')
@@ -126,6 +127,46 @@ export class UserController {
     return {
       success: true,
       message: 'user profile Picture updated successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'User profile updated successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'string',
+                },
+                user: {
+                  $ref: getSchemaPath(UserModel),
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Patch(':userId/upgradePlan')
+  async upgradeUserPlan(
+    @Param('userId') userId: string,
+    @Body() upgradeUserPlanDto: Omit<UpgradePlanDto, 'userId'>,
+  ) {
+    const data = await this.userService.upgradeUserPlan(
+      userId,
+      upgradeUserPlanDto,
+    );
+    return {
+      success: true,
+      message: 'user Plan upgraded successfully',
       data: data,
     };
   }
