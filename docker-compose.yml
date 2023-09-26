@@ -113,6 +113,35 @@ services:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=tib_wallet_db
 
+  idea_service:
+    build:
+      context: .
+      dockerfile: ./apps/idea-service/Dockerfile
+      target: development
+    env_file:
+      - ./apps/idea-service/.env
+    networks:
+      - postgres
+      - rabbitmq
+    depends_on:
+      - idea_db
+      - rabbitmq
+    volumes:
+      - .:/usr/src/app
+
+  idea_db:
+    image: postgres:latest
+    networks:
+      - postgres
+    ports:
+      - 5435:5432
+    volumes:
+      - idea_db:/data/postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=tib_idea_db
+
   notification_service:
     build:
       context: .
@@ -150,5 +179,6 @@ volumes:
   user_db:
   file_db:
   wallet_db:
+  idea_db:
   pgadmin-data:
   file_storage:

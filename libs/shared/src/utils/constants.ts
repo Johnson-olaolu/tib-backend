@@ -7,6 +7,7 @@ export const RABBITMQ_QUEUES = {
   FILE_SERVICE: 'FILE',
   NOTIFICATION_SERVICE: 'NOTIFICATION',
   WALLET_SERVICE: 'WALLET',
+  IDEA_SERVICE: 'IDEA',
 };
 
 export enum FileTypeEnum {

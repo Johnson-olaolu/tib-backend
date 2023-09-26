@@ -9,18 +9,14 @@ import {
   UseGuards,
   Req,
   UploadedFile,
-  ParseFilePipeBuilder,
   ParseFilePipe,
   MaxFileSizeValidator,
-  FileTypeValidator,
   HttpStatus,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ApiBearerAuth,
-  ApiConsumes,
   ApiExtraModels,
   ApiResponse,
   ApiTags,
@@ -229,6 +225,22 @@ export class UserController {
     };
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'User details fetched  successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              $ref: getSchemaPath(UserModel),
+            },
+          },
+        },
+      ],
+    },
+  })
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const data = await this.userService.findOne(id);
@@ -237,11 +249,6 @@ export class UserController {
       message: 'user logged in successfully',
       data: data,
     };
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')

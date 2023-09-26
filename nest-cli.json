@@ -10,7 +10,11 @@
       {
         "name": "@nestjs/swagger",
         "options": {
-          "dtoFileNameSuffix": [".dto.ts", ".entity.ts", ".model.ts"]
+          "dtoFileNameSuffix": [
+            ".dto.ts",
+            ".entity.ts",
+            ".model.ts"
+          ]
         }
       }
     ]
@@ -109,6 +113,15 @@
             "watchAssets": true
           }
         ]
+      }
+    },
+    "idea-service": {
+      "type": "application",
+      "root": "apps/idea-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/idea-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/idea-service/tsconfig.app.json"
       }
     }
   }
