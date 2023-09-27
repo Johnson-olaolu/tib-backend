@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Interest } from './entities/interest.entity';
 import { CreateInterestDto } from '@app/shared/dto/user-service/create-interest.dto';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class InterestService {
@@ -24,7 +25,9 @@ export class InterestService {
   async findOne(id: string) {
     const interest = await this.interestRepository.findOneBy({ id });
     if (!interest) {
-      throw new NotFoundException('Could not find interest for this ID');
+      throw new RpcException(
+        new NotFoundException('Could not find interest for this ID'),
+      );
     }
     return interest;
   }
@@ -32,7 +35,9 @@ export class InterestService {
   async findOneByName(name: string) {
     const interest = await this.interestRepository.findOneBy({ name });
     if (!interest) {
-      throw new NotFoundException('Could not find interest for this name');
+      throw new RpcException(
+        new NotFoundException('Could not find interest for this name'),
+      );
     }
     return interest;
   }
@@ -50,7 +55,9 @@ export class InterestService {
   async remove(id: string) {
     const deleteResponse = await this.interestRepository.delete(id);
     if (!deleteResponse.affected) {
-      throw new NotFoundException('Interest not found for this ID');
+      throw new RpcException(
+        new NotFoundException('Could not find interest for this ID'),
+      );
     }
   }
 }

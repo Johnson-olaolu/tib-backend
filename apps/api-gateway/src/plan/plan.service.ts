@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { ClientProxy } from '@nestjs/microservices';
-import { PlanModel } from './model/plan.model';
+import { PlanModel } from '../../../../libs/shared/src/model/plan.model';
 import { lastValueFrom } from 'rxjs';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { CreatePlanDto } from '@app/shared/dto/user-service/create-plan.dto';

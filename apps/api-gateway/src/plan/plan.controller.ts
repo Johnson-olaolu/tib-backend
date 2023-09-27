@@ -18,7 +18,7 @@ import {
   getSchemaPath,
 } from '@nestjs/swagger';
 import { ResponseDto } from '../utils/Response.dto';
-import { PlanModel } from './model/plan.model';
+import { PlanModel } from '../../../../libs/shared/src/model/plan.model';
 import { AuthGuard } from '@nestjs/passport';
 import RoleGuard from '../guards/roleGuards.guard';
 import { CreatePlanDto } from '@app/shared/dto/user-service/create-plan.dto';
@@ -52,6 +52,7 @@ export class PlanController {
   create(@Body() createPlanDto: CreatePlanDto) {
     return this.planService.create(createPlanDto);
   }
+
   @ApiResponse({
     status: 200,
     description: 'Plans fetched successfully',

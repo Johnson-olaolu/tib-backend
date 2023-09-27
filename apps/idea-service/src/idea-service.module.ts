@@ -6,9 +6,21 @@ import { CommentModule } from './comment/comment.module';
 import { LikeModule } from './like/like.module';
 import { DatabaseModule } from '@app/database';
 import { RmqModule } from '@app/rmq';
+import { ConfigModule } from '@nestjs/config';
+import { validateEnv } from './utils/env.validate';
 
 @Module({
-  imports: [IdeaModule, CommentModule, LikeModule, DatabaseModule],
+  imports: [
+    IdeaModule,
+    CommentModule,
+    LikeModule,
+    DatabaseModule,
+    RmqModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate: validateEnv,
+    }),
+  ],
   controllers: [IdeaServiceController],
   providers: [IdeaServiceService],
 })

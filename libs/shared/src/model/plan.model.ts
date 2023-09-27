@@ -1,4 +1,4 @@
-import { PlanPermissionModel } from '../../plan-permission/model/plan-permission.model';
+import { PlanPermissionModel } from './plan-permission.model';
 
 export class PlanModel {
   id: string;
