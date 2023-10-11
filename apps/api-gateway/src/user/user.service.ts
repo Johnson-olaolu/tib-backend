@@ -3,7 +3,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateProfileDto } from '@app/shared/dto/user-service/update-profile.dto';
 import { lastValueFrom } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { ProfileModel } from './model/profile.model';
+import { ProfileModel } from '../../../../libs/shared/src/model/profile.model';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
 import { WalletModel } from '@app/shared/model/wallet.model';

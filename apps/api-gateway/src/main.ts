@@ -8,6 +8,9 @@ import { RpcExceptionFilter } from './utils/rpc.exception';
 
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
+  app.enableCors({
+    origin: true,
+  });
   app.setGlobalPrefix(`api/${app.get(ConfigService).get('VERSION')}`);
 
   const config = new DocumentBuilder()

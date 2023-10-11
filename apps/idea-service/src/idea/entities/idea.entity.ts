@@ -13,6 +13,9 @@ export class Idea extends BaseEntity {
   id: string;
 
   @Column()
+  userId: string;
+
+  @Column()
   title: string;
 
   @Column()

@@ -1,4 +1,4 @@
+import { CreateInterestDto } from '@app/shared/dto/user-service/create-interest.dto';
 import { PartialType } from '@nestjs/swagger';
-import { CreateInterestDto } from './create-interest.dto';
 
 export class UpdateInterestDto extends PartialType(CreateInterestDto) {}

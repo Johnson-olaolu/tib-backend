@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { IdeaService } from './idea.service';
-import { CreateIdeaDto } from './dto/create-idea.dto';
+import { CreateIdeaDto } from '../../../../libs/shared/src/dto/idea/create-idea.dto';
 import { UpdateIdeaDto } from './dto/update-idea.dto';
 
 @Controller()

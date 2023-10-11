@@ -1,4 +1,4 @@
-import { InterestModel } from '../../interest/model/interest.model';
+import { InterestModel } from './interest.model';
 
 export class ProfileModel {
   id: string;

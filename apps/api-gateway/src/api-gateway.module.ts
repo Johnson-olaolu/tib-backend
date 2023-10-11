@@ -13,6 +13,7 @@ import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { WalletModule } from './wallet/wallet.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { PaymentMethodModule } from './payment-method/payment-method.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { TransactionModule } from './transaction/transaction.module';
     PlanPermissionModule,
     WalletModule,
     TransactionModule,
+    PaymentMethodModule,
   ],
   controllers: [ApiGatewayController],
   providers: [ApiGatewayService],

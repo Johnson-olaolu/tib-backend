@@ -17,13 +17,15 @@ import {
 import { UserService } from './user.service';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiExtraModels,
   ApiResponse,
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
 import { UserModel } from '../../../../libs/shared/src/model/user.model';
-import { ProfileModel } from './model/profile.model';
+import { ProfileModel } from '../../../../libs/shared/src/model/profile.model';
 import { ResponseDto } from '../utils/Response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
@@ -102,6 +104,18 @@ export class UserController {
           },
         },
       ],
+    },
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
     },
   })
   @UseInterceptors(FileInterceptor('file'))

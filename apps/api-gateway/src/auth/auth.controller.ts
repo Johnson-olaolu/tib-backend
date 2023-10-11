@@ -23,7 +23,7 @@ import { UserModel } from '../../../../libs/shared/src/model/user.model';
 import { ResponseDto } from '../utils/Response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { ProfileModel } from '../user/model/profile.model';
+import { ProfileModel } from '../../../../libs/shared/src/model/profile.model';
 import { AuthGuard } from '@nestjs/passport';
 import { GetPasswordResetLinkDto } from './dto/get-password-reset-link.dto';
 import { ChangePasswordDto } from '@app/shared/dto/user-service/change-password.dto';

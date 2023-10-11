@@ -136,7 +136,7 @@ export class UserService {
 
   //Handle confirm account
   async generateConfirmUserEmailToken(user: User) {
-    const verificationToken = otpGenerator.generate(6, {
+    const verificationToken = otpGenerator.generate(4, {
       digits: true,
       lowerCaseAlphabets: false,
       specialChars: false,
