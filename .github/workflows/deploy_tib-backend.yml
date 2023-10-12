@@ -1,0 +1,32 @@
+name: Deploy The Idea Bank Backend
+
+on:
+  push:
+    branches: [deploy]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Deploy App
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+          script: |
+            docker system prune --force
+            cd tib/tib-backend
+            git checkout deploy
+            git pull
+            echo "${{ vars.API_GATEWAY_ENVIROMENT_VARIABLES }}" > apps/api-gateway/.env
+            echo "${{ vars.FILE_SERVICE_ENVIROMENT_VARIABLES }}" > apps/file-service/.env
+            echo "${{ vars.IDEA_SERVICE_ENVIROMENT_VARIABLES }}" > apps/idea-service/.env
+            echo "${{ vars.NOTIFICATION_ENVIROMENT_VARIABLES }}" > apps/notification-service/.env
+            echo "${{ vars.USER_SERVICE_ENVIROMENT_VARIABLES }}" > apps/user-service/.env
+            echo "${{ vars.WALLET_SERVICE_ENVIROMENT_VARIABLES }}" > apps/wallet-service/.env
+            docker-compose down
+            docker-compose up --build -d
+            exit
