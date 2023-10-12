@@ -18,7 +18,7 @@ jobs:
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           script: |
             docker system prune --force
-            cd cargle/cash-get
+            cd tib/tib-backend
             git checkout deploy
             git pull
             echo "${{ vars.API_GATEWAY_ENVIROMENT_VARIABLES }}" > apps/api-gateway/.env
