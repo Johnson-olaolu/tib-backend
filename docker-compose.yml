@@ -69,7 +69,7 @@ services:
     volumes:
       - file_storage:/usr/src/app
     ports:
-      - 5000:5000
+      - 5003:5003
 
   file_db:
     image: postgres:latest

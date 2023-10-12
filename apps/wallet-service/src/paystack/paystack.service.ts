@@ -41,8 +41,9 @@ export class PaystackService {
             email,
             amount: amount * 100,
             // callback_url: this.callbackUrl,
-            callback_url:
-              'https://b10f-102-89-33-21.ngrok-free.app/api/v1/transaction/verify-credit-transaction-paystack',
+            callback_url: `${this.configService.get(
+              'API_GATEWAY_BASE_URL',
+            )}/transaction/verify-credit-transaction-paystack`,
             reference,
             currency,
           },
