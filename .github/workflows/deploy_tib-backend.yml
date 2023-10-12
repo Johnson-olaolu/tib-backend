@@ -24,7 +24,7 @@ jobs:
             echo "${{ vars.API_GATEWAY_ENVIROMENT_VARIABLES }}" > apps/api-gateway/.env
             echo "${{ vars.FILE_SERVICE_ENVIROMENT_VARIABLES }}" > apps/file-service/.env
             echo "${{ vars.IDEA_SERVICE_ENVIROMENT_VARIABLES }}" > apps/idea-service/.env
-            echo "${{ vars.NOTIFICATION_ENVIROMENT_VARIABLES }}" > apps/notification-service/.env
+            echo "${{ vars.NOTIFICATION_SERVICE_ENVIROMENT_VARIABLES }}" > apps/notification-service/.env
             echo "${{ vars.USER_SERVICE_ENVIROMENT_VARIABLES }}" > apps/user-service/.env
             echo "${{ vars.WALLET_SERVICE_ENVIROMENT_VARIABLES }}" > apps/wallet-service/.env
             docker-compose down
