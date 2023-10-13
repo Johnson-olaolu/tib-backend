@@ -71,8 +71,6 @@ services:
       - postgres
     ports:
       - 5433:5432
-    volumes:
-      - file_db:/data/postgres
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
@@ -143,8 +141,6 @@ services:
       - rabbitmq
     depends_on:
       - rabbitmq
-    volumes:
-      - .:/usr/src/app
 
 
   pgadmin:

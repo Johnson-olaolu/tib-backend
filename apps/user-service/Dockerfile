@@ -17,9 +17,11 @@ ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /usr/src/app
 
-COPY . .
+COPY package*.json ./
 
 RUN yarn install --frozen-lockfile
+
+COPY . .
 
 # Build the app
 RUN yarn run build
