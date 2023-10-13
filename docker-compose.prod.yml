@@ -13,7 +13,7 @@ services:
     build:
       context: .
       dockerfile: ./apps/api-gateway/Dockerfile
-      target: production
+      target: development
     networks:
       - rabbitmq
     # depends_on:
