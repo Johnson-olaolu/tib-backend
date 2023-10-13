@@ -20,7 +20,7 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN yarn install --frozen-lockfile
+RUN yarn install --production false --frozen-lockfile 
 
 # Build the app
 RUN yarn run build
