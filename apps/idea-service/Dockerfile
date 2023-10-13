@@ -21,7 +21,7 @@ COPY package*.json .
 
 RUN yarn install --frozen-lockfile
 
-COPY . .
+# COPY . .
 
 # Build the app
 RUN yarn run build
