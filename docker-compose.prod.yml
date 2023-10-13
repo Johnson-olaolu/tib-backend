@@ -16,9 +16,9 @@ services:
       target: production
     networks:
       - rabbitmq
-    depends_on:
-      - user_service
-      - rabbitmq
+    # depends_on:
+    #   - user_service
+    #   - rabbitmq
     ports:
       - 5001:5001
 
