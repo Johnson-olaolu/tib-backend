@@ -18,12 +18,7 @@ ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /usr/src/app
 
-COPY . .
-
-RUN yarn install --production false --frozen-lockfile 
-
-# Build the app
-RUN yarn run build
+COPY --from=development . .
 
 CMD [ "node", "dist/apps/api-gateway/main.js" ]
 
