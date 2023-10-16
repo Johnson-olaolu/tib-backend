@@ -19,7 +19,7 @@ import { PaymentMethodModule } from './payment-method/payment-method.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      validate: validateEnv,
+      // validate: validateEnv,
     }),
     NestjsFormDataModule.config({ storage: MemoryStoredFile, isGlobal: true }),
     RmqModule.register({ name: RABBITMQ_QUEUES.USER_SERVICE }),

@@ -10,15 +10,26 @@ COPY . .
 
 CMD [ "yarn", "start:dev", "user-service"]
 
+FROM node:alpine as build
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN yarn install
+
+COPY . .
+
+RUN yarn build user-service
+
 FROM node:alpine as production 
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
-COPY --from=development . .
+WORKDIR /usr/src/app
 
-# Build the app
-RUN yarn run build
+COPY --from=build /usr/src/app /usr/src/app
 
 CMD [ "node", "dist/apps/user-service/main.js" ]
 

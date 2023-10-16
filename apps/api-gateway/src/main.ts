@@ -5,9 +5,16 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ResponseDto } from './utils/Response.dto';
 import { RpcExceptionFilter } from './utils/rpc.exception';
+import { readFileSync } from 'fs';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ApiGatewayModule);
+  const httpsOptions = {
+    key: readFileSync('./secrets/private.pem'),
+    cert: readFileSync('./secrets/cert.pem'),
+  };
+  const app = await NestFactory.create(ApiGatewayModule, {
+    // httpsOptions,
+  });
   app.enableCors({
     origin: true,
   });

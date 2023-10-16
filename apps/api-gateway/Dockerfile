@@ -10,6 +10,18 @@ COPY . .
 
 CMD [ "yarn", "start:dev", "api-gateway"]
 
+FROM node:alpine as build
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN yarn install
+
+COPY . .
+
+RUN yarn build api-gateway
+
 
 FROM node:alpine as production 
 
@@ -18,11 +30,8 @@ ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY --from=build /usr/src/app /usr/src/app
 
-RUN yarn install --prod false --frozen-lockfile
-
-COPY . .
 CMD [ "node", "dist/apps/api-gateway/main.js" ]
 
 

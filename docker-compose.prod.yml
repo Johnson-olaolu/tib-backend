@@ -1,4 +1,5 @@
 version: "3.7"
+name: tib-production
 services:
   rabbitmq:
     image: rabbitmq
@@ -6,6 +7,7 @@ services:
       - rabbitmq
     ports:
       - 5672:5672
+    
 
   api_gateway: 
     env_file:
@@ -13,135 +15,141 @@ services:
     build:
       context: .
       dockerfile: ./apps/api-gateway/Dockerfile
-      target: development
+      target: production
     networks:
       - rabbitmq
-    # depends_on:
-    #   - user_service
-    #   - rabbitmq
+    depends_on:
+      - user_service
+      - rabbitmq
+    restart: always
     ports:
       - 5001:5001
 
-  # user_service:
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/user-service/Dockerfile
-  #     target: production
-  #   env_file:
-  #     - ./apps/user-service/.env
-  #   networks:
-  #     - postgres
-  #     - rabbitmq
-  #   depends_on:
-  #     - user_db
-  #     - rabbitmq
+  user_service:
+    build:
+      context: .
+      dockerfile: ./apps/user-service/Dockerfile
+      target: production
+    env_file:
+      - ./apps/user-service/.env
+    networks:
+      - postgres
+      - rabbitmq
+    depends_on:
+      - user_db
+      - rabbitmq
+    restart: always
 
-  # user_db:
-  #   image: postgres:latest
-  #   networks:
-  #     - postgres
-  #   ports:
-  #     - 5432:5432
-  #   volumes:
-  #     - user_db:/data/postgres
-  #   environment:
-  #     - POSTGRES_USER=admin
-  #     - POSTGRES_PASSWORD=admin
-  #     - POSTGRES_DB=tib_user_db
+  user_db:
+    image: postgres:latest
+    networks:
+      - postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - user_db:/data/postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=tib_user_db
 
-  # file_service:
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/file-service/Dockerfile
-  #     target: production
-  #   env_file:
-  #     - ./apps/file-service/.env
-  #   networks:
-  #     - postgres
-  #     - rabbitmq
-  #   depends_on:
-  #     - file_db
-  #     - rabbitmq
-  #   ports:
-  #     - 5003:5003
+  file_service:
+    build:
+      context: .
+      dockerfile: ./apps/file-service/Dockerfile
+      target: production
+    env_file:
+      - ./apps/file-service/.env
+    networks:
+      - postgres
+      - rabbitmq
+    depends_on:
+      - file_db
+      - rabbitmq
+    restart: always
+    ports:
+      - 5003:5003
 
-  # file_db:
-  #   image: postgres:latest
-  #   networks:
-  #     - postgres
-  #   ports:
-  #     - 5433:5432
-  #   environment:
-  #     - POSTGRES_USER=admin
-  #     - POSTGRES_PASSWORD=admin
-  #     - POSTGRES_DB=tib_file_db
+  file_db:
+    image: postgres:latest
+    networks:
+      - postgres
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=tib_file_db
 
-  # wallet_service:
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/wallet-service/Dockerfile
-  #     target: production
-  #   env_file:
-  #     - ./apps/wallet-service/.env
-  #   networks:
-  #     - postgres
-  #     - rabbitmq
-  #   depends_on:
-  #     - file_db
-  #     - rabbitmq
+  wallet_service:
+    build:
+      context: .
+      dockerfile: ./apps/wallet-service/Dockerfile
+      target: production
+    env_file:
+      - ./apps/wallet-service/.env
+    networks:
+      - postgres
+      - rabbitmq
+    restart: always
+    depends_on:
+      - file_db
+      - rabbitmq
 
-  # wallet_db:
-  #   image: postgres:latest
-  #   networks:
-  #     - postgres
-  #   ports:
-  #     - 5434:5432
-  #   volumes:
-  #     - wallet_db:/data/postgres
-  #   environment:
-  #     - POSTGRES_USER=admin
-  #     - POSTGRES_PASSWORD=admin
-  #     - POSTGRES_DB=tib_wallet_db
+  wallet_db:
+    image: postgres:latest
+    networks:
+      - postgres
+    ports:
+      - 5434:5432
+    volumes:
+      - wallet_db:/data/postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=tib_wallet_db
 
-  # idea_service:
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/idea-service/Dockerfile
-  #     target: production
-  #   env_file:
-  #     - ./apps/idea-service/.env
-  #   networks:
-  #     - postgres
-  #     - rabbitmq
-  #   depends_on:
-  #     - idea_db
-  #     - rabbitmq
+  idea_service:
+    build:
+      context: .
+      dockerfile: ./apps/idea-service/Dockerfile
+      target: production
+    env_file:
+      - ./apps/idea-service/.env
+    networks:
+      - postgres
+      - rabbitmq
+    depends_on:
+      - idea_db
+      - rabbitmq
+    restart: always
 
-  # idea_db:
-  #   image: postgres:latest
-  #   networks:
-  #     - postgres
-  #   ports:
-  #     - 5435:5432
-  #   volumes:
-  #     - idea_db:/data/postgres
-  #   environment:
-  #     - POSTGRES_USER=admin
-  #     - POSTGRES_PASSWORD=admin
-  #     - POSTGRES_DB=tib_idea_db
+  idea_db:
+    image: postgres:latest
+    networks:
+      - postgres
+    ports:
+      - 5435:5432
+    volumes:
+      - idea_db:/data/postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=tib_idea_db
 
-  # notification_service:
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/notification-service/Dockerfile
-  #     target: production
-  #   env_file:
-  #     - ./apps/notification-service/.env
-  #   networks:
-  #     - rabbitmq
-  #   depends_on:
-  #     - rabbitmq
-
+  notification_service:
+    build:
+      context: .
+      dockerfile: ./apps/notification-service/Dockerfile
+      target: production
+    env_file:
+      - ./apps/notification-service/.env
+    networks:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+    restart: always
+      
 
   pgadmin:
     image: dpage/pgadmin4:6.18

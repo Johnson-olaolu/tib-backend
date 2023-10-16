@@ -10,6 +10,18 @@ COPY . .
 
 CMD [ "yarn", "start:dev", "notification-service"]
 
+FROM node:alpine as build
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN yarn install
+
+COPY . .
+
+RUN yarn build notification-service
+
 FROM node:alpine as production 
 
 ARG NODE_ENV=production
@@ -17,10 +29,7 @@ ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /usr/src/app
 
-COPY --from=development . .
-
-# Build the app
-RUN yarn run build
+COPY --from=build /usr/src/app /usr/src/app
 
 CMD [ "node", "dist/apps/notification-service/main.js" ]
 
