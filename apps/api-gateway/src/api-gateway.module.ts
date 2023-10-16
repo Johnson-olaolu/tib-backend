@@ -14,6 +14,7 @@ import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { WalletModule } from './wallet/wallet.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { PaymentMethodModule } from './payment-method/payment-method.module';
+import { IdeaConstantsModule } from './idea-constants/idea-constants.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PaymentMethodModule } from './payment-method/payment-method.module';
     NestjsFormDataModule.config({ storage: MemoryStoredFile, isGlobal: true }),
     RmqModule.register({ name: RABBITMQ_QUEUES.USER_SERVICE }),
     RmqModule.register({ name: RABBITMQ_QUEUES.WALLET_SERVICE }),
+    RmqModule.register({ name: RABBITMQ_QUEUES.IDEA_SERVICE }),
     AuthModule,
     UserModule,
     InterestModule,
@@ -32,6 +34,7 @@ import { PaymentMethodModule } from './payment-method/payment-method.module';
     WalletModule,
     TransactionModule,
     PaymentMethodModule,
+    IdeaConstantsModule,
   ],
   controllers: [ApiGatewayController],
   providers: [ApiGatewayService],

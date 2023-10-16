@@ -8,6 +8,8 @@ import { DatabaseModule } from '@app/database';
 import { RmqModule } from '@app/rmq';
 import { ConfigModule } from '@nestjs/config';
 import { validateEnv } from './utils/env.validate';
+import { IdeaConstantsModule } from './idea-constants/idea-constants.module';
+import { SeedService } from './seed/seed.service';
 
 @Module({
   imports: [
@@ -20,8 +22,9 @@ import { validateEnv } from './utils/env.validate';
       isGlobal: true,
       validate: validateEnv,
     }),
+    IdeaConstantsModule,
   ],
   controllers: [IdeaServiceController],
-  providers: [IdeaServiceService],
+  providers: [IdeaServiceService, SeedService],
 })
 export class IdeaServiceModule {}

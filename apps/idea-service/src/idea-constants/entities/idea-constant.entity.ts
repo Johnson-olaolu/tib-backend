@@ -8,15 +8,19 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class IdeaFieldsConstants extends BaseEntity {
+export class IdeaConstant extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({
+    unique: true,
+  })
   name: string;
 
-  @Column()
-  value: string;
+  @Column({
+    type: 'simple-array',
+  })
+  value: string[];
 
   @CreateDateColumn()
   createdAt: Date;
