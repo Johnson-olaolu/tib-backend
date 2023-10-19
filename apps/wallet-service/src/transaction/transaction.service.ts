@@ -36,15 +36,17 @@ export class TransactionService {
     ) {
       const response = await this.paystackService.initiateTransaction(
         createTransactionDto.user.email,
-        createTransactionDto.amount,
+        createTransactionDto.amount.value,
         createTransactionDto.reference,
+        createTransactionDto.amount.currency,
       );
       const transaction = this.transactionRepository.create({
-        amount: createTransactionDto.amount,
+        amount: createTransactionDto.amount.value,
         paymentMethod: createTransactionDto.paymentMethod,
         wallet: createTransactionDto.wallet,
         reference: createTransactionDto.reference,
         paystackTransactionUrl: response.authorization_url,
+        currency: createTransactionDto.amount.currency,
         type: TransactionTypeEnum.CREDIT,
       });
       await transaction.save();
@@ -85,12 +87,12 @@ export class TransactionService {
       );
       const response = await this.paystackService.initiateTransfer(
         recipient.recipient_code,
-        createDebitTransactionDto.amount,
+        createDebitTransactionDto.amount.value,
         createDebitTransactionDto.reference,
         'Transfer from TIB',
       );
       const transaction = this.transactionRepository.create({
-        amount: createDebitTransactionDto.amount,
+        amount: createDebitTransactionDto.amount.value,
         wallet: createDebitTransactionDto.wallet,
         reference: createDebitTransactionDto.reference,
         type: TransactionTypeEnum.DEBIT,

@@ -15,6 +15,7 @@ import { WalletModule } from './wallet/wallet.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { PaymentMethodModule } from './payment-method/payment-method.module';
 import { IdeaConstantsModule } from './idea-constants/idea-constants.module';
+import { IdeaModule } from './idea/idea.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { IdeaConstantsModule } from './idea-constants/idea-constants.module';
     TransactionModule,
     PaymentMethodModule,
     IdeaConstantsModule,
+    IdeaModule,
   ],
   controllers: [ApiGatewayController],
   providers: [ApiGatewayService],

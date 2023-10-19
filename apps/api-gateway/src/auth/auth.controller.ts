@@ -111,7 +111,7 @@ export class AuthController {
   })
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Get('confirmEmail')
+  @Get('confirm-email')
   async getConfirmEmailToken(@Req() request: Request) {
     const user = (request as any).user as UserModel;
     await this.authService.generateConfirmAccountToken(user);
@@ -140,7 +140,7 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(201)
-  @Post('confirmEmail')
+  @Post('confirm-email')
   async confirmEmail(
     @Req() request: Request,
     @Body() body: ConfirmEmailAPIDto,
@@ -161,7 +161,7 @@ export class AuthController {
       allOf: [{ $ref: getSchemaPath(ResponseDto) }],
     },
   })
-  @Get('changePassword')
+  @Get('change-password')
   async getPasswordResetLink(@Query('email') email: string) {
     await this.authService.getPasswordResetLink(email);
     return {
@@ -187,7 +187,7 @@ export class AuthController {
     },
   })
   @HttpCode(201)
-  @Post('changePassword')
+  @Post('change-password')
   async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
     const data = await this.authService.changePassword(changePasswordDto);
     return {

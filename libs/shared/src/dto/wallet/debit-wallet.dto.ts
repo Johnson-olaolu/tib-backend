@@ -1,10 +1,16 @@
+import { AmountWithCurrency } from '@app/shared/utils/amount-with-currency.dto';
+import { Type } from 'class-transformer';
 import {
+  IsDefined,
   IsNotEmpty,
+  IsNotEmptyObject,
   IsNumber,
   IsNumberString,
+  IsObject,
   IsString,
   Length,
   Min,
+  ValidateNested,
 } from 'class-validator';
 
 export class InitiateDebitWalletDto {
@@ -12,9 +18,12 @@ export class InitiateDebitWalletDto {
   @IsNotEmpty()
   walletId: string;
 
-  @IsNumber()
-  @Min(100)
-  amount: number;
+  @ValidateNested()
+  @IsDefined()
+  @IsNotEmptyObject()
+  @IsObject()
+  @Type(() => AmountWithCurrency)
+  amount: AmountWithCurrency;
 
   @IsNumberString()
   @IsNotEmpty()

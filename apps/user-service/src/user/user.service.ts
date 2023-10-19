@@ -13,7 +13,7 @@ import * as otpGenerator from 'otp-generator';
 import { BCRYPT_HASH_ROUND } from '../utils/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { RoleService } from '../role/role.service';
 import { PlanService } from '../plan/plan.service';
 import { ValidateUserDto } from '@app/shared/dto/user-service/validate-user.dto';
@@ -50,6 +50,7 @@ import { ServicePaymentDto } from '@app/shared/dto/wallet/service-payment.dto';
 @Injectable()
 export class UserService {
   constructor(
+    private dataSource: DataSource,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Profile) private profileRepository: Repository<Profile>,
     private planService: PlanService,
@@ -64,6 +65,11 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     const hashedPass = await bcrypt.hash(
       createUserDto.password,
       BCRYPT_HASH_ROUND,
@@ -91,19 +97,24 @@ export class UserService {
     };
     try {
       const newUser = this.userRepository.create(newUserDetails);
-      const savedUser = await this.generateConfirmUserEmailToken(newUser);
+      const user = await this.generateConfirmUserEmailToken(newUser);
+      await queryRunner.manager.save(user);
       const createWalletDto: CreateWalletDto = {
-        userId: savedUser.id,
+        userId: user.id,
       };
       const wallet = await lastValueFrom(
         this.walletClient.send<WalletModel>('createWallet', createWalletDto),
       );
+      await queryRunner.commitTransaction();
       return { ...newUser, wallet };
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       if (error?.code == POSTGRES_ERROR_CODES.unique_violation) {
         throw new RpcException(new BadRequestException(error.detail));
       }
       throw new RpcException(new InternalServerErrorException());
+    } finally {
+      await queryRunner.release();
     }
   }
   async findOne(id: string) {
@@ -162,7 +173,7 @@ export class UserService {
     await firstValueFrom(
       this.notificationClient.emit('userRegistered', registrationNotification),
     );
-    return await user.save();
+    return user;
   }
 
   async generateNewConfirmUserEmailToken(userId: string) {

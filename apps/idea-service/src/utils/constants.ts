@@ -14,3 +14,14 @@ export const defaultIdeaConstants: CreateIdeaConstantDto[] = [
     value: ['I own this idea', "I'm part of a team"],
   },
 ];
+
+export enum IdeaTypeEnum {
+  SHARED = 'SHARED',
+  VAULT = 'VAULT',
+}
+
+export enum IdeaNeedEnum {
+  FUNDING = 'FUNDING',
+  SALE = 'SALE',
+  NEW_CONCEPT = 'NEW_CONCEPT',
+}

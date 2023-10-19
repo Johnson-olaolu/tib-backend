@@ -4,6 +4,12 @@ services:
     image: rabbitmq
     networks:
       - rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      start_period: 120s
+      interval: 30s
+      timeout: 30s
+      retries: 3
     ports:
       - 5672:5672
 
@@ -19,8 +25,10 @@ services:
     networks:
       - rabbitmq
     depends_on:
-      - user_service
-      - rabbitmq
+      user_service: 
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     ports:
       - 5001:5001
 
@@ -34,9 +42,12 @@ services:
     networks:
       - postgres
       - rabbitmq
+    restart: always
     depends_on:
-      - user_db
-      - rabbitmq
+      user_db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - .:/usr/src/app
 
@@ -64,8 +75,10 @@ services:
       - postgres
       - rabbitmq
     depends_on:
-      - file_db
-      - rabbitmq
+      file_db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - file_storage:/usr/src/app
     ports:

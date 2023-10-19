@@ -62,13 +62,17 @@ export class WalletService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
-    const user = await lastValueFrom(
-      this.userClient.send<UserModel>(
-        'findOneUserByEmailOrUserName',
-        'SuperAdmin',
-      ),
-    );
-    this.adminWallet = await this.getUserWalletDetails(user.id);
+    try {
+      const user = await lastValueFrom(
+        this.userClient.send<UserModel>(
+          'findOneUserByEmailOrUserName',
+          'SuperAdmin',
+        ),
+      );
+      this.adminWallet = await this.getUserWalletDetails(user.id);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async create(createWalletDto: CreateWalletDto) {
@@ -289,7 +293,7 @@ export class WalletService implements OnApplicationBootstrap {
 
   async initiateDebit(initiateDebitWalletDto: InitiateDebitWalletDto) {
     const wallet = await this.findOne(initiateDebitWalletDto.walletId);
-    if (wallet.balance < initiateDebitWalletDto.amount) {
+    if (wallet.balance < initiateDebitWalletDto.amount.value) {
       throw new RpcException(
         new BadRequestException('Wallet Balance Is Too Low'),
       );

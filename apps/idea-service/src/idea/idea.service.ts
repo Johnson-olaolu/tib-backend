@@ -1,24 +1,84 @@
-import { Injectable } from '@nestjs/common';
-import { CreateIdeaDto } from '../../../../libs/shared/src/dto/idea/create-idea.dto';
-import { UpdateIdeaDto } from './dto/update-idea.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+// import { UpdateIdeaDto } from './dto/update-idea.dto';
+import {
+  CreateIdeaForSaleDto,
+  CreateIdeaFundingNeededDto,
+  CreateIdeaNewConceptDto,
+  CreateIdeaSimpleDto,
+} from '@app/shared/dto/idea/create-idea.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Idea } from './entities/idea.entity';
+import { Repository } from 'typeorm';
+import { IdeaNeedEnum, IdeaTypeEnum } from '../utils/constants';
 
 @Injectable()
 export class IdeaService {
-  create(createIdeaDto: CreateIdeaDto) {
-    return 'This action adds a new idea';
+  constructor(
+    @InjectRepository(Idea) private ideaRepository: Repository<Idea>,
+  ) {}
+
+  async createIdeaSimple(createIdeaSimpleDto: CreateIdeaSimpleDto) {
+    const idea = this.ideaRepository.create(createIdeaSimpleDto);
+    idea.ideaType = IdeaTypeEnum.SHARED;
+    await idea.save();
+    return idea;
   }
 
-  findAll() {
-    return `This action returns all idea`;
+  async createIdeaFundingNeeded(
+    createIdeaFundingNeededDto: CreateIdeaFundingNeededDto,
+  ) {
+    const idea = await this.ideaRepository.create(createIdeaFundingNeededDto);
+    idea.ideaType = IdeaTypeEnum.VAULT;
+    idea.ideaNeed = IdeaNeedEnum.FUNDING;
+    await idea.save();
+    return idea;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} idea`;
+  async createIdeaForSale(createIdeaForSaleDto: CreateIdeaForSaleDto) {
+    const idea = await this.ideaRepository.create(createIdeaForSaleDto);
+    idea.ideaType = IdeaTypeEnum.VAULT;
+    idea.ideaNeed = IdeaNeedEnum.SALE;
+    await idea.save();
+    return idea;
   }
 
-  update(id: number, updateIdeaDto: UpdateIdeaDto) {
-    return `This action updates a #${id} idea`;
+  async createIdeaNewConcept(createIdeaNewConceptDto: CreateIdeaNewConceptDto) {
+    const idea = await this.ideaRepository.create(createIdeaNewConceptDto);
+    idea.ideaType = IdeaTypeEnum.VAULT;
+    idea.ideaNeed = IdeaNeedEnum.SALE;
+    await idea.save();
+    return idea;
   }
+
+  async findAll(query: Record<string, string>) {
+    const ideas = await this.ideaRepository.find({
+      where: query,
+    });
+    return ideas;
+  }
+
+  async findOne(id: string) {
+    const idea = await this.ideaRepository.findOne({
+      where: { id },
+    });
+    if (!idea) {
+      throw new NotFoundException('No idea found for this title');
+    }
+    return idea;
+  }
+  async findOneByTitle(title: string) {
+    const idea = await this.ideaRepository.findOne({
+      where: { title },
+    });
+    if (!idea) {
+      throw new NotFoundException('No idea found for this title');
+    }
+    return idea;
+  }
+
+  // update(id: number, updateIdeaDto: UpdateIdeaDto) {
+  //   return `This action updates a #${id} idea`;
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} idea`;

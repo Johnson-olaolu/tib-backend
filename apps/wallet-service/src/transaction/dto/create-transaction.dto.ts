@@ -1,5 +1,6 @@
 import { UserModel } from '@app/shared/model/user.model';
 import {
+  IsDefined,
   IsNotEmpty,
   IsNotEmptyObject,
   IsNumber,
@@ -9,14 +10,20 @@ import {
   IsString,
   Length,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 import { PaymentMethod } from '../../payment-method/entities/payment-method.entity';
+import { Type } from 'class-transformer';
+import { AmountWithCurrency } from '@app/shared/utils/amount-with-currency.dto';
 
 export class CreateCreditTransactionDto {
-  @IsNumber()
-  @Min(100)
-  amount: number;
+  @ValidateNested()
+  @IsDefined()
+  @IsNotEmptyObject()
+  @IsObject()
+  @Type(() => AmountWithCurrency)
+  amount: AmountWithCurrency;
 
   @IsString()
   @IsNotEmpty()
@@ -35,9 +42,12 @@ export class CreateCreditTransactionDto {
   paymentMethod: PaymentMethod;
 }
 export class CreateDebitTransactionDto {
-  @IsNumber()
-  @Min(100)
-  amount: number;
+  @ValidateNested()
+  @IsDefined()
+  @IsNotEmptyObject()
+  @IsObject()
+  @Type(() => AmountWithCurrency)
+  amount: AmountWithCurrency;
 
   @IsString()
   @IsNotEmpty()
