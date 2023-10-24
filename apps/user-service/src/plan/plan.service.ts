@@ -33,7 +33,11 @@ export class PlanService {
   }
 
   async findAll() {
-    const plans = await this.planRepository.find();
+    const plans = await this.planRepository.find({
+      relations: {
+        planPermissions: true,
+      },
+    });
     return plans;
   }
 

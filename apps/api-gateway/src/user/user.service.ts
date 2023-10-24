@@ -19,6 +19,7 @@ export class UserService {
     private readonly walletClient: ClientProxy,
   ) {}
   async updateUserProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+    console.log(userId);
     const user = await lastValueFrom(
       this.userClient.send<ProfileModel>('updateUserProfile', {
         userId,

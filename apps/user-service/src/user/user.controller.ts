@@ -79,14 +79,14 @@ export class UserController {
   updateUserProfile(
     @Payload()
     {
-      id,
+      userId,
       updateProfileDto,
     }: {
-      id: string;
+      userId: string;
       updateProfileDto: UpdateProfileDto;
     },
   ) {
-    return this.userService.updateProfile(id, updateProfileDto);
+    return this.userService.updateProfile(userId, updateProfileDto);
   }
 
   @MessagePattern('upgradeUserPlan')

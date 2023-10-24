@@ -141,7 +141,6 @@ export class UserService {
         new NotFoundException('User not Found for this ID'),
       );
     }
-    console.log(user);
     return user;
   }
 
@@ -301,29 +300,31 @@ export class UserService {
 
   //handle profile updates
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+    const profileDetails = updateProfileDto;
+    console.log({ userId });
     const user = await this.getUserDetails(userId);
+    console.log({ user });
     const profile = await this.profileRepository.findOne({
       where: {
         id: user.profile.id,
       },
     });
-    const interests: Interest[] = [];
-    for (const selectedInterest of updateProfileDto.interests) {
-      const interest = await this.interestService.findOneByName(
-        selectedInterest,
-      );
-      interests.push(interest);
+    if (updateProfileDto.interests) {
+      const interests: Interest[] = [];
+      for (const selectedInterest of profileDetails.interests) {
+        const interest = await this.interestService.findOneByName(
+          selectedInterest,
+        );
+        interests.push(interest);
+      }
+      profile.interests = interests;
+      delete profileDetails.interests;
     }
-    const profileDetails: Partial<Profile> = {
-      firstName: updateProfileDto.firstName,
-      lastName: updateProfileDto.lastName,
-      bio: updateProfileDto.bio,
-      interests: interests,
-    };
     for (const detail in profileDetails) {
       profile[detail] = profileDetails[detail];
     }
     await profile.save();
+    // console.log(profile);
     return profile;
   }
 

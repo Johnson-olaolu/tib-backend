@@ -9,6 +9,10 @@ export class UpdateProfileDto {
   @IsNotEmpty()
   lastName: string;
 
+  @IsString()
+  @IsNotEmpty()
+  phoneNumber: string;
+
   @ArrayMinSize(3)
   @IsString({
     each: true,

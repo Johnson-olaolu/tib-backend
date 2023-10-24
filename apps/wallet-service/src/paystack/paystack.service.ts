@@ -24,7 +24,7 @@ export class PaystackService {
   ) {
     this.callbackUrl = `${configService.get(
       'API_GATEWAY_BASE_URL',
-    )}/transaction/verify-transaction`;
+    )}/transaction/transaction/verify-transaction`;
   }
 
   async initiateTransaction(
@@ -40,7 +40,6 @@ export class PaystackService {
           {
             email,
             amount: amount * 100,
-            // callback_url: this.callbackUrl,
             callback_url: `${this.configService.get(
               'API_GATEWAY_BASE_URL',
             )}/transaction/verify-credit-transaction-paystack`,

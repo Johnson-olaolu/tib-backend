@@ -29,6 +29,11 @@ export class Profile extends BaseEntity {
   @Column({
     nullable: true,
   })
+  phoneNumber: string;
+
+  @Column({
+    nullable: true,
+  })
   profilePicture: string;
 
   @ManyToMany(() => Interest)

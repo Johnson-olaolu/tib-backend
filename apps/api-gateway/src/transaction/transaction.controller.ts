@@ -2,16 +2,23 @@ import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { ResolveAccountDto } from '@app/shared/dto/wallet/resolve-account.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { TransactionGateway } from './transaction.gateway';
 
 @ApiTags('Transaction')
 @Controller('transaction')
 export class TransactionController {
-  constructor(private readonly transactionService: TransactionService) {}
+  constructor(
+    private readonly transactionService: TransactionService,
+    private transactionGateway: TransactionGateway,
+  ) {}
   @Get('verify-credit-transaction-paystack')
   async verifyCreditTransactionPaystack(@Query('reference') reference: string) {
-    return await this.transactionService.verifyCreditTransactionPaystack(
+    console.log(reference);
+    const data = await this.transactionService.verifyCreditTransactionPaystack(
       reference,
     );
+    this.transactionGateway.confirmTransfer(data.id, data);
+    return 'transaction handled';
   }
 
   @Post('paystack-notification')

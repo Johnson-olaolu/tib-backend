@@ -42,7 +42,6 @@ services:
     networks:
       - postgres
       - rabbitmq
-    restart: always
     depends_on:
       user_db:
         condition: service_started

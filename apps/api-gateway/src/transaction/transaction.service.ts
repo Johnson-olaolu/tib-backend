@@ -6,6 +6,7 @@ import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { TransactionGateway } from './transaction.gateway';
 
 @Injectable()
 export class TransactionService {
@@ -29,9 +30,10 @@ export class TransactionService {
       await firstValueFrom(
         this.walletClient.emit('creditWallet', confirmCreditWalletDto),
       );
-      return 'transaction successfull';
+      // return 'transaction successfull';
     }
-    return 'Transaction Processed';
+    // return 'Transaction Processed';
+    return transaction;
   }
 
   async verifyDebitTransactionPaystack(reference: string) {
