@@ -16,6 +16,7 @@ jobs:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+          command_timeout: 30m
           script: |
             docker system prune --force
             cd tib/tib-backend
