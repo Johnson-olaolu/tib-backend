@@ -27,6 +27,6 @@ jobs:
             echo "${{ vars.NOTIFICATION_SERVICE_ENVIROMENT_VARIABLES }}" > apps/notification-service/.env
             echo "${{ vars.USER_SERVICE_ENVIROMENT_VARIABLES }}" > apps/user-service/.env
             echo "${{ vars.WALLET_SERVICE_ENVIROMENT_VARIABLES }}" > apps/wallet-service/.env
-            docker-compose -f docker-compose.prod.yml down
-            docker-compose -f docker-compose.prod.yml up --build -d
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up --build -d
             exit
