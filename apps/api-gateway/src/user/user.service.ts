@@ -9,6 +9,7 @@ import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
 import { WalletModel } from '@app/shared/model/wallet.model';
 import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
 import { UserModel } from '@app/shared/model/user.model';
+import { QueryUserDto } from '@app/shared/dto/user-service/query-user.dto';
 
 @Injectable()
 export class UserService {
@@ -40,14 +41,12 @@ export class UserService {
   }
 
   async getUserWalletDetails(userId: string) {
-    try {
-      const response = await lastValueFrom(
-        this.walletClient.send<WalletModel>('getUserWalletDetails', userId),
-      );
-      return response;
-    } catch (error) {
+    const response = await lastValueFrom(
+      this.walletClient.send<WalletModel>('getUserWalletDetails', userId),
+    ).catch((error) => {
       throw new RpcException(error.response);
-    }
+    });
+    return response;
   }
   findAll() {
     return `This action returns all user`;
@@ -55,6 +54,15 @@ export class UserService {
 
   findOne(id: string) {
     return `This action returns a #${id} user`;
+  }
+
+  async query(query: QueryUserDto) {
+    const response = await lastValueFrom(
+      this.userClient.send<UserModel[]>('queryUser', query),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return response;
   }
 
   async getUserDetails(id: string) {

@@ -13,6 +13,7 @@ import {
   MaxFileSizeValidator,
   HttpStatus,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -33,6 +34,7 @@ import { UpdateProfileDto } from '@app/shared/dto/user-service/update-profile.dt
 import { FileInterceptor } from '@nestjs/platform-express';
 import { WalletModel } from '@app/shared/model/wallet.model';
 import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
+import { QueryUserDto } from '@app/shared/dto/user-service/query-user.dto';
 
 @ApiBearerAuth()
 @ApiTags('User')
@@ -184,6 +186,16 @@ export class UserController {
   @Get()
   findAll() {
     return this.userService.findAll();
+  }
+
+  @Get('query')
+  async query(@Query() query: QueryUserDto) {
+    const data = await this.userService.query(query);
+    return {
+      success: true,
+      message: 'user queried successfully',
+      data: data,
+    };
   }
 
   @ApiResponse({

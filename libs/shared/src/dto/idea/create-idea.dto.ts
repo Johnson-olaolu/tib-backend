@@ -23,29 +23,26 @@ export class CreateIdeaSimpleDto {
   @IsNotEmpty()
   description: string;
 
+  @IsOptional()
   @IsString({
     each: true,
   })
   @IsNotEmpty({
     each: true,
   })
-  categories: string[];
+  categories?: string[];
 
-  @IsString({
-    each: true,
-  })
-  @IsNotEmpty({
-    each: true,
-  })
-  media: string[];
+  @IsOptional()
+  media?: Express.Multer.File[];
 
+  @IsOptional()
   @IsString({
     each: true,
   })
   @IsNotEmpty({
     each: true,
   })
-  collaborators: string[];
+  collaborators?: string[];
 }
 
 export class CreateIdeaFundingNeededDto {

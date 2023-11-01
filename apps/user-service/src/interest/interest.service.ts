@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateInterestDto } from './dto/update-interest.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Like, Repository } from 'typeorm';
 import { Interest } from './entities/interest.entity';
 import { CreateInterestDto } from '@app/shared/dto/user-service/create-interest.dto';
 import { RpcException } from '@nestjs/microservices';
@@ -50,6 +50,16 @@ export class InterestService {
     }
     await interest.save();
     return interest;
+  }
+
+  async query(name: string) {
+    console.log(name);
+    const interests = await this.interestRepository.find({
+      where: {
+        name: ILike(`%${name}%`),
+      },
+    });
+    return interests;
   }
 
   async remove(id: string) {

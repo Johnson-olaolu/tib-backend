@@ -13,7 +13,7 @@ import * as otpGenerator from 'otp-generator';
 import { BCRYPT_HASH_ROUND } from '../utils/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, ILike, Repository } from 'typeorm';
 import { RoleService } from '../role/role.service';
 import { PlanService } from '../plan/plan.service';
 import { ValidateUserDto } from '@app/shared/dto/user-service/validate-user.dto';
@@ -46,6 +46,7 @@ import { Role } from '../role/entities/role.entity';
 import { Plan } from '../plan/entities/plan.entity';
 import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
 import { ServicePaymentDto } from '@app/shared/dto/wallet/service-payment.dto';
+import { QueryUserDto } from '@app/shared/dto/user-service/query-user.dto';
 
 @Injectable()
 export class UserService {
@@ -267,6 +268,24 @@ export class UserService {
 
   async findAll() {
     const users = await this.userRepository.find();
+    return users;
+  }
+
+  async query(query: QueryUserDto) {
+    const users = await this.userRepository.find({
+      where: [
+        { roleName: query.role },
+        { planName: query.plan },
+        { email: query.email },
+        { userName: ILike(`%${query.email}%`) },
+        { profile: { firstName: ILike(`%${query.name}%`) } },
+        { profile: { lastName: ILike(`%${query.name}%`) } },
+        { profile: { phoneNumber: ILike(`%${query.phoneNumber}%`) } },
+      ],
+      relations: {
+        profile: true,
+      },
+    });
     return users;
   }
 

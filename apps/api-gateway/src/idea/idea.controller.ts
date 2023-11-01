@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   UseGuards,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { IdeaService } from './idea.service';
 import {
@@ -17,6 +19,7 @@ import {
 } from '@app/shared/dto/idea/create-idea.dto';
 import {
   ApiBearerAuth,
+  ApiConsumes,
   ApiExtraModels,
   ApiResponse,
   ApiTags,
@@ -25,6 +28,7 @@ import {
 import { IdeaModel } from '@app/shared/model/idea.model';
 import { AuthGuard } from '@nestjs/passport';
 import { ResponseDto } from '../utils/Response.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Idea')
 @ApiExtraModels(IdeaModel)
@@ -50,9 +54,17 @@ export class IdeaController {
       ],
     },
   })
-  @Post('simple')
-  async createIdeaSimple(@Body() createIdeaSimpleDto: CreateIdeaSimpleDto) {
-    const data = await this.ideaService.createIdeaSimple(createIdeaSimpleDto);
+  @Post('create/simple')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('media[]'))
+  async createIdeaSimple(
+    @UploadedFiles() media: Express.Multer.File[],
+    @Body() createIdeaSimpleDto: CreateIdeaSimpleDto,
+  ) {
+    const data = await this.ideaService.createIdeaSimple({
+      media,
+      ...createIdeaSimpleDto,
+    });
     return {
       success: true,
       message: 'Idea Created Successfully',

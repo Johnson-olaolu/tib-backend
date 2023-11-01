@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { validateEnv } from './utils/env.validate';
 import { IdeaConstantsModule } from './idea-constants/idea-constants.module';
 import { SeedService } from './seed/seed.service';
+import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SeedService } from './seed/seed.service';
     LikeModule,
     DatabaseModule,
     RmqModule,
+    RmqModule.register({ name: RABBITMQ_QUEUES.FILE_SERVICE }),
     ConfigModule.forRoot({
       isGlobal: true,
       validate: validateEnv,

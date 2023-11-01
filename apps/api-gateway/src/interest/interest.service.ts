@@ -38,6 +38,15 @@ export class InterestService {
     return interest;
   }
 
+  async query(name: string) {
+    const interests = await lastValueFrom(
+      this.userClient.send<InterestModel[]>('queryInterest', name),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return interests;
+  }
+
   async update(id: string, updateInterestDto: Omit<UpdateInterestDto, 'id'>) {
     const interest = await lastValueFrom(
       this.userClient.send<InterestModel>('updateInterest', {

@@ -23,6 +23,11 @@ export class InterestController {
     return this.interestService.findOne(id);
   }
 
+  @MessagePattern('queryInterest')
+  query(@Payload() name: string) {
+    return this.interestService.query(name);
+  }
+
   @MessagePattern('updateInterest')
   update(@Payload() updateInterestDto: UpdateInterestDto) {
     return this.interestService.update(updateInterestDto.id, updateInterestDto);
