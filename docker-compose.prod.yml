@@ -143,17 +143,17 @@ services:
     restart: always
       
 
-  pgadmin:
-    image: dpage/pgadmin4:6.18
-    networks:
-      - postgres
-    ports:
-      - "8080:80"
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@tib.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
+  # pgadmin:
+  #   image: dpage/pgadmin4:6.18
+  #   networks:
+  #     - postgres
+  #   ports:
+  #     - "8080:80"
+  #   volumes:
+  #     - pgadmin-data:/var/lib/pgadmin
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=admin@tib.com
+  #     - PGADMIN_DEFAULT_PASSWORD=admin
 
 networks:
   rabbitmq:
