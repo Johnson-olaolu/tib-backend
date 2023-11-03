@@ -10,6 +10,8 @@ import { WalletModel } from '@app/shared/model/wallet.model';
 import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
 import { UserModel } from '@app/shared/model/user.model';
 import { QueryUserDto } from '@app/shared/dto/user-service/query-user.dto';
+import { InterestModel } from '@app/shared/model/interest.model';
+import { error } from 'console';
 
 @Injectable()
 export class UserService {
@@ -74,6 +76,15 @@ export class UserService {
     } catch (error) {
       throw new RpcException(error.response);
     }
+  }
+
+  async getUserInterests(id: string) {
+    const interests = await lastValueFrom(
+      this.userClient.send<InterestModel[]>('getUserInterest', id),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return interests;
   }
 
   update(userId: string, updateUserDto: UpdateUserDto) {

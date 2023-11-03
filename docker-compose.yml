@@ -81,7 +81,7 @@ services:
     volumes:
       - file_storage:/usr/src/app
     ports:
-      - 6000:6000
+      - 6100:6100
 
   file_db:
     image: postgres:latest
@@ -163,11 +163,27 @@ services:
       - ./apps/notification-service/.env
     networks:
       - rabbitmq
+      - postgres
     depends_on:
       - rabbitmq
+      - notification_db
     volumes:
       - .:/usr/src/app
+    ports:
+      - 6200:6200
 
+  notification_db:
+    image: postgres:latest
+    networks:
+      - postgres
+    ports:
+      - 5436:5432
+    volumes:
+      - notification_db:/data/postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=tib_notification_db
 
   pgadmin:
     image: dpage/pgadmin4:6.18
@@ -192,5 +208,6 @@ volumes:
   file_db:
   wallet_db:
   idea_db:
+  notification_db:
   pgadmin-data:
   file_storage:

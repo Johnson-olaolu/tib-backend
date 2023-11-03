@@ -134,7 +134,9 @@ export class UserService {
         id,
       },
       relations: {
-        profile: true,
+        profile: {
+          interests: true,
+        },
       },
     });
     if (!user) {
@@ -179,6 +181,7 @@ export class UserService {
   async generateNewConfirmUserEmailToken(userId: string) {
     const user = await this.findOne(userId);
     this.generateConfirmUserEmailToken(user);
+    await user.save();
   }
 
   async confirmUserEmail(confirmUserDto: ConfirmUserDto) {
@@ -274,13 +277,28 @@ export class UserService {
   async query(query: QueryUserDto) {
     const users = await this.userRepository.find({
       where: [
-        { roleName: query.role },
-        { planName: query.plan },
-        { email: query.email },
-        { userName: ILike(`%${query.email}%`) },
-        { profile: { firstName: ILike(`%${query.name}%`) } },
-        { profile: { lastName: ILike(`%${query.name}%`) } },
-        { profile: { phoneNumber: ILike(`%${query.phoneNumber}%`) } },
+        { planName: query.plan, roleName: 'user', isEmailVerified: true },
+        { email: query.email, roleName: 'user', isEmailVerified: true },
+        {
+          userName: ILike(`%${query.email}%`),
+          roleName: 'user',
+          isEmailVerified: true,
+        },
+        {
+          profile: { firstName: ILike(`%${query.name}%`) },
+          roleName: 'user',
+          isEmailVerified: true,
+        },
+        {
+          profile: { lastName: ILike(`%${query.name}%`) },
+          roleName: 'user',
+          isEmailVerified: true,
+        },
+        {
+          profile: { phoneNumber: ILike(`%${query.phoneNumber}%`) },
+          roleName: 'user',
+          isEmailVerified: true,
+        },
       ],
       relations: {
         profile: true,

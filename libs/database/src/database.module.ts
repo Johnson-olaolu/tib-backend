@@ -15,6 +15,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
         entities: [__dirname + '/../**/*.entity.{js,ts}'],
+        ssl:
+          configService.get('NODE_ENV') == 'production'
+            ? {
+                ca: configService.get('POSTGRES_CERT').replace(/\\n/g, '\n'),
+              }
+            : false,
+        // ssl: {
+        //   ca: configService.get('POSTGRES_CERT').replace(/\\n/g, '\n'),
+        // },
         synchronize: true,
         autoLoadEntities: true,
       }),
