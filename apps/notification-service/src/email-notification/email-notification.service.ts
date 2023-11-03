@@ -31,7 +31,7 @@ export class EmailNotificationService implements OnApplicationBootstrap {
     @Inject(RABBITMQ_QUEUES.FILE_SERVICE) private fileClient: ClientProxy,
   ) {}
   async onApplicationBootstrap() {
-    //ogo
+    //logo
     const logoFile = await lastValueFrom(
       this.fileClient.send<FileModel>('getFile', { title: 'logo' }),
     );

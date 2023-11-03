@@ -7,16 +7,20 @@ import { ConfigModule } from '@nestjs/config';
 import { validateEnv } from './utils/env.validation';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { RmqModule } from '@app/rmq';
+import { NotificationModule } from './notification/notification.module';
+import { DatabaseModule } from '@app/database';
 
 @Module({
   imports: [
     PushNotificationModule,
     EmailNotificationModule,
+    DatabaseModule,
     ConfigModule.forRoot({
       isGlobal: true,
       validate: validateEnv,
     }),
     RmqModule.register({ name: RABBITMQ_QUEUES.FILE_SERVICE }),
+    NotificationModule,
   ],
   controllers: [NotificationServiceController],
   providers: [NotificationServiceService],

@@ -40,18 +40,18 @@ services:
       - rabbitmq
     restart: always
 
-  user_db:
-    image: postgres:latest
-    networks:
-      - postgres
-    ports:
-      - 5432:5432
-    volumes:
-      - user_db:/data/postgres
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
-      - POSTGRES_DB=tib_user_db
+  # user_db:
+  #   image: postgres:latest
+  #   networks:
+  #     - postgres
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - user_db:/data/postgres
+  #   environment:
+  #     - POSTGRES_USER=admin
+  #     - POSTGRES_PASSWORD=admin
+  #     - POSTGRES_DB=tib_user_db
 
   file_service:
     build:
@@ -70,16 +70,16 @@ services:
     ports:
       - 6000:6000
 
-  file_db:
-    image: postgres:latest
-    networks:
-      - postgres
-    ports:
-      - 5433:5432
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
-      - POSTGRES_DB=tib_file_db
+  # file_db:
+  #   image: postgres:latest
+  #   networks:
+  #     - postgres
+  #   ports:
+  #     - 5433:5432
+  #   environment:
+  #     - POSTGRES_USER=admin
+  #     - POSTGRES_PASSWORD=admin
+  #     - POSTGRES_DB=tib_file_db
 
   wallet_service:
     build:
@@ -96,18 +96,18 @@ services:
       - file_db
       - rabbitmq
 
-  wallet_db:
-    image: postgres:latest
-    networks:
-      - postgres
-    ports:
-      - 5434:5432
-    volumes:
-      - wallet_db:/data/postgres
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
-      - POSTGRES_DB=tib_wallet_db
+  # wallet_db:
+  #   image: postgres:latest
+  #   networks:
+  #     - postgres
+  #   ports:
+  #     - 5434:5432
+  #   volumes:
+  #     - wallet_db:/data/postgres
+  #   environment:
+  #     - POSTGRES_USER=admin
+  #     - POSTGRES_PASSWORD=admin
+  #     - POSTGRES_DB=tib_wallet_db
 
   idea_service:
     build:
@@ -124,18 +124,18 @@ services:
       - rabbitmq
     restart: always
 
-  idea_db:
-    image: postgres:latest
-    networks:
-      - postgres
-    ports:
-      - 5435:5432
-    volumes:
-      - idea_db:/data/postgres
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
-      - POSTGRES_DB=tib_idea_db
+  # idea_db:
+  #   image: postgres:latest
+  #   networks:
+  #     - postgres
+  #   ports:
+  #     - 5435:5432
+  #   volumes:
+  #     - idea_db:/data/postgres
+  #   environment:
+  #     - POSTGRES_USER=admin
+  #     - POSTGRES_PASSWORD=admin
+  #     - POSTGRES_DB=tib_idea_db
 
   notification_service:
     build:
@@ -170,9 +170,9 @@ networks:
     driver: bridge
 
 volumes:
-  user_db:
-  file_db:
-  wallet_db:
-  idea_db:
+  # user_db:
+  # file_db:
+  # wallet_db:
+  # idea_db:
   pgadmin-data:
   file_storage:

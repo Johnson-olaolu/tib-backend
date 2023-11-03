@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { InterestService } from './interest.service';
 import { UpdateInterestDto } from './dto/update-interest.dto';
@@ -76,6 +77,35 @@ export class InterestController {
     return {
       success: true,
       message: 'interests fetched successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Interest fetched successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                $ref: getSchemaPath(InterestModel),
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Get(`query`)
+  async query(@Query('name') name: string) {
+    const data = await this.interestService.query(name);
+    return {
+      success: true,
+      message: 'interests queried successfully',
       data: data,
     };
   }

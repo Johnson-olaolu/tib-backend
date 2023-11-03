@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 // import { UpdateIdeaDto } from './dto/update-idea.dto';
 import {
   CreateIdeaForSaleDto,
@@ -10,17 +10,46 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Idea } from './entities/idea.entity';
 import { Repository } from 'typeorm';
 import { IdeaNeedEnum, IdeaTypeEnum } from '../utils/constants';
+import { FileTypeEnum, RABBITMQ_QUEUES } from '@app/shared/utils/constants';
+import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
+import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
+import { FileModel } from '@app/shared/model/file.model';
 
 @Injectable()
 export class IdeaService {
   constructor(
     @InjectRepository(Idea) private ideaRepository: Repository<Idea>,
+    @Inject(RABBITMQ_QUEUES.FILE_SERVICE) private fileClient: ClientProxy,
   ) {}
 
   async createIdeaSimple(createIdeaSimpleDto: CreateIdeaSimpleDto) {
-    const idea = this.ideaRepository.create(createIdeaSimpleDto);
+    const idea = await this.ideaRepository.save({
+      ...createIdeaSimpleDto,
+      media: [],
+    });
+
+    const ideaFiles: string[] = [];
+    for (let i = 0; i < createIdeaSimpleDto.media.length; i++) {
+      // console.log(file);
+      const fileName = idea.id + '_' + `file_${i}`;
+      const fileDetails: SaveFileDto = {
+        author: createIdeaSimpleDto.userId,
+        name: fileName,
+        file: createIdeaSimpleDto.media[i],
+        mimetype: createIdeaSimpleDto.media[i].mimetype,
+        parent: idea.id,
+        type: FileTypeEnum.APP,
+      };
+      const savedFile = await lastValueFrom(
+        this.fileClient.send<FileModel>('saveFile', fileDetails),
+      );
+      ideaFiles.push(savedFile.path);
+    }
     idea.ideaType = IdeaTypeEnum.SHARED;
-    await idea.save();
+    idea.media = ideaFiles;
+    // await idea.save();
+    await this.ideaRepository.save(idea);
     return idea;
   }
 
