@@ -64,7 +64,7 @@ services:
       - rabbitmq
     restart: always
     ports:
-      - 6000:6000
+      - 6100:6100
 
   # file_db:
   #   image: postgres:latest
