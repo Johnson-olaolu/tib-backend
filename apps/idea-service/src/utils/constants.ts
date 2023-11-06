@@ -1,4 +1,5 @@
 import { CreateIdeaConstantDto } from '@app/shared/dto/idea/create-idea-constant.dto';
+import { CreateCategoryDto } from '@app/shared/dto/user-service/create-category.dto';
 
 export const defaultIdeaConstants: CreateIdeaConstantDto[] = [
   {
@@ -25,3 +26,11 @@ export enum IdeaNeedEnum {
   SALE = 'SALE',
   NEW_CONCEPT = 'NEW_CONCEPT',
 }
+
+export const defaultCategories: CreateCategoryDto[] = [
+  { name: 'Cartoons' },
+  { name: 'Science' },
+  { name: 'Marriage' },
+  { name: 'Technology' },
+  { name: 'Entertainment' },
+];

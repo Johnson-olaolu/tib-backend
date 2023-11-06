@@ -1,6 +1,5 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import {
-  defaultInterests,
   defaultPlanPermissions,
   defaultPlans,
   defaultRoles,
@@ -69,19 +68,6 @@ export class SeedService implements OnApplicationBootstrap {
       }
     }
   }
-
-  // async seedInterests() {
-  //   for (const interest of defaultInterests) {
-  //     let foundInterest = null;
-  //     try {
-  //       foundInterest = await this.interestService.findOneByName(interest.name);
-  //     } catch (error) {}
-  //     if (!foundInterest) {
-  //       await this.interestService.create(interest);
-  //       this.logger.log(`Interest: ${interest.name} Seeded`);
-  //     }
-  //   }
-  // }
 
   async seedSuperAdmin() {
     let foundSuperAdmin = null;

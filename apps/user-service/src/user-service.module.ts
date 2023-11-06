@@ -7,7 +7,6 @@ import { validateEnv } from './utils/env.validate';
 import { RmqModule } from 'libs/rabbitmq/src';
 import { UserModule } from './user/user.module';
 import { PlanModule } from './plan/plan.module';
-import { InterestModule } from './interest/interest.module';
 import { RoleModule } from './role/role.module';
 import { SeedService } from './seed/seed.service';
 import { PlanPermissionModule } from './plan-permission/plan-permission.module';
@@ -26,7 +25,6 @@ import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
     }),
     UserModule,
     PlanModule,
-    InterestModule,
     RoleModule,
     PlanPermissionModule,
   ],

@@ -1,4 +1,3 @@
-import { CreateInterestDto } from '@app/shared/dto/user-service/create-interest.dto';
 import { CreateRoleDto } from '@app/shared/dto/user-service/create-role.dto';
 import { CreatePlanPermissionDto } from '@app/shared/dto/user-service/create-plan-permission.dto';
 import { CreatePlanDto } from '@app/shared/dto/user-service/create-plan.dto';
@@ -59,14 +58,6 @@ export const defaultPlans: CreatePlanDto[] = [
       'Chat with ideator',
     ],
   },
-];
-
-export const defaultInterests: CreateInterestDto[] = [
-  { name: 'Cartoons' },
-  { name: 'Science' },
-  { name: 'Marriage' },
-  { name: 'Technology' },
-  { name: 'Entertainment' },
 ];
 
 interface IDefaultSuperAdmin extends CreateUserDto {
