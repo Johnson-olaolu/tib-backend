@@ -16,7 +16,7 @@ export const defaultIdeaConstants: CreateIdeaConstantDto[] = [
 ];
 
 export enum IdeaTypeEnum {
-  SHARED = 'SHARED',
+  FREE = 'FREE',
   VAULT = 'VAULT',
 }
 

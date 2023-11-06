@@ -1,26 +1,56 @@
-import { Injectable } from '@nestjs/common';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { Controller, Injectable, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { Notification } from './entities/notification.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { RpcException } from '@nestjs/microservices';
+import { CreateNotificationDto } from '@app/shared/dto/notification/create-notification.dto';
 
 @Injectable()
 export class NotificationService {
-  create(createNotificationDto: CreateNotificationDto) {
-    return 'This action adds a new notification';
+  constructor(
+    @InjectRepository(Notification)
+    private notificationRepository: Repository<Notification>,
+  ) {}
+  async create(createNotificationDto: CreateNotificationDto) {
+    const newNotification = await this.notificationRepository.save(
+      createNotificationDto,
+    );
+    return newNotification;
   }
 
   findAll() {
     return `This action returns all notification`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} notification`;
+  async findUserNotifications(userId: string) {
+    const notifications = await this.notificationRepository.find({
+      where: {
+        userId,
+      },
+    });
+    return notifications;
   }
 
-  update(id: number, updateNotificationDto: UpdateNotificationDto) {
-    return `This action updates a #${id} notification`;
+  async findOne(id: string) {
+    const notification = await this.notificationRepository.findOneBy({ id });
+    if (!notification) {
+      throw new RpcException(
+        new NotFoundException('User not found for this ID'),
+      );
+    }
+    return notification;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} notification`;
+  async updateNotificationSeen(id: string) {
+    const notification = await this.findOne(id);
+    notification.seen = true;
+    await notification.save();
+    return notification;
+  }
+
+  async remove(id: string) {
+    const notification = await this.findOne(id);
+    await notification.remove();
+    return notification;
   }
 }

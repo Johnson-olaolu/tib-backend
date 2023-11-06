@@ -107,8 +107,10 @@ services:
       - postgres
       - rabbitmq
     depends_on:
-      - file_db
-      - rabbitmq
+      wallet_db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - .:/usr/src/app
 
@@ -136,8 +138,10 @@ services:
       - postgres
       - rabbitmq
     depends_on:
-      - idea_db
-      - rabbitmq
+      idea_db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - .:/usr/src/app
 
@@ -165,8 +169,10 @@ services:
       - rabbitmq
       - postgres
     depends_on:
-      - rabbitmq
-      - notification_db
+      notification_db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - .:/usr/src/app
     ports:

@@ -3,6 +3,7 @@ import { NotificationServiceModule } from './notification-service.module';
 import { RmqService } from '@app/rmq';
 import { ValidationPipe } from '@nestjs/common';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(NotificationServiceModule);
@@ -13,5 +14,6 @@ async function bootstrap() {
   );
   app.init();
   await app.startAllMicroservices();
+  await app.listen(app.get(ConfigService).get('PORT') || 3000);
 }
 bootstrap();

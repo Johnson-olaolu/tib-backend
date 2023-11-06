@@ -21,6 +21,25 @@ class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty()
+  DB_HOST: string;
+
+  @IsNumber()
+  DB_PORT: number;
+
+  @IsString()
+  @IsNotEmpty()
+  DB_USER: string;
+
+  @IsString()
+  @IsNotEmpty()
+  DB_PASSWORD: string;
+
+  @IsString()
+  @IsNotEmpty()
+  DB_DATABASE: string;
+
+  @IsString()
+  @IsNotEmpty()
   RABBITMQ_URL: string;
 
   @IsString()

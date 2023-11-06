@@ -3,12 +3,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Idea } from '../../idea/entities/idea.entity';
 
 @Entity()
-export class Interest extends BaseEntity {
+export class Category extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -16,6 +18,9 @@ export class Interest extends BaseEntity {
     unique: true,
   })
   name: string;
+
+  @ManyToMany(() => Idea)
+  ideas: Idea[];
 
   @CreateDateColumn()
   public createdAt: Date;

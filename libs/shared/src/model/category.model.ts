@@ -1,4 +1,4 @@
-export class InterestModel {
+export class CategoryModel {
   id: string;
 
   name: string;

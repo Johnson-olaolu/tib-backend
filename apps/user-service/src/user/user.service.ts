@@ -10,7 +10,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from '@app/shared/dto/user-service/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import * as otpGenerator from 'otp-generator';
-import { BCRYPT_HASH_ROUND } from '../utils/constants';
+import { BCRYPT_HASH_ROUND, FollowStatusEnum } from '../utils/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { DataSource, ILike, Repository } from 'typeorm';
@@ -25,10 +25,8 @@ import {
 } from '@app/shared/utils/constants';
 import { UpdateProfileDto } from '@app/shared/dto/user-service/update-profile.dto';
 import { Profile } from './entities/profile.entity';
-import { InterestService } from '../interest/interest.service';
-import { Interest } from '../interest/entities/interest.entity';
 import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { first, firstValueFrom, lastValueFrom } from 'rxjs';
 import { FileModel } from '@app/shared/model/file.model';
 import { GetFileDto } from '@app/shared/dto/file/get-file.dto';
 import {
@@ -47,6 +45,20 @@ import { Plan } from '../plan/entities/plan.entity';
 import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
 import { ServicePaymentDto } from '@app/shared/dto/wallet/service-payment.dto';
 import { QueryUserDto } from '@app/shared/dto/user-service/query-user.dto';
+import { Follow } from './entities/follow.entity';
+import { Report } from './entities/report.entity';
+import { Block } from './entities/block.entity';
+import {
+  FetchFollowsDto,
+  FollowUserDto,
+  HandleFollowDto,
+} from '@app/shared/dto/user-service/follow-user.dto';
+import {
+  BlockUserDto,
+  UnBlockUserDto,
+} from '@app/shared/dto/user-service/block-user.dto';
+import { ReportUserDto } from '@app/shared/dto/user-service/report-user.dto';
+import { CreateNotificationDto } from '@app/shared/dto/notification/create-notification.dto';
 
 @Injectable()
 export class UserService {
@@ -54,9 +66,11 @@ export class UserService {
     private dataSource: DataSource,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Profile) private profileRepository: Repository<Profile>,
+    @InjectRepository(Follow) private followRepository: Repository<Follow>,
+    @InjectRepository(Report) private reportRepository: Repository<Report>,
+    @InjectRepository(Block) private blockRepository: Repository<Block>,
     private planService: PlanService,
     private roleService: RoleService,
-    private interestService: InterestService,
     private configService: ConfigService,
     @Inject(RABBITMQ_QUEUES.FILE_SERVICE) private fileClient: ClientProxy,
     @Inject(RABBITMQ_QUEUES.NOTIFICATION_SERVICE)
@@ -338,30 +352,16 @@ export class UserService {
   //handle profile updates
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
     const profileDetails = updateProfileDto;
-    console.log({ userId });
     const user = await this.getUserDetails(userId);
-    console.log({ user });
     const profile = await this.profileRepository.findOne({
       where: {
         id: user.profile.id,
       },
     });
-    if (updateProfileDto.interests) {
-      const interests: Interest[] = [];
-      for (const selectedInterest of profileDetails.interests) {
-        const interest = await this.interestService.findOneByName(
-          selectedInterest,
-        );
-        interests.push(interest);
-      }
-      profile.interests = interests;
-      delete profileDetails.interests;
-    }
     for (const detail in profileDetails) {
       profile[detail] = profileDetails[detail];
     }
     await profile.save();
-    // console.log(profile);
     return profile;
   }
 
@@ -425,6 +425,129 @@ export class UserService {
     return user;
   }
 
+  //Follow Requests
+  async followUser(followUserDto: FollowUserDto) {
+    const user = await this.findOne(followUserDto.userId);
+    const follower = await this.findOne(followUserDto.followerId);
+    const follow = await this.followRepository.save({
+      user: user,
+      follower: follower,
+    });
+    const notification: CreateNotificationDto = {
+      data: follow,
+      eventType: 'follow-request',
+      userId: user.id,
+    };
+    await firstValueFrom(
+      this.notificationClient.emit('createNotification', notification),
+    );
+    return follow;
+  }
+
+  async handleFollow(handleFollowDto: HandleFollowDto) {
+    const follow = await this.followRepository.findOneBy({
+      id: handleFollowDto.followRequestId,
+      user: {
+        id: handleFollowDto.userId,
+      },
+    });
+    if (!follow) {
+      throw new RpcException(new NotFoundException('Follow Request Not found'));
+    }
+    follow.status = handleFollowDto.status;
+    await follow.save();
+    return follow;
+  }
+
+  async fetchUserFollows(fetchFollowsDto: FetchFollowsDto) {
+    const followers = await this.followRepository.find({
+      where: {
+        user: {
+          id: fetchFollowsDto.userId,
+        },
+        status: fetchFollowsDto.status,
+      },
+      relations: {
+        follower: true,
+      },
+    });
+    const following = await this.followRepository.find({
+      where: {
+        follower: {
+          id: fetchFollowsDto.userId,
+        },
+        status: fetchFollowsDto.status,
+      },
+      relations: {
+        user: true,
+      },
+    });
+
+    return {
+      followers,
+      following,
+    };
+  }
+
+  //Report User
+  async reportUser(reportUserDto: ReportUserDto) {
+    const user = await this.findOne(reportUserDto.userId);
+    const reporter = await this.findOne(reportUserDto.reporterId);
+
+    const report = await this.reportRepository.save({
+      user,
+      reporter,
+      reason: reportUserDto.reason,
+    });
+    return report;
+  }
+
+  //Block User
+  async blockUser(blockUserDto: BlockUserDto) {
+    const user = await this.findOne(blockUserDto.userId);
+    const blocked = await this.findOne(blockUserDto.blockedId);
+
+    const block = await this.blockRepository.save({
+      user,
+      blocked,
+    });
+    return block;
+  }
+
+  async unBlockUser(unBlockUserDto: UnBlockUserDto) {
+    const block = await this.blockRepository.findOne({
+      where: {
+        id: unBlockUserDto.blockId,
+        user: {
+          id: unBlockUserDto.userId,
+        },
+      },
+    });
+    if (!block) {
+      throw new RpcException(
+        new NotFoundException('Block not found for this ID'),
+      );
+    }
+    await block.remove();
+    return true;
+  }
+
+  async fetchBlockedUsers(userId) {
+    const blocks = await this.blockRepository.find({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      relations: {
+        blocked: true,
+        user: true,
+      },
+    });
+    return blocks;
+  }
+
+  //delete User
   async remove(id: string) {
     const deleteResponse = await this.userRepository.delete(id);
     if (!deleteResponse.affected) {

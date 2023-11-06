@@ -35,10 +35,29 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { WalletModel } from '@app/shared/model/wallet.model';
 import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
 import { QueryUserDto } from '@app/shared/dto/user-service/query-user.dto';
+import {
+  FollowUserDto,
+  HandleFollowDto,
+} from '@app/shared/dto/user-service/follow-user.dto';
+import { FollowStatusEnum } from 'apps/user-service/src/utils/constants';
+import { FollowModel } from '@app/shared/model/follow.model';
+import { BlockModel } from '@app/shared/model/block.model';
+import { ReportModel } from '@app/shared/model/report.model';
+import {
+  BlockUserDto,
+  UnBlockUserDto,
+} from '@app/shared/dto/user-service/block-user.dto';
 
 @ApiBearerAuth()
 @ApiTags('User')
-@ApiExtraModels(UserModel, ProfileModel, WalletModel)
+@ApiExtraModels(
+  UserModel,
+  ProfileModel,
+  WalletModel,
+  FollowModel,
+  BlockModel,
+  ReportModel,
+)
 @Controller('user')
 @UseGuards(AuthGuard('jwt'))
 export class UserController {
@@ -247,6 +266,182 @@ export class UserController {
     return {
       success: true,
       message: 'wallet fetched successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'follow request sent successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              $ref: getSchemaPath(FollowModel),
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Post(':id/follow-user')
+  async followUser(
+    @Param('id') followerId: string,
+    @Body() followUserDto: Omit<FollowUserDto, 'followerId'>,
+  ) {
+    const data = await this.userService.followUser({
+      ...followUserDto,
+      followerId,
+    });
+    return {
+      success: true,
+      message: 'follow request sent successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Follow request handled successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              $ref: getSchemaPath(FollowModel),
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Post(':id/handle-follow-request/:followRequestId')
+  async handleFollowRequest(
+    @Param('id') userId: string,
+    @Param('followRequestId') followRequestId: string,
+    @Body() handleFollowDto: Omit<HandleFollowDto, 'followId'>,
+  ) {
+    const data = await this.userService.handleFollow({
+      ...handleFollowDto,
+      userId,
+      followRequestId,
+    });
+    return {
+      success: true,
+      message: 'follow request handled successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Follow request fetched successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                following: {
+                  type: 'array',
+                  items: {
+                    $ref: getSchemaPath(FollowModel),
+                  },
+                },
+                followers: {
+                  type: 'array',
+                  items: {
+                    $ref: getSchemaPath(FollowModel),
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Get(':id/follow')
+  async getUserFollows(
+    @Param('id') userId: string,
+    @Query('status') status: FollowStatusEnum,
+  ) {
+    const data = await this.userService.fetchFollows({
+      userId,
+      status,
+    });
+    return {
+      success: true,
+      message: 'Follow requests fetched successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'User Blocked successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              $ref: getSchemaPath(BlockModel),
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Post(':id/follow')
+  async blockUser(
+    @Param('id') userId: string,
+    @Body() blockUserDto: Omit<BlockUserDto, 'userId'>,
+  ) {
+    const data = await this.userService.blockUser({
+      ...blockUserDto,
+      userId,
+    });
+    return {
+      success: true,
+      message: 'User blocked successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'User UnBlocked successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              $ref: getSchemaPath(null),
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Post(':id/follow')
+  async unBlockUser(
+    @Param('id') userId: string,
+    @Body() unBlockUserDto: Omit<UnBlockUserDto, 'userId'>,
+  ) {
+    const data = await this.userService.unBlockUser({
+      ...unBlockUserDto,
+      userId,
+    });
+    return {
+      success: true,
+      message: 'User blocked successfully',
       data: data,
     };
   }

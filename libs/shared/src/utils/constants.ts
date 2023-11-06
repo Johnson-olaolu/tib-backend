@@ -26,3 +26,5 @@ export enum TransferTypesEnum {
 }
 
 export const currencies = ['NGN', 'USD'] as const;
+
+export type NotificationEventTypes = 'follow-request';

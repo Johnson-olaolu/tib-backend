@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -15,17 +16,19 @@ export class Report extends BaseEntity {
   id: string;
 
   @ManyToOne(() => User)
+  @JoinColumn()
   user: User;
 
   @ManyToOne(() => User)
-  reported: User;
+  @JoinColumn()
+  reporter: User;
 
   @Column()
   reason: string;
 
   @CreateDateColumn()
-  public createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  public updatedAt: Date;
+  updatedAt: Date;
 }

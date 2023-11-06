@@ -15,23 +15,32 @@ import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
 import { FileModel } from '@app/shared/model/file.model';
+import { CategoryService } from '../category/category.service';
+import { Category } from '../category/entities/category.entity';
 
 @Injectable()
 export class IdeaService {
   constructor(
     @InjectRepository(Idea) private ideaRepository: Repository<Idea>,
+    private categoryService: CategoryService,
     @Inject(RABBITMQ_QUEUES.FILE_SERVICE) private fileClient: ClientProxy,
   ) {}
 
   async createIdeaSimple(createIdeaSimpleDto: CreateIdeaSimpleDto) {
+    const categories: Category[] = [];
+    for (const category of createIdeaSimpleDto.categories) {
+      const c = await this.categoryService.findOneByName(category);
+      categories.push(c);
+    }
     const idea = await this.ideaRepository.save({
       ...createIdeaSimpleDto,
+      accepted: true,
       media: [],
+      categories: categories,
     });
 
     const ideaFiles: string[] = [];
     for (let i = 0; i < createIdeaSimpleDto.media.length; i++) {
-      // console.log(file);
       const fileName = idea.id + '_' + `file_${i}`;
       const fileDetails: SaveFileDto = {
         author: createIdeaSimpleDto.userId,
@@ -46,9 +55,7 @@ export class IdeaService {
       );
       ideaFiles.push(savedFile.path);
     }
-    idea.ideaType = IdeaTypeEnum.SHARED;
     idea.media = ideaFiles;
-    // await idea.save();
     await this.ideaRepository.save(idea);
     return idea;
   }
@@ -56,32 +63,48 @@ export class IdeaService {
   async createIdeaFundingNeeded(
     createIdeaFundingNeededDto: CreateIdeaFundingNeededDto,
   ) {
-    const idea = await this.ideaRepository.create(createIdeaFundingNeededDto);
-    idea.ideaType = IdeaTypeEnum.VAULT;
-    idea.ideaNeed = IdeaNeedEnum.FUNDING;
-    await idea.save();
-    return idea;
+    // const idea = await this.ideaRepository.create(createIdeaFundingNeededDto);
+    // idea.ideaType = IdeaTypeEnum.VAULT;
+    // idea.ideaNeed = IdeaNeedEnum.FUNDING;
+    // await idea.save();
+    // return idea;
   }
 
   async createIdeaForSale(createIdeaForSaleDto: CreateIdeaForSaleDto) {
-    const idea = await this.ideaRepository.create(createIdeaForSaleDto);
-    idea.ideaType = IdeaTypeEnum.VAULT;
-    idea.ideaNeed = IdeaNeedEnum.SALE;
-    await idea.save();
-    return idea;
+    // const idea = await this.ideaRepository.create(createIdeaForSaleDto);
+    // idea.ideaType = IdeaTypeEnum.VAULT;
+    // idea.ideaNeed = IdeaNeedEnum.SALE;
+    // await idea.save();
+    // return idea;
   }
 
   async createIdeaNewConcept(createIdeaNewConceptDto: CreateIdeaNewConceptDto) {
-    const idea = await this.ideaRepository.create(createIdeaNewConceptDto);
-    idea.ideaType = IdeaTypeEnum.VAULT;
-    idea.ideaNeed = IdeaNeedEnum.SALE;
-    await idea.save();
-    return idea;
+    // const idea = await this.ideaRepository.create(createIdeaNewConceptDto);
+    // idea.ideaType = IdeaTypeEnum.VAULT;
+    // idea.ideaNeed = IdeaNeedEnum.SALE;
+    // await idea.save();
+    // return idea;
   }
 
-  async findAll(query: Record<string, string>) {
+  async findAll() {
+    const ideas = await this.ideaRepository.find();
+    return ideas;
+  }
+
+  async findAllSimpleIdeas() {
     const ideas = await this.ideaRepository.find({
-      where: query,
+      where: {
+        ideaType: IdeaTypeEnum.FREE,
+      },
+    });
+    return ideas;
+  }
+
+  async querySimpleIdeas() {
+    const ideas = await this.ideaRepository.find({
+      where: {
+        ideaType: IdeaTypeEnum.FREE,
+      },
     });
     return ideas;
   }

@@ -9,7 +9,6 @@ import {
 import { RoleService } from '../role/role.service';
 import { PlanPermissionService } from '../plan-permission/plan-permission.service';
 import { PlanService } from '../plan/plan.service';
-import { InterestService } from '../interest/interest.service';
 import { UserService } from '../user/user.service';
 
 @Injectable()
@@ -20,7 +19,6 @@ export class SeedService implements OnApplicationBootstrap {
     private roleService: RoleService,
     private planPermissionService: PlanPermissionService,
     private planService: PlanService,
-    private interestService: InterestService,
     private userService: UserService,
   ) {}
 
@@ -28,7 +26,6 @@ export class SeedService implements OnApplicationBootstrap {
     await this.seedRoles();
     await this.seedPlanPermission();
     await this.seedPlan();
-    await this.seedInterests();
     await this.seedSuperAdmin();
   }
 
@@ -73,18 +70,18 @@ export class SeedService implements OnApplicationBootstrap {
     }
   }
 
-  async seedInterests() {
-    for (const interest of defaultInterests) {
-      let foundInterest = null;
-      try {
-        foundInterest = await this.interestService.findOneByName(interest.name);
-      } catch (error) {}
-      if (!foundInterest) {
-        await this.interestService.create(interest);
-        this.logger.log(`Interest: ${interest.name} Seeded`);
-      }
-    }
-  }
+  // async seedInterests() {
+  //   for (const interest of defaultInterests) {
+  //     let foundInterest = null;
+  //     try {
+  //       foundInterest = await this.interestService.findOneByName(interest.name);
+  //     } catch (error) {}
+  //     if (!foundInterest) {
+  //       await this.interestService.create(interest);
+  //       this.logger.log(`Interest: ${interest.name} Seeded`);
+  //     }
+  //   }
+  // }
 
   async seedSuperAdmin() {
     let foundSuperAdmin = null;

@@ -37,8 +37,8 @@ export class IdeaController {
   }
 
   @MessagePattern('findAllIdea')
-  findAll(@Payload() query) {
-    return this.ideaService.findAll(query);
+  findAll() {
+    return this.ideaService.findAll();
   }
 
   @MessagePattern('findOneIdea')

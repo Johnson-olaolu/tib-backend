@@ -7,35 +7,37 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { InterestService } from './interest.service';
-import { UpdateInterestDto } from './dto/update-interest.dto';
+import { CategoryService } from './category.service';
 import {
   ApiExtraModels,
   ApiResponse,
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { CreateInterestDto } from '@app/shared/dto/user-service/create-interest.dto';
-import { InterestModel } from '@app/shared/model/interest.model';
+import { CategoryModel } from '@app/shared/model/category.model';
 import { ResponseDto } from '../utils/Response.dto';
+import { CreateCategoryDto } from '@app/shared/dto/user-service/create-category.dto';
+import { AuthGuard } from '@nestjs/passport';
 
-@Controller('interest')
-@ApiTags('Interest')
-@ApiExtraModels(InterestModel)
-export class InterestController {
-  constructor(private readonly interestService: InterestService) {}
+@UseGuards(AuthGuard('jwt'))
+@ApiTags('Category')
+@ApiExtraModels(CategoryModel)
+@Controller('category')
+export class CategoryController {
+  constructor(private readonly categoryService: CategoryService) {}
 
   @ApiResponse({
     status: 200,
-    description: 'Interest created successfully',
+    description: 'Category created successfully',
     schema: {
       allOf: [
         { $ref: getSchemaPath(ResponseDto) },
         {
           properties: {
             data: {
-              $ref: getSchemaPath(InterestModel),
+              $ref: getSchemaPath(CategoryModel),
             },
           },
         },
@@ -43,18 +45,18 @@ export class InterestController {
     },
   })
   @Post()
-  async create(@Body() createInterestDto: CreateInterestDto) {
-    const data = await this.interestService.create(createInterestDto);
+  async create(@Body() createCategoryDto: CreateCategoryDto) {
+    const data = await this.categoryService.create(createCategoryDto);
     return {
       success: true,
-      message: 'interest created successfully',
+      message: 'Category created successfully',
       data: data,
     };
   }
 
   @ApiResponse({
     status: 200,
-    description: 'Interest fetched successfully',
+    description: 'Categories fetched successfully',
     schema: {
       allOf: [
         { $ref: getSchemaPath(ResponseDto) },
@@ -63,7 +65,7 @@ export class InterestController {
             data: {
               type: 'array',
               items: {
-                $ref: getSchemaPath(InterestModel),
+                $ref: getSchemaPath(CategoryModel),
               },
             },
           },
@@ -73,17 +75,17 @@ export class InterestController {
   })
   @Get()
   async findAll() {
-    const data = await this.interestService.findAll();
+    const data = await this.categoryService.findAll();
     return {
       success: true,
-      message: 'interests fetched successfully',
+      message: 'Categories fetched successfully',
       data: data,
     };
   }
 
   @ApiResponse({
     status: 200,
-    description: 'Interest fetched successfully',
+    description: 'Categories fetched successfully',
     schema: {
       allOf: [
         { $ref: getSchemaPath(ResponseDto) },
@@ -92,7 +94,7 @@ export class InterestController {
             data: {
               type: 'array',
               items: {
-                $ref: getSchemaPath(InterestModel),
+                $ref: getSchemaPath(CategoryModel),
               },
             },
           },
@@ -102,24 +104,24 @@ export class InterestController {
   })
   @Get(`query`)
   async query(@Query('name') name: string) {
-    const data = await this.interestService.query(name);
+    const data = await this.categoryService.query(name);
     return {
       success: true,
-      message: 'interests queried successfully',
+      message: 'Categories queried successfully',
       data: data,
     };
   }
 
   @ApiResponse({
     status: 200,
-    description: 'Interest fetched successfully',
+    description: 'Category fetched successfully',
     schema: {
       allOf: [
         { $ref: getSchemaPath(ResponseDto) },
         {
           properties: {
             data: {
-              $ref: getSchemaPath(InterestModel),
+              $ref: getSchemaPath(CategoryModel),
             },
           },
         },
@@ -128,24 +130,24 @@ export class InterestController {
   })
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const data = await this.interestService.findOne(id);
+    const data = await this.categoryService.findOne(id);
     return {
       success: true,
-      message: 'interest fetched successfully',
+      message: 'Category fetched successfully',
       data: data,
     };
   }
 
   @ApiResponse({
     status: 200,
-    description: 'Interest updated successfully',
+    description: 'Category updated successfully',
     schema: {
       allOf: [
         { $ref: getSchemaPath(ResponseDto) },
         {
           properties: {
             data: {
-              $ref: getSchemaPath(InterestModel),
+              $ref: getSchemaPath(CategoryModel),
             },
           },
         },
@@ -155,19 +157,19 @@ export class InterestController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateInterestDto: UpdateInterestDto,
+    @Body() updateCategoryDto: CreateCategoryDto,
   ) {
-    const data = await this.interestService.update(id, updateInterestDto);
+    const data = await this.categoryService.update(id, updateCategoryDto);
     return {
       success: true,
-      message: 'interest updated successfully',
+      message: 'Category updated successfully',
       data: data,
     };
   }
 
   @ApiResponse({
     status: 200,
-    description: 'Interest deleted successfully',
+    description: 'Category deleted successfully',
     schema: {
       allOf: [
         { $ref: getSchemaPath(ResponseDto) },
@@ -181,10 +183,10 @@ export class InterestController {
   })
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    await this.interestService.remove(id);
+    await this.categoryService.remove(id);
     return {
       success: true,
-      message: 'interest updated successfully',
+      message: 'Category updated successfully',
     };
   }
 }

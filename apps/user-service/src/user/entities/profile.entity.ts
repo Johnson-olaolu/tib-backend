@@ -9,7 +9,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Interest } from '../../interest/entities/interest.entity';
 
 @Entity()
 export class Profile extends BaseEntity {
@@ -36,9 +35,11 @@ export class Profile extends BaseEntity {
   })
   profilePicture: string;
 
-  @ManyToMany(() => Interest)
-  @JoinTable()
-  interests: Interest[];
+  @Column({
+    type: 'simple-array',
+    nullable: true,
+  })
+  interests: string[];
 
   @Column({
     nullable: true,

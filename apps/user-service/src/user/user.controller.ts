@@ -9,6 +9,16 @@ import { ConfirmUserDto } from '@app/shared/dto/user-service/confirm-user.dto';
 import { ChangePasswordDto } from '@app/shared/dto/user-service/change-password.dto';
 import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
 import { QueryUserDto } from '@app/shared/dto/user-service/query-user.dto';
+import {
+  FetchFollowsDto,
+  FollowUserDto,
+  HandleFollowDto,
+} from '@app/shared/dto/user-service/follow-user.dto';
+import {
+  BlockUserDto,
+  UnBlockUserDto,
+} from '@app/shared/dto/user-service/block-user.dto';
+import { ReportUserDto } from '@app/shared/dto/user-service/report-user.dto';
 
 @Controller()
 export class UserController {
@@ -108,6 +118,41 @@ export class UserController {
   @MessagePattern('validateUser')
   validateUser(@Payload() validateUserDto: ValidateUserDto) {
     return this.userService.validateUser(validateUserDto);
+  }
+
+  @MessagePattern('followUser')
+  followUser(@Payload() followUserDto: FollowUserDto) {
+    return this.userService.followUser(followUserDto);
+  }
+
+  @MessagePattern('handleFollow')
+  handleFollow(@Payload() handleFollowDto: HandleFollowDto) {
+    return this.userService.handleFollow(handleFollowDto);
+  }
+
+  @MessagePattern('fetchUserFollows')
+  fetchUserFollows(@Payload() fetchFollowsDto: FetchFollowsDto) {
+    return this.userService.fetchUserFollows(fetchFollowsDto);
+  }
+
+  @MessagePattern('blockUser')
+  blockUser(@Payload() blockUserDto: BlockUserDto) {
+    return this.userService.blockUser(blockUserDto);
+  }
+
+  @MessagePattern('unBlockUser')
+  unBlockUser(@Payload() unBlockUserDto: UnBlockUserDto) {
+    return this.userService.unBlockUser(unBlockUserDto);
+  }
+
+  @MessagePattern('fetchBlockedUsers')
+  fetchBlockedUsers(@Payload() blockId: string) {
+    return this.userService.fetchBlockedUsers(blockId);
+  }
+
+  @MessagePattern('reportUser')
+  reportUser(@Payload() reportUserDto: ReportUserDto) {
+    return this.userService.reportUser(reportUserDto);
   }
 
   @MessagePattern('removeUser')

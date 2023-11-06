@@ -33,8 +33,8 @@ export class Follow extends BaseEntity {
   status: FollowStatusEnum;
 
   @CreateDateColumn()
-  public createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  public updatedAt: Date;
+  updatedAt: Date;
 }

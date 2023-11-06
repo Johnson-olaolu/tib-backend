@@ -13,7 +13,6 @@ export class TransactionController {
   ) {}
   @Get('verify-credit-transaction-paystack')
   async verifyCreditTransactionPaystack(@Query('reference') reference: string) {
-    console.log(reference);
     const data = await this.transactionService.verifyCreditTransactionPaystack(
       reference,
     );

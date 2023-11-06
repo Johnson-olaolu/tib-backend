@@ -11,6 +11,7 @@ import { validateEnv } from './utils/env.validate';
 import { IdeaConstantsModule } from './idea-constants/idea-constants.module';
 import { SeedService } from './seed/seed.service';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
       validate: validateEnv,
     }),
     IdeaConstantsModule,
+    CategoryModule,
   ],
   controllers: [IdeaServiceController],
   providers: [IdeaServiceService, SeedService],

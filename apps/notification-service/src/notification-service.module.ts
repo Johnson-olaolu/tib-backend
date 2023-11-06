@@ -7,8 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { validateEnv } from './utils/env.validation';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { RmqModule } from '@app/rmq';
-import { NotificationModule } from './notification/notification.module';
 import { DatabaseModule } from '@app/database';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [

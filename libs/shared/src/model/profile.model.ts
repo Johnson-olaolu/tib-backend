@@ -1,4 +1,4 @@
-import { InterestModel } from './interest.model';
+import { CategoryModel } from './category.model';
 
 export class ProfileModel {
   id: string;
@@ -9,7 +9,7 @@ export class ProfileModel {
 
   profilePicture: string;
 
-  interests: InterestModel[];
+  interests: CategoryModel[];
 
   bio: string;
 

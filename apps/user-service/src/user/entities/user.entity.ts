@@ -14,6 +14,9 @@ import { Profile } from './profile.entity';
 import { Role } from '../../role/entities/role.entity';
 import { Plan } from '../../plan/entities/plan.entity';
 import { Exclude, instanceToPlain } from 'class-transformer';
+import { Follow } from './follow.entity';
+import { Block } from './block.entity';
+import { Report } from './report.entity';
 
 @Entity({
   name: '_user',
@@ -84,6 +87,36 @@ export class User extends BaseEntity {
 
   @Column()
   planName: string;
+
+  @ManyToOne(() => Follow, (follow) => follow.user, {
+    onDelete: 'CASCADE',
+  })
+  followers: Follow[];
+
+  @ManyToOne(() => Follow, (follow) => follow.follower, {
+    onDelete: 'CASCADE',
+  })
+  following: Follow[];
+
+  @ManyToOne(() => Block, (block) => block.blocked, {
+    onDelete: 'CASCADE',
+  })
+  blocked: Block[];
+
+  @ManyToOne(() => Block, (block) => block.user, {
+    onDelete: 'CASCADE',
+  })
+  blocks: Block[];
+
+  @ManyToOne(() => Report, (report) => report.user, {
+    onDelete: 'CASCADE',
+  })
+  reported: Report[];
+
+  @ManyToOne(() => Report, (report) => report.reporter, {
+    onDelete: 'CASCADE',
+  })
+  reports: Report[];
 
   @CreateDateColumn()
   public createdAt: Date;

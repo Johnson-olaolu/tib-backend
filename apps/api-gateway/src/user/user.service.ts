@@ -5,13 +5,24 @@ import { lastValueFrom } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { ProfileModel } from '../../../../libs/shared/src/model/profile.model';
 import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
-import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
 import { WalletModel } from '@app/shared/model/wallet.model';
 import { UpgradePlanDto } from '@app/shared/dto/user-service/upgrade-plan.dto';
 import { UserModel } from '@app/shared/model/user.model';
 import { QueryUserDto } from '@app/shared/dto/user-service/query-user.dto';
-import { InterestModel } from '@app/shared/model/interest.model';
-import { error } from 'console';
+import { CategoryModel } from '@app/shared/model/category.model';
+import {
+  FetchFollowsDto,
+  FollowUserDto,
+  HandleFollowDto,
+} from '@app/shared/dto/user-service/follow-user.dto';
+import { FollowModel } from '@app/shared/model/follow.model';
+import { ReportUserDto } from '@app/shared/dto/user-service/report-user.dto';
+import { ReportModel } from '@app/shared/model/report.model';
+import {
+  BlockUserDto,
+  UnBlockUserDto,
+} from '@app/shared/dto/user-service/block-user.dto';
+import { BlockModel } from '@app/shared/model/block.model';
 
 @Injectable()
 export class UserService {
@@ -22,7 +33,6 @@ export class UserService {
     private readonly walletClient: ClientProxy,
   ) {}
   async updateUserProfile(userId: string, updateProfileDto: UpdateProfileDto) {
-    console.log(userId);
     const user = await lastValueFrom(
       this.userClient.send<ProfileModel>('updateUserProfile', {
         userId,
@@ -80,7 +90,7 @@ export class UserService {
 
   async getUserInterests(id: string) {
     const interests = await lastValueFrom(
-      this.userClient.send<InterestModel[]>('getUserInterest', id),
+      this.userClient.send<CategoryModel[]>('getUserInterest', id),
     ).catch((error) => {
       throw new RpcException(error.response);
     });
@@ -95,18 +105,76 @@ export class UserService {
     userId: string,
     upgradeUserPlanDto: Omit<UpgradePlanDto, 'userId'>,
   ) {
-    try {
-      const upgradePlanDto: UpgradePlanDto = {
-        plan: upgradeUserPlanDto.plan,
-        userId,
-      };
-      const user = await lastValueFrom(
-        this.userClient.send<UserModel>('upgradeUserPlan', upgradePlanDto),
-      );
-      return user;
-    } catch (error) {
+    const upgradePlanDto: UpgradePlanDto = {
+      plan: upgradeUserPlanDto.plan,
+      userId,
+    };
+    const user = await lastValueFrom(
+      this.userClient.send<UserModel>('upgradeUserPlan', upgradePlanDto),
+    ).catch((error) => {
       throw new RpcException(error.response);
-    }
+    });
+    return user;
+  }
+
+  async followUser(followUserDto: FollowUserDto) {
+    const follow = await lastValueFrom(
+      this.userClient.send<{ follow: UserModel; follower: UserModel }>(
+        'followUser',
+        followUserDto,
+      ),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return follow;
+  }
+
+  async handleFollow(handleFollowDto: HandleFollowDto) {
+    const follow = await lastValueFrom(
+      this.userClient.send<FollowModel>('handleFollow', handleFollowDto),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return follow;
+  }
+
+  async fetchFollows(fetchFollowsDto: FetchFollowsDto) {
+    const follow = await lastValueFrom(
+      this.userClient.send<{
+        followers: FollowModel[];
+        following: FollowModel[];
+      }>('fetchUserFollows', fetchFollowsDto),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return follow;
+  }
+
+  async reportUser(reportUserDto: ReportUserDto) {
+    const report = await lastValueFrom(
+      this.userClient.send<ReportModel>('reportUser', reportUserDto),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return report;
+  }
+
+  async blockUser(blockUserDto: BlockUserDto) {
+    const block = await lastValueFrom(
+      this.userClient.send<BlockModel>('blockUser', blockUserDto),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return block;
+  }
+
+  async unBlockUser(unBlockUserDto: UnBlockUserDto) {
+    const success = await lastValueFrom(
+      this.userClient.send<boolean>('unBlockUser', unBlockUserDto),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return success;
   }
 
   remove(id: number) {

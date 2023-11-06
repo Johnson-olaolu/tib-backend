@@ -1,34 +1,55 @@
-import { WebSocketGateway, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import { Injectable } from '@nestjs/common';
+import {
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 import { NotificationService } from './notification.service';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true, namespace: 'notification' })
 export class NotificationGateway {
   constructor(private readonly notificationService: NotificationService) {}
+  @WebSocketServer()
+  server: Server;
 
-  @SubscribeMessage('createNotification')
-  create(@MessageBody() createNotificationDto: CreateNotificationDto) {
-    return this.notificationService.create(createNotificationDto);
+  handleConnection(client: Socket) {
+    // Handle connection event
+    const userId = (client.handshake.query?.userId as string) || '';
+    console.log({ userId });
+    this.updateUserNotifications(userId);
   }
 
-  @SubscribeMessage('findAllNotification')
-  findAll() {
-    return this.notificationService.findAll();
+  handleDisconnect(client: Socket) {
+    // Handle disconnection event
   }
 
-  @SubscribeMessage('findOneNotification')
-  findOne(@MessageBody() id: number) {
-    return this.notificationService.findOne(id);
+  async updateUserNotifications(userId: string) {
+    const notifications = await this.notificationService.findUserNotifications(
+      userId,
+    );
+    console.log(notifications);
+    this.server.emit(userId, notifications);
   }
 
-  @SubscribeMessage('updateNotification')
-  update(@MessageBody() updateNotificationDto: UpdateNotificationDto) {
-    return this.notificationService.update(updateNotificationDto.id, updateNotificationDto);
+  // @SubscribeMessage('message')
+  // handleMessage(client: any, payload: any): string {
+  //   return 'Hello world!';
+  // }
+
+  @SubscribeMessage('notificationSeen')
+  async handleNotificationSeen(client: any, payload: string) {
+    const notification = await this.notificationService.updateNotificationSeen(
+      payload,
+    );
+
+    this.updateUserNotifications(notification.userId);
   }
 
-  @SubscribeMessage('removeNotification')
-  remove(@MessageBody() id: number) {
-    return this.notificationService.remove(id);
+  @SubscribeMessage('notificationDelete')
+  async handleNotificationDelete(client: any, payload: string) {
+    const notification = await this.notificationService.remove(payload);
+
+    this.updateUserNotifications(notification.userId);
   }
 }

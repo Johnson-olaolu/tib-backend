@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -11,6 +12,7 @@ import { IdeaNeedEnum, IdeaTypeEnum } from '../../utils/constants';
 import { Comment } from '../../comment/entities/comment.entity';
 import { Like } from '../../like/entities/like.entity';
 import { AmountWithCurrency } from '@app/shared/utils/amount-with-currency.dto';
+import { Category } from '../../category/entities/category.entity';
 
 @Entity()
 export class Idea extends BaseEntity {
@@ -21,16 +23,17 @@ export class Idea extends BaseEntity {
   userId: string;
 
   @Column()
+  accepted: boolean;
+
+  @Column()
   title: string;
 
   @Column()
   description: string;
 
-  @Column({
-    type: 'simple-array',
-    nullable: true,
-  })
-  categories: string[];
+  @ManyToOne(() => Category)
+  @JoinTable()
+  categories: Category[];
 
   @Column({
     type: 'simple-array',
@@ -47,7 +50,7 @@ export class Idea extends BaseEntity {
   @Column({
     type: 'enum',
     enum: IdeaTypeEnum,
-    nullable: true,
+    default: IdeaTypeEnum.FREE,
   })
   ideaType: IdeaTypeEnum;
 
