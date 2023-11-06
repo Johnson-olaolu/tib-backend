@@ -6,7 +6,6 @@ import { validateEnv } from './utils/env.validation';
 import { RmqModule } from 'libs/rabbitmq/src';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { InterestModule } from './interest/interest.module';
 import { PlanModule } from './plan/plan.module';
 import { PlanPermissionModule } from './plan-permission/plan-permission.module';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
@@ -30,7 +29,6 @@ import { CategoryModule } from './category/category.module';
     RmqModule.register({ name: RABBITMQ_QUEUES.IDEA_SERVICE }),
     AuthModule,
     UserModule,
-    InterestModule,
     PlanModule,
     PlanPermissionModule,
     WalletModule,
