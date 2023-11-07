@@ -148,9 +148,7 @@ export class UserService {
         id,
       },
       relations: {
-        profile: {
-          interests: true,
-        },
+        profile: true,
       },
     });
     if (!user) {
