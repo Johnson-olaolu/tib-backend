@@ -286,13 +286,61 @@ export class UserController {
       ],
     },
   })
-  @Post(':id/follow-user')
+  @Post(':id/follow')
   async followUser(
     @Param('id') followerId: string,
     @Body() followUserDto: Omit<FollowUserDto, 'followerId'>,
   ) {
     const data = await this.userService.followUser({
       ...followUserDto,
+      followerId,
+    });
+    return {
+      success: true,
+      message: 'follow request sent successfully',
+      data: data,
+    };
+  }
+
+  @Post(':id/unfollow')
+  async unFollowUser(
+    @Param('id') followerId: string,
+    @Body() followUserDto: Omit<FollowUserDto, 'followerId'>,
+  ) {
+    const data = await this.userService.unFollowUser({
+      ...followUserDto,
+      followerId,
+    });
+    return {
+      success: true,
+      message: 'follow request sent successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'follow request sent successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              $ref: getSchemaPath(FollowModel),
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Get(':id/follow/check')
+  async checkIfFollowing(
+    @Param('id') followerId: string,
+    @Query('userId') userId: string,
+  ) {
+    const data = await this.userService.checkIfFollowing({
+      userId,
       followerId,
     });
     return {
@@ -318,7 +366,7 @@ export class UserController {
       ],
     },
   })
-  @Post(':id/handle-follow-request/:followRequestId')
+  @Post(':id/follow/:followRequestId/handle')
   async handleFollowRequest(
     @Param('id') userId: string,
     @Param('followRequestId') followRequestId: string,
@@ -398,7 +446,7 @@ export class UserController {
       ],
     },
   })
-  @Post(':id/follow')
+  @Post(':id/block')
   async blockUser(
     @Param('id') userId: string,
     @Body() blockUserDto: Omit<BlockUserDto, 'userId'>,
@@ -430,7 +478,7 @@ export class UserController {
       ],
     },
   })
-  @Post(':id/follow')
+  @Post(':id/unblock')
   async unBlockUser(
     @Param('id') userId: string,
     @Body() unBlockUserDto: Omit<UnBlockUserDto, 'userId'>,

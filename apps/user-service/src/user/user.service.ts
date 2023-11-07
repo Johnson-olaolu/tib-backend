@@ -442,6 +442,22 @@ export class UserService {
     return follow;
   }
 
+  async unfollowUser(followUserDto: FollowUserDto) {
+    const follow = await this.followRepository.findOneBy({
+      user: {
+        id: followUserDto.userId,
+      },
+      follower: {
+        id: followUserDto.followerId,
+      },
+    });
+    if (!follow) {
+      new NotFoundException('Follow not found');
+    }
+    await follow.remove();
+    return true;
+  }
+
   async handleFollow(handleFollowDto: HandleFollowDto) {
     const follow = await this.followRepository.findOneBy({
       id: handleFollowDto.followRequestId,
@@ -485,6 +501,24 @@ export class UserService {
       followers,
       following,
     };
+  }
+
+  async checkIfFollowing(followUserDto: FollowUserDto) {
+    const follow = await this.followRepository.findOne({
+      where: {
+        follower: {
+          id: followUserDto.followerId,
+        },
+        user: {
+          id: followUserDto.userId,
+        },
+      },
+    });
+
+    if (!follow) {
+      return false;
+    }
+    return follow;
   }
 
   //Report User

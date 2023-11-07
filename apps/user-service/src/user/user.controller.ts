@@ -125,6 +125,16 @@ export class UserController {
     return this.userService.followUser(followUserDto);
   }
 
+  @MessagePattern('unFollowUser')
+  unFollowUser(@Payload() followUserDto: FollowUserDto) {
+    return this.userService.unfollowUser(followUserDto);
+  }
+
+  @MessagePattern('checkIfFollowing')
+  checkIfFollowing(@Payload() followUserDto: FollowUserDto) {
+    return this.userService.checkIfFollowing(followUserDto);
+  }
+
   @MessagePattern('handleFollow')
   handleFollow(@Payload() handleFollowDto: HandleFollowDto) {
     return this.userService.handleFollow(handleFollowDto);

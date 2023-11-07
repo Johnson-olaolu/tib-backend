@@ -129,6 +129,24 @@ export class UserService {
     return follow;
   }
 
+  async unFollowUser(followUserDto: FollowUserDto) {
+    const follow = await lastValueFrom(
+      this.userClient.send<boolean>('unFollowUser', followUserDto),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return follow;
+  }
+
+  async checkIfFollowing(followUserDto: FollowUserDto) {
+    const isFollowing = await lastValueFrom(
+      this.userClient.send<boolean>('checkIfFollowing', followUserDto),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return isFollowing;
+  }
+
   async handleFollow(handleFollowDto: HandleFollowDto) {
     const follow = await lastValueFrom(
       this.userClient.send<FollowModel>('handleFollow', handleFollowDto),

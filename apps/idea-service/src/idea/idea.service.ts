@@ -109,32 +109,19 @@ export class IdeaService {
 
   async querySimpleIdea(query: QueryIdeaSimpleDto) {
     const ideas = await this.ideaRepository.find({
-      relations: ['categories'],
+      relations: {
+        categories: true,
+      },
       where: [
         {
-          title: ILike(`%${query.title}%`),
+          title: ILike(`%${query.title || ''}%`),
           ideaType: IdeaTypeEnum.FREE,
-        },
-        {
-          userId: Equal(query.user),
-          ideaType: IdeaTypeEnum.FREE,
-        },
-        {
-          spotlight: Equal(query.spotlight),
-          ideaType: IdeaTypeEnum.FREE,
-        },
-        {
+          userId: query.user,
+          spotlight: query.spotlight,
           categories: {
-            name: Like(query.category),
+            name: query.category,
           },
-          ideaType: IdeaTypeEnum.FREE,
         },
-        // {
-        //   categories: {
-        //     name: In(query.categories || []),
-        //   },
-        //   ideaType: IdeaTypeEnum.FREE,
-        // },
       ],
     });
     return ideas;
