@@ -8,7 +8,7 @@ import {
 } from '@app/shared/dto/idea/create-idea.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Idea } from './entities/idea.entity';
-import { Repository } from 'typeorm';
+import { Equal, ILike, In, Like, Repository } from 'typeorm';
 import { IdeaNeedEnum, IdeaTypeEnum } from '../utils/constants';
 import { FileTypeEnum, RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { ClientProxy } from '@nestjs/microservices';
@@ -17,6 +17,7 @@ import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
 import { FileModel } from '@app/shared/model/file.model';
 import { CategoryService } from '../category/category.service';
 import { Category } from '../category/entities/category.entity';
+import { QueryIdeaSimpleDto } from '@app/shared/dto/idea/query-idea-simple.dto';
 
 @Injectable()
 export class IdeaService {
@@ -32,6 +33,12 @@ export class IdeaService {
       const c = await this.categoryService.findOneByName(category);
       categories.push(c);
     }
+    console.log({
+      ...createIdeaSimpleDto,
+      accepted: true,
+      media: [],
+      categories: categories,
+    });
     const idea = await this.ideaRepository.save({
       ...createIdeaSimpleDto,
       accepted: true,
@@ -100,11 +107,35 @@ export class IdeaService {
     return ideas;
   }
 
-  async querySimpleIdeas() {
+  async querySimpleIdea(query: QueryIdeaSimpleDto) {
     const ideas = await this.ideaRepository.find({
-      where: {
-        ideaType: IdeaTypeEnum.FREE,
-      },
+      relations: ['categories'],
+      where: [
+        {
+          title: ILike(`%${query.title}%`),
+          ideaType: IdeaTypeEnum.FREE,
+        },
+        {
+          userId: Equal(query.user),
+          ideaType: IdeaTypeEnum.FREE,
+        },
+        {
+          spotlight: Equal(query.spotlight),
+          ideaType: IdeaTypeEnum.FREE,
+        },
+        {
+          categories: {
+            name: Like(query.category),
+          },
+          ideaType: IdeaTypeEnum.FREE,
+        },
+        // {
+        //   categories: {
+        //     name: In(query.categories || []),
+        //   },
+        //   ideaType: IdeaTypeEnum.FREE,
+        // },
+      ],
     });
     return ideas;
   }

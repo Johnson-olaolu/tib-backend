@@ -5,11 +5,14 @@ import {
 import { AmountWithCurrency } from '../utils/amount-with-currency.dto';
 import { LikeModel } from './like.model';
 import { CommentModel } from './comment.model';
+import { UserModel } from './user.model';
 
 export class IdeaModel {
   id: string;
 
   userId: string;
+
+  user?: UserModel;
 
   title: string;
 

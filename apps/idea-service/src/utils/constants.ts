@@ -31,6 +31,8 @@ export const defaultCategories: CreateCategoryDto[] = [
   { name: 'Cartoons' },
   { name: 'Science' },
   { name: 'Marriage' },
-  { name: 'Technology' },
-  { name: 'Entertainment' },
+  { name: 'Technology', isTopCategory: true },
+  { name: 'Entertainment', isTopCategory: true },
+  { name: 'Finance', isTopCategory: true },
+  { name: 'Music', isTopCategory: true },
 ];

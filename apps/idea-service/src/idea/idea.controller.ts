@@ -7,6 +7,7 @@ import {
   CreateIdeaNewConceptDto,
   CreateIdeaSimpleDto,
 } from '@app/shared/dto/idea/create-idea.dto';
+import { QueryIdeaSimpleDto } from '@app/shared/dto/idea/query-idea-simple.dto';
 
 @Controller()
 export class IdeaController {
@@ -39,6 +40,11 @@ export class IdeaController {
   @MessagePattern('findAllIdea')
   findAll() {
     return this.ideaService.findAll();
+  }
+
+  @MessagePattern('querySimpleIdea')
+  querySimpleIdea(@Payload() queryIdeaSimpleDto: QueryIdeaSimpleDto) {
+    return this.ideaService.querySimpleIdea(queryIdeaSimpleDto);
   }
 
   @MessagePattern('findOneIdea')

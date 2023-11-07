@@ -80,7 +80,7 @@ export class UserService {
   async getUserDetails(id: string) {
     try {
       const user = await lastValueFrom(
-        this.userClient.send('getUserDetails', id),
+        this.userClient.send<UserModel>('getUserDetails', id),
       );
       return user;
     } catch (error) {

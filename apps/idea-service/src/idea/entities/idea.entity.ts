@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -31,7 +32,12 @@ export class Idea extends BaseEntity {
   @Column()
   description: string;
 
-  @ManyToOne(() => Category)
+  @Column({
+    default: false,
+  })
+  spotlight: boolean;
+
+  @ManyToMany(() => Category)
   @JoinTable()
   categories: Category[];
 

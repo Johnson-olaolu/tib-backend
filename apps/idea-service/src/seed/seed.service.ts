@@ -12,6 +12,7 @@ export class SeedService implements OnApplicationBootstrap {
   ) {}
   async onApplicationBootstrap() {
     await this.seedIdeaConstants();
+    await this.seedCategories();
   }
 
   async seedIdeaConstants() {
@@ -28,14 +29,14 @@ export class SeedService implements OnApplicationBootstrap {
   }
 
   async seedCategories() {
-    for (const interest of defaultCategories) {
-      let foundInterest = null;
+    for (const category of defaultCategories) {
+      let foundCategory = null;
       try {
-        foundInterest = await this.categoryService.findOneByName(interest.name);
+        foundCategory = await this.categoryService.findOneByName(category.name);
       } catch (error) {}
-      if (!foundInterest) {
-        await this.categoryService.create(interest);
-        this.logger.log(`Category: ${interest.name} Seeded`);
+      if (!foundCategory) {
+        await this.categoryService.create(category);
+        this.logger.log(`Category: ${category.name} Seeded`);
       }
     }
   }

@@ -9,6 +9,7 @@ import {
   UseGuards,
   UploadedFiles,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { IdeaService } from './idea.service';
 import {
@@ -29,6 +30,8 @@ import { IdeaModel } from '@app/shared/model/idea.model';
 import { AuthGuard } from '@nestjs/passport';
 import { ResponseDto } from '../utils/Response.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { query } from 'express';
+import { QueryIdeaSimpleDto } from '@app/shared/dto/idea/query-idea-simple.dto';
 
 @ApiTags('Idea')
 @ApiExtraModels(IdeaModel)
@@ -54,7 +57,7 @@ export class IdeaController {
       ],
     },
   })
-  @Post('create/simple')
+  @Post('simple')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('media[]'))
   async createIdeaSimple(
@@ -65,6 +68,16 @@ export class IdeaController {
       media,
       ...createIdeaSimpleDto,
     });
+    return {
+      success: true,
+      message: 'Idea Created Successfully',
+      data,
+    };
+  }
+
+  @Get('simple/query')
+  async queryIdeaSimple(@Query() query: QueryIdeaSimpleDto) {
+    const data = await this.ideaService.querySimpleIdea(query);
     return {
       success: true,
       message: 'Idea Created Successfully',
@@ -156,10 +169,10 @@ export class IdeaController {
     };
   }
 
-  @Get()
-  findAll() {
-    return this.ideaService.findAll();
-  }
+  // @Get()
+  // findAll() {
+  //   return this.ideaService.findAll();
+  // }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

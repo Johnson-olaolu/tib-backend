@@ -19,6 +19,11 @@ export class Category extends BaseEntity {
   })
   name: string;
 
+  @Column({
+    default: false,
+  })
+  isTopCategory: boolean;
+
   @ManyToMany(() => Idea)
   ideas: Idea[];
 

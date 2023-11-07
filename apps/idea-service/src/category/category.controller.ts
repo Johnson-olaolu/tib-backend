@@ -22,6 +22,11 @@ export class CategoryController {
     return this.categoryService.findOne(id);
   }
 
+  @MessagePattern('queryCategory')
+  queryCategory(@Payload() name: string) {
+    return this.categoryService.queryCategory(name);
+  }
+
   @MessagePattern('updateCategory')
   update(@Payload() updateCategoryDto: CreateCategoryDto & { id: string }) {
     return this.categoryService.update(updateCategoryDto.id, updateCategoryDto);
