@@ -7,12 +7,14 @@ import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(NotificationServiceModule);
+  app.enableCors({
+    origin: true,
+  });
   const rmqService = app.get<RmqService>(RmqService);
   app.useGlobalPipes(new ValidationPipe());
   app.connectMicroservice(
     rmqService.getOptions(RABBITMQ_QUEUES.NOTIFICATION_SERVICE, true),
   );
-  app.init();
   await app.startAllMicroservices();
   await app.listen(app.get(ConfigService).get('PORT') || 3000);
 }
