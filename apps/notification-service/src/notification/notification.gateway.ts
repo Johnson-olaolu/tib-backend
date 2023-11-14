@@ -49,7 +49,7 @@ export class NotificationGateway {
   @SubscribeMessage('notificationDelete')
   async handleNotificationDelete(client: any, payload: string) {
     const notification = await this.notificationService.remove(payload);
-
+    console.log(notification);
     this.updateUserNotifications(notification.userId);
   }
 }

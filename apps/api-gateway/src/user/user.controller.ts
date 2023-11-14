@@ -370,7 +370,8 @@ export class UserController {
   async handleFollowRequest(
     @Param('id') userId: string,
     @Param('followRequestId') followRequestId: string,
-    @Body() handleFollowDto: Omit<HandleFollowDto, 'followId'>,
+    @Body()
+    handleFollowDto: Omit<HandleFollowDto, 'followRequestId' | 'userId'>,
   ) {
     const data = await this.userService.handleFollow({
       ...handleFollowDto,

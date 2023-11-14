@@ -133,7 +133,14 @@ export class UserService {
     }
   }
   async findOne(id: string) {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        profile: true,
+      },
+    });
     if (!user) {
       throw new RpcException(
         new NotFoundException('User not Found for this ID'),
@@ -288,30 +295,44 @@ export class UserService {
 
   async query(query: QueryUserDto) {
     const users = await this.userRepository.find({
-      where: [
-        { planName: query.plan, roleName: 'user', isEmailVerified: true },
-        { email: query.email, roleName: 'user', isEmailVerified: true },
-        {
-          userName: ILike(`%${query.email}%`),
-          roleName: 'user',
-          isEmailVerified: true,
-        },
-        {
-          profile: { firstName: ILike(`%${query.name}%`) },
-          roleName: 'user',
-          isEmailVerified: true,
-        },
-        {
-          profile: { lastName: ILike(`%${query.name}%`) },
-          roleName: 'user',
-          isEmailVerified: true,
-        },
-        {
-          profile: { phoneNumber: ILike(`%${query.phoneNumber}%`) },
-          roleName: 'user',
-          isEmailVerified: true,
-        },
-      ],
+      where: {
+        planName: query.plan,
+        isEmailVerified: true,
+        roleName: 'user',
+        userName: query.userName,
+        profile: [
+          {
+            firstName: ILike(`%${query.name || ''}%`),
+            phoneNumber: ILike(`%${query.phoneNumber || ''}%`),
+          },
+          {
+            lastName: ILike(`%${query.name || ''}%`),
+            phoneNumber: ILike(`%${query.phoneNumber || ''}%`),
+          },
+        ],
+      },
+      // {  roleName: 'user',  },
+      // { email: query.email, , isEmailVerified: true },
+      // {
+      //   userName: ILike(`%${query.email}%`),
+      //   roleName: 'user',
+      //   isEmailVerified: true,
+      // },
+      // {
+      //   profile: { firstName: ILike(`%${query.name}%`) },
+      //   roleName: 'user',
+      //   isEmailVerified: true,
+      // },
+      // {
+      //   profile: { lastName: ILike(`%${query.name}%`) },
+      //   roleName: 'user',
+      //   isEmailVerified: true,
+      // },
+      // {
+      //   profile: { phoneNumber: ILike(`%${query.phoneNumber}%`) },
+      //   roleName: 'user',
+      //   isEmailVerified: true,
+      // },
       relations: {
         profile: true,
       },
@@ -425,6 +446,12 @@ export class UserService {
 
   //Follow Requests
   async followUser(followUserDto: FollowUserDto) {
+    const isFollowed = await this.checkIfFollowing(followUserDto);
+    if (isFollowed) {
+      throw new RpcException(
+        new BadRequestException('Follow request sent Already'),
+      );
+    }
     const user = await this.findOne(followUserDto.userId);
     const follower = await this.findOne(followUserDto.followerId);
     const follow = await this.followRepository.save({
@@ -459,10 +486,16 @@ export class UserService {
   }
 
   async handleFollow(handleFollowDto: HandleFollowDto) {
-    const follow = await this.followRepository.findOneBy({
-      id: handleFollowDto.followRequestId,
-      user: {
-        id: handleFollowDto.userId,
+    const follow = await this.followRepository.findOne({
+      where: {
+        id: handleFollowDto.followRequestId,
+        user: {
+          id: handleFollowDto.userId,
+        },
+      },
+      relations: {
+        follower: { profile: true },
+        user: { profile: true },
       },
     });
     if (!follow) {
@@ -470,6 +503,17 @@ export class UserService {
     }
     follow.status = handleFollowDto.status;
     await follow.save();
+    if (handleFollowDto.status == FollowStatusEnum.ACCEPTED) {
+      const notification: CreateNotificationDto = {
+        data: follow,
+        eventType: 'follow-request-accepted',
+        userId: follow.follower.id,
+      };
+      await firstValueFrom(
+        this.notificationClient.emit('createNotification', notification),
+      );
+    }
+
     return follow;
   }
 
@@ -482,7 +526,7 @@ export class UserService {
         status: fetchFollowsDto.status,
       },
       relations: {
-        follower: true,
+        follower: { profile: true },
       },
     });
     const following = await this.followRepository.find({
@@ -493,7 +537,7 @@ export class UserService {
         status: fetchFollowsDto.status,
       },
       relations: {
-        user: true,
+        user: { profile: true },
       },
     });
 

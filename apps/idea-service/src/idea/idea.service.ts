@@ -136,6 +136,7 @@ export class IdeaService {
     }
     return idea;
   }
+
   async findOneByTitle(title: string) {
     const idea = await this.ideaRepository.findOne({
       where: { title },
