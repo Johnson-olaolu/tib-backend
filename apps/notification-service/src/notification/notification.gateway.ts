@@ -7,7 +7,11 @@ import {
 import { Server, Socket } from 'socket.io';
 import { NotificationService } from './notification.service';
 
-@WebSocketGateway({ cors: true, namespace: 'notification' })
+@WebSocketGateway({
+  cors: true,
+  namespace: 'notification',
+  transports: ['websocket', 'polling'],
+})
 export class NotificationGateway {
   constructor(private readonly notificationService: NotificationService) {}
   @WebSocketServer()
