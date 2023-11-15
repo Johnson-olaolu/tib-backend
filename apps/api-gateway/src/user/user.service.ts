@@ -52,6 +52,16 @@ export class UserService {
     return user;
   }
 
+  async updateUserBackgroundPicture(userId: string, file: Express.Multer.File) {
+    const user = await lastValueFrom(
+      this.userClient.send<ProfileModel>('updateBackgroundPicture', {
+        userId,
+        file,
+      }),
+    );
+    return user;
+  }
+
   async getUserWalletDetails(userId: string) {
     const response = await lastValueFrom(
       this.walletClient.send<WalletModel>('getUserWalletDetails', userId),

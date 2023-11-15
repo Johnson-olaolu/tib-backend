@@ -36,6 +36,11 @@ export class Profile extends BaseEntity {
   profilePicture: string;
 
   @Column({
+    nullable: true,
+  })
+  backgroundPicture: string;
+
+  @Column({
     type: 'simple-array',
     nullable: true,
   })

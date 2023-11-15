@@ -71,6 +71,14 @@ export class UserController {
     return this.userService.updateProfilePicture(userId, file);
   }
 
+  @MessagePattern('updateBackgroundPicture')
+  updateBackgroundPicture(
+    @Payload()
+    { userId, file }: { userId: string; file: Express.Multer.File },
+  ) {
+    return this.userService.updateBackgroundPicture(userId, file);
+  }
+
   @MessagePattern('findAllUser')
   findAll() {
     return this.userService.findAll();

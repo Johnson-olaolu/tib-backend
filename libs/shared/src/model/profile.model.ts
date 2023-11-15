@@ -9,6 +9,8 @@ export class ProfileModel {
 
   profilePicture: string;
 
+  backgroundPicture: string;
+
   interests: CategoryModel[];
 
   bio: string;

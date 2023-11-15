@@ -186,6 +186,68 @@ export class UserController {
       ],
     },
   })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @Patch(':userId/backgroundPicture')
+  async updateBackgroundPicture(
+    @Param('userId') userId: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1e7 }),
+          // new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    const data = await this.userService.updateUserBackgroundPicture(
+      userId,
+      file,
+    );
+    return {
+      success: true,
+      message: 'user background Picture updated successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'User profile updated successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'string',
+                },
+                user: {
+                  $ref: getSchemaPath(UserModel),
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
   @Patch(':userId/upgradePlan')
   async upgradeUserPlan(
     @Param('userId') userId: string,

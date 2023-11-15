@@ -422,6 +422,44 @@ export class UserService {
     return profile;
   }
 
+  async updateBackgroundPicture(userId: string, file: Express.Multer.File) {
+    const user = await this.getUserDetails(userId);
+    const profile = await this.profileRepository.findOne({
+      where: {
+        id: user.profile.id,
+      },
+    });
+    const fileName = user.userName + '_' + 'background_pic';
+
+    const fileDetails: SaveFileDto = {
+      author: user.id,
+      name: fileName,
+      file: file,
+      mimetype: file.mimetype,
+      parent: user.id,
+      type: FileTypeEnum.PROFILE,
+    };
+
+    let savedFile: FileModel;
+
+    try {
+      await lastValueFrom(
+        this.fileClient.send<FileModel>('getFile', { title: fileName }),
+      );
+      savedFile = await lastValueFrom(
+        this.fileClient.send<FileModel>('updateFile', fileDetails),
+      );
+    } catch (error) {
+      savedFile = await lastValueFrom(
+        this.fileClient.send<FileModel>('saveFile', fileDetails),
+      );
+    }
+
+    profile.backgroundPicture = savedFile.path;
+    await profile.save();
+    return profile;
+  }
+
   //handle plans
   async upgradeUserPlan(upgradePlanDto: UpgradePlanDto) {
     const user = await this.findOne(upgradePlanDto.userId);
