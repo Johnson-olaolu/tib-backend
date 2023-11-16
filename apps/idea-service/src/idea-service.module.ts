@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { IdeaServiceController } from './idea-service.controller';
 import { IdeaServiceService } from './idea-service.service';
 import { IdeaModule } from './idea/idea.module';
-import { CommentModule } from './comment/comment.module';
-import { LikeModule } from './like/like.module';
 import { DatabaseModule } from '@app/database';
 import { RmqModule } from '@app/rmq';
 import { ConfigModule } from '@nestjs/config';
@@ -16,8 +14,6 @@ import { CategoryModule } from './category/category.module';
 @Module({
   imports: [
     IdeaModule,
-    CommentModule,
-    LikeModule,
     DatabaseModule,
     RmqModule,
     RmqModule.register({ name: RABBITMQ_QUEUES.FILE_SERVICE }),

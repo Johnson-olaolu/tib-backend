@@ -8,6 +8,10 @@ import {
   CreateIdeaSimpleDto,
 } from '@app/shared/dto/idea/create-idea.dto';
 import { QueryIdeaSimpleDto } from '@app/shared/dto/idea/query-idea-simple.dto';
+import { LikeIdeaDto } from '@app/shared/dto/idea/like-idea.dto';
+import { ShareIdeaDto } from '@app/shared/dto/idea/share-idea.dto';
+import { CreateCommentDto } from '@app/shared/dto/idea/create-comment.dto';
+import { GetCommentsDto } from '@app/shared/dto/idea/get-comments.dto';
 
 @Controller()
 export class IdeaController {
@@ -61,6 +65,36 @@ export class IdeaController {
   // update(@Payload() updateIdeaDto: UpdateIdeaDto) {
   //   return this.ideaService.update(updateIdeaDto.id, updateIdeaDto);
   // }
+
+  @MessagePattern('like')
+  async like(@Payload() likeIdeaDto: LikeIdeaDto) {
+    return this.ideaService.like(likeIdeaDto);
+  }
+
+  @MessagePattern('unllike')
+  async unlike(@Payload() likeId: string) {
+    return this.ideaService.unLikeIdea(likeId);
+  }
+
+  @MessagePattern('share')
+  async share(@Payload() shareIdeaDto: ShareIdeaDto) {
+    return this.ideaService.shareIdea(shareIdeaDto);
+  }
+
+  @MessagePattern('unShare')
+  async unShare(@Payload() shareId: string) {
+    return this.ideaService.unShareIdea(shareId);
+  }
+
+  @MessagePattern('comment')
+  async comment(@Payload() createCommentDto: CreateCommentDto) {
+    return this.ideaService.comment(createCommentDto);
+  }
+
+  @MessagePattern('fetchComments')
+  async fetchComments(@Payload() getCommentsDto: GetCommentsDto) {
+    return this.ideaService.findComments(getCommentsDto);
+  }
 
   @MessagePattern('removeIdea')
   remove(@Payload() id: number) {

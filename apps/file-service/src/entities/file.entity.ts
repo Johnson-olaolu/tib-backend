@@ -34,6 +34,9 @@ export class File extends BaseEntity {
   })
   title: string;
 
+  @Column()
+  originalName: string;
+
   @Column({
     type: 'enum',
     enum: FileTypeEnum,

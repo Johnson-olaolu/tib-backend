@@ -399,7 +399,7 @@ export class UserService {
       file: file,
       mimetype: file.mimetype,
       parent: user.id,
-      type: FileTypeEnum.PROFILE,
+      type: FileTypeEnum.USER,
     };
 
     let savedFile: FileModel;
@@ -437,7 +437,7 @@ export class UserService {
       file: file,
       mimetype: file.mimetype,
       parent: user.id,
-      type: FileTypeEnum.PROFILE,
+      type: FileTypeEnum.USER,
     };
 
     let savedFile: FileModel;

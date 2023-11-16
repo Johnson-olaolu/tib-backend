@@ -16,6 +16,11 @@ export const defaultIdeaConstants: CreateIdeaConstantDto[] = [
   },
 ];
 
+export enum LIkeTypeEnum {
+  IDEA = 'IDEA',
+  COMMENT = 'COMMENT',
+}
+
 export enum IdeaTypeEnum {
   FREE = 'FREE',
   VAULT = 'VAULT',
@@ -32,6 +37,7 @@ export const defaultCategories: CreateCategoryDto[] = [
   { name: 'Science' },
   { name: 'Marriage' },
   { name: 'Technology', isTopCategory: true },
+  { name: 'Art', isTopCategory: true },
   { name: 'Entertainment', isTopCategory: true },
   { name: 'Finance', isTopCategory: true },
   { name: 'Music', isTopCategory: true },

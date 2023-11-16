@@ -6,6 +6,8 @@ import { AmountWithCurrency } from '../utils/amount-with-currency.dto';
 import { LikeModel } from './like.model';
 import { CommentModel } from './comment.model';
 import { UserModel } from './user.model';
+import { FileModel } from './file.model';
+import { ShareModel } from './share.model';
 
 export class IdeaModel {
   id: string;
@@ -20,7 +22,7 @@ export class IdeaModel {
 
   categories: string[];
 
-  media: string[];
+  media: FileModel[];
 
   collaborators: string[];
 
@@ -63,6 +65,7 @@ export class IdeaModel {
   comments: CommentModel[];
 
   likes: LikeModel[];
+  shares: ShareModel[];
 
   createdAt: Date;
 

@@ -74,8 +74,13 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} user`;
+  async findOne(userId: string) {
+    const response = await lastValueFrom(
+      this.userClient.send<UserModel>('findOneUser', userId),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return response;
   }
 
   async query(query: QueryUserDto) {

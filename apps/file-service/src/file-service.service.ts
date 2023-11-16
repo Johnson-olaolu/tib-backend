@@ -33,8 +33,14 @@ export class FileServiceService {
   ) {
     let directory = '';
     switch (type) {
-      case FileTypeEnum.PROFILE:
-        directory = join(this.defaultPath, 'profile');
+      case FileTypeEnum.USER:
+        directory = join(this.defaultPath, 'user');
+        break;
+      case FileTypeEnum.IDEA:
+        directory = join(this.defaultPath, 'idea');
+        break;
+      case FileTypeEnum.CHAT:
+        directory = join(this.defaultPath, 'chat');
         break;
       default:
         directory = join(this.defaultPath, 'app');
@@ -61,12 +67,14 @@ export class FileServiceService {
       saveFileDto.name,
       saveFileDto.mimetype,
     );
+    console.log(saveFileDto.file);
     const savedfile = await this.fileRepository.save({
       author: saveFileDto.author,
       name: fileData.name,
       path: fileData.path,
       type: saveFileDto.type,
       title: saveFileDto.name,
+      originalName: saveFileDto.file.originalname || fileData.name,
       ownerId: saveFileDto.parent,
       mimeType: saveFileDto.mimetype,
     });
@@ -82,7 +90,12 @@ export class FileServiceService {
   }
 
   async updateFile(saveFileDto: SaveFileDto) {
-    const file = await this.getFile(saveFileDto.name);
+    console.log(saveFileDto.file);
+    const file = await this.fileRepository.findOne({
+      where: {
+        name: saveFileDto.name,
+      },
+    });
     await fs.unlink(join(this.defaultPath, file.path), (err) => {
       if (err) console.log(err);
       else {

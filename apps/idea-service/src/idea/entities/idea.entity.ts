@@ -6,14 +6,17 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { IdeaNeedEnum, IdeaTypeEnum } from '../../utils/constants';
-import { Comment } from '../../comment/entities/comment.entity';
-import { Like } from '../../like/entities/like.entity';
 import { AmountWithCurrency } from '@app/shared/utils/amount-with-currency.dto';
 import { Category } from '../../category/entities/category.entity';
+import { FileModel } from '@app/shared/model/file.model';
+import { Like } from './like.entity';
+import { Comment } from './comment.entity';
+import { Share } from './share.entity';
 
 @Entity()
 export class Idea extends BaseEntity {
@@ -45,7 +48,7 @@ export class Idea extends BaseEntity {
     type: 'simple-array',
     nullable: true,
   })
-  media: string[];
+  media: FileModel[];
 
   @Column({
     type: 'simple-array',
@@ -130,11 +133,14 @@ export class Idea extends BaseEntity {
   @Column({ nullable: true })
   sharesRating: number;
 
-  @ManyToOne(() => Comment, { nullable: true })
+  @OneToMany(() => Comment, (comment) => comment.idea)
   comments: Comment[];
 
-  @ManyToOne(() => Like, { nullable: true })
+  @OneToMany(() => Like, (like) => like.idea)
   likes: Like[];
+
+  @OneToMany(() => Share, (share) => share.idea)
+  shares: Share[];
 
   @CreateDateColumn()
   createdAt: Date;

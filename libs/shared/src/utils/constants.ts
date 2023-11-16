@@ -12,8 +12,10 @@ export const RABBITMQ_QUEUES = {
 
 export enum FileTypeEnum {
   APP = 'APP',
-  PROFILE = 'PROFILE',
+  USER = 'USER',
   PAYMENT_METHOD = 'PAYMENT_METHOD',
+  IDEA = 'IDEA',
+  CHAT = 'CHAT',
 }
 
 export type notificationTypes = 'email' | 'push';

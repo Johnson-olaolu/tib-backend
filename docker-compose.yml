@@ -79,7 +79,8 @@ services:
       rabbitmq:
         condition: service_healthy
     volumes:
-      - file_storage:/usr/src/app
+      # - file_storage:/usr/src/app
+      - .:/usr/src/app
     ports:
       - 6100:6100
 

@@ -4,9 +4,15 @@ import { IdeaController } from './idea.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Idea } from './entities/idea.entity';
 import { CategoryModule } from '../category/category.module';
+import { Share } from './entities/share.entity';
+import { Like } from './entities/like.entity';
+import { Comment } from './entities/comment.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Idea]), CategoryModule],
+  imports: [
+    TypeOrmModule.forFeature([Idea, Share, Like, Comment]),
+    CategoryModule,
+  ],
   controllers: [IdeaController],
   providers: [IdeaService],
 })

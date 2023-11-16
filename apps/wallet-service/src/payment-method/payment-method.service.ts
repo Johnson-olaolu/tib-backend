@@ -86,7 +86,7 @@ export class PaymentMethodService {
         file: updatePaymentMethodDto.image,
         mimetype: updatePaymentMethodDto.image.mimetype,
         parent: 'SuperAdmin',
-        type: FileTypeEnum.PROFILE,
+        type: FileTypeEnum.APP,
       };
 
       const file = await lastValueFrom(

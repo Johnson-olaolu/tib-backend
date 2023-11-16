@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 // import { UpdateIdeaDto } from './dto/update-idea.dto';
 import {
   CreateIdeaForSaleDto,
@@ -8,37 +13,60 @@ import {
 } from '@app/shared/dto/idea/create-idea.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Idea } from './entities/idea.entity';
-import { Equal, ILike, In, Like, Repository } from 'typeorm';
-import { IdeaNeedEnum, IdeaTypeEnum } from '../utils/constants';
+import { Equal, ILike, In, Like, Repository, TreeRepository } from 'typeorm';
+import { IdeaNeedEnum, IdeaTypeEnum, LIkeTypeEnum } from '../utils/constants';
 import { FileTypeEnum, RABBITMQ_QUEUES } from '@app/shared/utils/constants';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { SaveFileDto } from '@app/shared/dto/file/save-file.dto';
 import { FileModel } from '@app/shared/model/file.model';
 import { CategoryService } from '../category/category.service';
 import { Category } from '../category/entities/category.entity';
 import { QueryIdeaSimpleDto } from '@app/shared/dto/idea/query-idea-simple.dto';
+import { LikeIdeaDto } from '@app/shared/dto/idea/like-idea.dto';
+import { Like as RepositoryLike } from './entities/like.entity';
+import { Share } from './entities/share.entity';
+import { ShareIdeaDto } from '@app/shared/dto/idea/share-idea.dto';
+import { CreateCommentDto } from '@app/shared/dto/idea/create-comment.dto';
+import { Comment } from './entities/comment.entity';
+import { GetCommentsDto } from '@app/shared/dto/idea/get-comments.dto';
 
 @Injectable()
 export class IdeaService {
   constructor(
     @InjectRepository(Idea) private ideaRepository: Repository<Idea>,
+    @InjectRepository(RepositoryLike)
+    private likeRepository: Repository<RepositoryLike>,
+    @InjectRepository(Share)
+    private shareRepository: Repository<Share>,
+    @InjectRepository(Comment)
+    private commentRepository: TreeRepository<Comment>,
     private categoryService: CategoryService,
     @Inject(RABBITMQ_QUEUES.FILE_SERVICE) private fileClient: ClientProxy,
   ) {}
 
+  async checkIfExistingIdea(userId: string, title: string) {
+    const existingIdea = await this.ideaRepository.findOneBy({
+      title: title,
+      userId: userId,
+    });
+    if (existingIdea) {
+      throw new RpcException(
+        new BadRequestException('Idea Title Alredy used by User'),
+      );
+    }
+  }
+
   async createIdeaSimple(createIdeaSimpleDto: CreateIdeaSimpleDto) {
     const categories: Category[] = [];
+    await this.checkIfExistingIdea(
+      createIdeaSimpleDto.userId,
+      createIdeaSimpleDto.title,
+    );
     for (const category of createIdeaSimpleDto.categories) {
       const c = await this.categoryService.findOneByName(category);
       categories.push(c);
     }
-    console.log({
-      ...createIdeaSimpleDto,
-      accepted: true,
-      media: [],
-      categories: categories,
-    });
     const idea = await this.ideaRepository.save({
       ...createIdeaSimpleDto,
       accepted: true,
@@ -46,7 +74,7 @@ export class IdeaService {
       categories: categories,
     });
 
-    const ideaFiles: string[] = [];
+    const ideaFiles: FileModel[] = [];
     for (let i = 0; i < createIdeaSimpleDto.media.length; i++) {
       const fileName = idea.id + '_' + `file_${i}`;
       const fileDetails: SaveFileDto = {
@@ -55,12 +83,12 @@ export class IdeaService {
         file: createIdeaSimpleDto.media[i],
         mimetype: createIdeaSimpleDto.media[i].mimetype,
         parent: idea.id,
-        type: FileTypeEnum.APP,
+        type: FileTypeEnum.IDEA,
       };
       const savedFile = await lastValueFrom(
         this.fileClient.send<FileModel>('saveFile', fileDetails),
       );
-      ideaFiles.push(savedFile.path);
+      ideaFiles.push(savedFile);
     }
     idea.media = ideaFiles;
     await this.ideaRepository.save(idea);
@@ -111,6 +139,9 @@ export class IdeaService {
     const ideas = await this.ideaRepository.find({
       relations: {
         categories: true,
+        likes: true,
+        shares: true,
+        comments: true,
       },
       where: [
         {
@@ -130,6 +161,11 @@ export class IdeaService {
   async findOne(id: string) {
     const idea = await this.ideaRepository.findOne({
       where: { id },
+      relations: {
+        likes: true,
+        shares: true,
+        comments: true,
+      },
     });
     if (!idea) {
       throw new NotFoundException('No idea found for this title');
@@ -145,6 +181,110 @@ export class IdeaService {
       throw new NotFoundException('No idea found for this title');
     }
     return idea;
+  }
+
+  //IDEA ACTIONS
+  //Share
+  async shareIdea(shareIdeaDto: ShareIdeaDto) {
+    if (shareIdeaDto.type === LIkeTypeEnum.IDEA) {
+      const idea = await this.findOne(shareIdeaDto.ideaId);
+      const share = this.shareRepository.save({
+        idea: idea,
+        userId: shareIdeaDto.userId,
+      });
+      return share;
+    } else {
+      const comment = await this.findOneComment(shareIdeaDto.commentId);
+      const share = this.shareRepository.save({
+        comment: comment,
+        userId: shareIdeaDto.userId,
+      });
+      return share;
+    }
+  }
+
+  async unShareIdea(shareId: string) {
+    const deleteResponse = await this.likeRepository.delete(shareId);
+    if (!deleteResponse.affected) {
+      throw new RpcException(new NotFoundException('Like Not Found'));
+    }
+  }
+
+  //Like
+  async like(likeIdeaDto: LikeIdeaDto) {
+    if ((likeIdeaDto.type = LIkeTypeEnum.IDEA)) {
+      const idea = await this.findOne(likeIdeaDto.ideaId);
+      const like = this.likeRepository.save({
+        idea: idea,
+        userId: likeIdeaDto.userId,
+      });
+      return like;
+    } else {
+      const comment = await this.findOneComment(likeIdeaDto.commentId);
+      const like = this.likeRepository.save({
+        comment: comment,
+        userId: likeIdeaDto.userId,
+      });
+      return like;
+    }
+  }
+
+  async unLikeIdea(likeId: string) {
+    const deleteResponse = await this.likeRepository.delete(likeId);
+    if (!deleteResponse.affected) {
+      throw new RpcException(new NotFoundException('Like Not Found'));
+    }
+    return true;
+  }
+
+  //Comment
+  async comment(createCommentDto: CreateCommentDto) {
+    const idea = await this.findOne(createCommentDto.ideaId);
+    if ((createCommentDto.type = LIkeTypeEnum.IDEA)) {
+      const comment = await this.commentRepository.save({
+        idea: idea,
+        comment: createCommentDto.comment,
+        type: createCommentDto.type,
+      });
+      return comment;
+    } else {
+      const parentComment = await this.findOneComment(
+        createCommentDto.commentId,
+      );
+      const comment = await this.commentRepository.save({
+        idea: idea,
+        parent: parentComment,
+        comment: createCommentDto.comment,
+        type: createCommentDto.type,
+      });
+      return comment;
+    }
+  }
+
+  async findOneComment(id: string) {
+    const comment = await this.commentRepository.findOne({
+      where: { id },
+    });
+    if (!comment) {
+      throw new NotFoundException('No Comment found for this title');
+    }
+    return comment;
+  }
+  async findComments(getCommentsDto: GetCommentsDto) {
+    if (getCommentsDto.type == LIkeTypeEnum.IDEA) {
+      const comments = await this.commentRepository.find({
+        where: {
+          idea: {
+            id: getCommentsDto.id,
+          },
+        },
+      });
+      return comments;
+    } else {
+      const comment = await this.findOneComment(getCommentsDto.id);
+      const comments = await this.commentRepository.findDescendants(comment);
+      return comments;
+    }
   }
 
   // update(id: number, updateIdeaDto: UpdateIdeaDto) {
