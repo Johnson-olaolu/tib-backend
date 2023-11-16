@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Idea } from '../../idea/entities/idea.entity';
 import { LIkeTypeEnum } from '../../utils/constants';
+import { Comment } from './comment.entity';
 
 @Entity()
 export class Share extends BaseEntity {
