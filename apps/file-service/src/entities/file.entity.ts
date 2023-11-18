@@ -34,7 +34,7 @@ export class File extends BaseEntity {
   })
   title: string;
 
-  @Column()
+  @Column({ nullable: true })
   originalName: string;
 
   @Column({
