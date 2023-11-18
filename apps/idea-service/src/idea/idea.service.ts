@@ -232,8 +232,8 @@ export class IdeaService {
 
   //Like
   async like(likeIdeaDto: LikeIdeaDto) {
-    if ((likeIdeaDto.type = LIkeTypeEnum.IDEA)) {
-      const existingLike = await this.shareRepository.findOneBy({
+    if (likeIdeaDto.type === LIkeTypeEnum.IDEA) {
+      const existingLike = await this.likeRepository.findOneBy({
         idea: {
           id: likeIdeaDto.ideaId,
         },
@@ -250,7 +250,7 @@ export class IdeaService {
       });
       return like;
     } else {
-      const existingLike = await this.shareRepository.findOneBy({
+      const existingLike = await this.likeRepository.findOneBy({
         comment: {
           id: likeIdeaDto.ideaId,
         },

@@ -252,9 +252,7 @@ export class IdeaController {
   })
   @Delete(':id/like/:likeId')
   async unlike(@Param('id') ideaId: string, @Param('likeId') likeId: string) {
-    console.log('reached');
     const data = await this.ideaService.unLike(likeId);
-
     return {
       success: true,
       message: 'Like Removed Successfully',
