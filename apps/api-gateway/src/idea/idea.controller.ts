@@ -339,6 +339,7 @@ export class IdeaController {
     @Param('id') ideaId: string,
     @Body() createCommentDto: Omit<CreateCommentDto, 'ideaId'>,
   ) {
+    console.log(createCommentDto);
     const data = await this.ideaService.comment(ideaId, createCommentDto);
     return {
       success: true,

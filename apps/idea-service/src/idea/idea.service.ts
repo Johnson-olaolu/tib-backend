@@ -289,6 +289,7 @@ export class IdeaService {
         idea: idea,
         comment: createCommentDto.comment,
         type: createCommentDto.type,
+        userId: createCommentDto.userId,
       });
       return comment;
     } else {
@@ -300,6 +301,7 @@ export class IdeaService {
         parent: parentComment,
         comment: createCommentDto.comment,
         type: createCommentDto.type,
+        userId: createCommentDto.userId,
       });
       return comment;
     }
@@ -322,11 +324,21 @@ export class IdeaService {
             id: getCommentsDto.id,
           },
         },
+        relations: {
+          likes: true,
+          shares: true,
+          children: true,
+        },
+        order: {
+          createdAt: 'DESC',
+        },
       });
       return comments;
     } else {
       const comment = await this.findOneComment(getCommentsDto.id);
-      const comments = await this.commentRepository.findDescendants(comment);
+      const comments = await this.commentRepository.findDescendants(comment, {
+        relations: ['likes', 'shares', 'children'],
+      });
       return comments;
     }
   }

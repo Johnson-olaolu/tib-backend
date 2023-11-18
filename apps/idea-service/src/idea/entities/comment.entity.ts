@@ -15,6 +15,8 @@ import {
 } from 'typeorm';
 import { Idea } from '../../idea/entities/idea.entity';
 import { LIkeTypeEnum } from '../../utils/constants';
+import { Like } from './like.entity';
+import { Share } from './share.entity';
 
 @Entity()
 @Tree('closure-table')
@@ -42,6 +44,12 @@ export class Comment extends BaseEntity {
 
   @TreeChildren()
   children: Comment[];
+
+  @OneToMany(() => Like, (like) => like.comment)
+  likes: Like[];
+
+  @OneToMany(() => Share, (share) => share.comment)
+  shares: Share[];
 
   @CreateDateColumn()
   createdAt: Date;
