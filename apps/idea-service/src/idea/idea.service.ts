@@ -187,24 +187,44 @@ export class IdeaService {
   //Share
   async shareIdea(shareIdeaDto: ShareIdeaDto) {
     if (shareIdeaDto.type === LIkeTypeEnum.IDEA) {
+      const existingShare = await this.shareRepository.findOneBy({
+        idea: {
+          id: shareIdeaDto.ideaId,
+        },
+        userId: shareIdeaDto.userId,
+      });
+      if (existingShare) {
+        return;
+      }
       const idea = await this.findOne(shareIdeaDto.ideaId);
       const share = this.shareRepository.save({
         idea: idea,
         userId: shareIdeaDto.userId,
+        type: shareIdeaDto.type,
       });
       return share;
     } else {
+      const existingShare = await this.shareRepository.findOneBy({
+        comment: {
+          id: shareIdeaDto.commentId,
+        },
+        userId: shareIdeaDto.userId,
+      });
+      if (existingShare) {
+        return;
+      }
       const comment = await this.findOneComment(shareIdeaDto.commentId);
       const share = this.shareRepository.save({
         comment: comment,
         userId: shareIdeaDto.userId,
+        type: shareIdeaDto.type,
       });
       return share;
     }
   }
 
   async unShareIdea(shareId: string) {
-    const deleteResponse = await this.likeRepository.delete(shareId);
+    const deleteResponse = await this.shareRepository.delete(shareId);
     if (!deleteResponse.affected) {
       throw new RpcException(new NotFoundException('Like Not Found'));
     }
@@ -213,28 +233,52 @@ export class IdeaService {
   //Like
   async like(likeIdeaDto: LikeIdeaDto) {
     if ((likeIdeaDto.type = LIkeTypeEnum.IDEA)) {
+      const existingLike = await this.shareRepository.findOneBy({
+        idea: {
+          id: likeIdeaDto.ideaId,
+        },
+        userId: likeIdeaDto.userId,
+      });
+      if (existingLike) {
+        return;
+      }
       const idea = await this.findOne(likeIdeaDto.ideaId);
       const like = this.likeRepository.save({
         idea: idea,
         userId: likeIdeaDto.userId,
+        type: likeIdeaDto.type,
       });
       return like;
     } else {
+      const existingLike = await this.shareRepository.findOneBy({
+        comment: {
+          id: likeIdeaDto.ideaId,
+        },
+        userId: likeIdeaDto.userId,
+      });
+      if (existingLike) {
+        return;
+      }
       const comment = await this.findOneComment(likeIdeaDto.commentId);
       const like = this.likeRepository.save({
         comment: comment,
         userId: likeIdeaDto.userId,
+        type: likeIdeaDto.type,
       });
       return like;
     }
   }
 
   async unLikeIdea(likeId: string) {
-    const deleteResponse = await this.likeRepository.delete(likeId);
-    if (!deleteResponse.affected) {
-      throw new RpcException(new NotFoundException('Like Not Found'));
+    try {
+      const deleteResponse = await this.likeRepository.delete(likeId);
+      if (!deleteResponse.affected) {
+        throw new RpcException(new NotFoundException('Like Not Found'));
+      }
+      return true;
+    } catch (error) {
+      console.log(error);
     }
-    return true;
   }
 
   //Comment

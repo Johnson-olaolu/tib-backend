@@ -224,7 +224,7 @@ export class IdeaController {
   @Post(':id/like')
   async like(
     @Param('id') ideaId: string,
-    likeIdeaDto: Omit<LikeIdeaDto, 'ideaId'>,
+    @Body() likeIdeaDto: Omit<LikeIdeaDto, 'ideaId'>,
   ) {
     const data = await this.ideaService.like(ideaId, likeIdeaDto);
     return {
@@ -252,7 +252,9 @@ export class IdeaController {
   })
   @Delete(':id/like/:likeId')
   async unlike(@Param('id') ideaId: string, @Param('likeId') likeId: string) {
+    console.log('reached');
     const data = await this.ideaService.unLike(likeId);
+
     return {
       success: true,
       message: 'Like Removed Successfully',
@@ -279,9 +281,9 @@ export class IdeaController {
   @Post(':id/share')
   async share(
     @Param('id') ideaId: string,
-    shareIdeaDto: Omit<ShareIdeaDto, 'ideaId'>,
+    @Body() shareIdeaDto: Omit<ShareIdeaDto, 'ideaId'>,
   ) {
-    const data = await this.ideaService.like(ideaId, shareIdeaDto);
+    const data = await this.ideaService.share(ideaId, shareIdeaDto);
     return {
       success: true,
       message: 'Idea Shared Successfully',
@@ -305,7 +307,7 @@ export class IdeaController {
       ],
     },
   })
-  @Delete(':id/like/:shareId')
+  @Delete(':id/share/:shareId')
   async unShare(
     @Param('id') ideaId: string,
     @Param('shareId') shareId: string,

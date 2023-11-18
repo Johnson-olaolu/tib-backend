@@ -71,7 +71,7 @@ export class IdeaController {
     return this.ideaService.like(likeIdeaDto);
   }
 
-  @MessagePattern('unllike')
+  @MessagePattern('unLike')
   async unlike(@Payload() likeId: string) {
     return this.ideaService.unLikeIdea(likeId);
   }
