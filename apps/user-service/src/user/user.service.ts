@@ -443,7 +443,7 @@ export class UserService {
     let savedFile: FileModel;
 
     try {
-      await lastValueFrom(
+      const file = await lastValueFrom(
         this.fileClient.send<FileModel>('getFile', { title: fileName }),
       );
       savedFile = await lastValueFrom(

@@ -67,7 +67,6 @@ export class FileServiceService {
       saveFileDto.name,
       saveFileDto.mimetype,
     );
-    console.log(saveFileDto.file);
     const savedfile = await this.fileRepository.save({
       author: saveFileDto.author,
       name: fileData.name,
@@ -90,13 +89,12 @@ export class FileServiceService {
   }
 
   async updateFile(saveFileDto: SaveFileDto) {
-    console.log(saveFileDto.file);
     const file = await this.fileRepository.findOne({
       where: {
-        name: saveFileDto.name,
+        title: saveFileDto.name,
       },
     });
-    await fs.unlink(join(this.defaultPath, file.path), (err) => {
+    await fs.unlink(join(__dirname, file.path), (err) => {
       if (err) console.log(err);
       else {
         console.log('File deleted successfully\n');
@@ -111,6 +109,7 @@ export class FileServiceService {
     file.mimeType = saveFileDto.mimetype;
     file.name = fileData.name;
     file.path = fileData.path;
+    file.originalName = saveFileDto.file.originalname || fileData.name;
 
     await file.save();
     return this.getFileRoute(file);

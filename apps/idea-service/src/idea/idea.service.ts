@@ -13,7 +13,16 @@ import {
 } from '@app/shared/dto/idea/create-idea.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Idea } from './entities/idea.entity';
-import { Equal, ILike, In, Like, Repository, TreeRepository } from 'typeorm';
+import {
+  Equal,
+  ILike,
+  In,
+  IsNull,
+  Like,
+  Not,
+  Repository,
+  TreeRepository,
+} from 'typeorm';
 import { IdeaNeedEnum, IdeaTypeEnum, LIkeTypeEnum } from '../utils/constants';
 import { FileTypeEnum, RABBITMQ_QUEUES } from '@app/shared/utils/constants';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
@@ -226,8 +235,9 @@ export class IdeaService {
   async unShareIdea(shareId: string) {
     const deleteResponse = await this.shareRepository.delete(shareId);
     if (!deleteResponse.affected) {
-      throw new RpcException(new NotFoundException('Like Not Found'));
+      throw new RpcException(new NotFoundException('Share Not Found'));
     }
+    return true;
   }
 
   //Like
@@ -284,7 +294,7 @@ export class IdeaService {
   //Comment
   async comment(createCommentDto: CreateCommentDto) {
     const idea = await this.findOne(createCommentDto.ideaId);
-    if ((createCommentDto.type = LIkeTypeEnum.IDEA)) {
+    if (createCommentDto.type === LIkeTypeEnum.IDEA) {
       const comment = await this.commentRepository.save({
         idea: idea,
         comment: createCommentDto.comment,
@@ -328,6 +338,7 @@ export class IdeaService {
           likes: true,
           shares: true,
           children: true,
+          parent: true,
         },
         order: {
           createdAt: 'DESC',
