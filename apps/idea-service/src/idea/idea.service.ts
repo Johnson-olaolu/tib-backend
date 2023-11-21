@@ -358,6 +358,53 @@ export class IdeaService {
   //   return `This action updates a #${id} idea`;
   // }
 
+  //Custom
+  async fetchUserIdeaDetails(userId: string) {
+    const ideas = await this.ideaRepository.find({
+      where: [{ userId }, { shares: { userId } }],
+    });
+    const sharedIdeas = await this.ideaRepository.find({
+      where: { shares: { userId } },
+      relations: {
+        categories: true,
+        likes: true,
+        shares: true,
+        comments: true,
+      },
+    });
+    const likedIdeas = await this.ideaRepository.find({
+      where: { likes: { userId } },
+      relations: {
+        categories: true,
+        likes: true,
+        shares: true,
+        comments: true,
+      },
+    });
+    const shares = await this.shareRepository.find({
+      where: {
+        idea: {
+          userId,
+        },
+      },
+    });
+    const likes = await this.likeRepository.find({
+      where: {
+        idea: {
+          userId,
+        },
+      },
+    });
+
+    return {
+      ideas,
+      shares,
+      likes,
+      sharedIdeas,
+      likedIdeas,
+    };
+  }
+
   remove(id: number) {
     return `This action removes a #${id} idea`;
   }

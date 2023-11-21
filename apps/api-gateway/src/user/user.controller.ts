@@ -332,6 +332,16 @@ export class UserController {
     };
   }
 
+  @Get(':id/idea-details')
+  async getIdeaDetails(@Param('id') userId: string) {
+    const data = await this.userService.fetchUserIdeaDetails(userId);
+    return {
+      success: true,
+      message: 'idea details fetched successfully',
+      data: data,
+    };
+  }
+
   @ApiResponse({
     status: 200,
     description: 'follow request sent successfully',

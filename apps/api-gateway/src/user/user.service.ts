@@ -23,6 +23,9 @@ import {
   UnBlockUserDto,
 } from '@app/shared/dto/user-service/block-user.dto';
 import { BlockModel } from '@app/shared/model/block.model';
+import { IdeaModel } from '@app/shared/model/idea.model';
+import { LikeModel } from '@app/shared/model/like.model';
+import { ShareModel } from '@app/shared/model/share.model';
 
 @Injectable()
 export class UserService {
@@ -31,6 +34,8 @@ export class UserService {
     private readonly userClient: ClientProxy,
     @Inject(RABBITMQ_QUEUES.WALLET_SERVICE)
     private readonly walletClient: ClientProxy,
+    @Inject(RABBITMQ_QUEUES.IDEA_SERVICE)
+    private readonly ideaClient: ClientProxy,
   ) {}
   async updateUserProfile(userId: string, updateProfileDto: UpdateProfileDto) {
     const user = await lastValueFrom(
@@ -101,6 +106,30 @@ export class UserService {
     } catch (error) {
       throw new RpcException(error.response);
     }
+  }
+
+  async fetchUserIdeaDetails(userId: string) {
+    const userIdeaDetails = await lastValueFrom(
+      this.ideaClient.send<{
+        ideas: IdeaModel[];
+        likes: LikeModel[];
+        shares: ShareModel[];
+        sharedIdeas: IdeaModel[];
+        likedIdeas: IdeaModel[];
+      }>('fetchUserIdeaDetails', userId),
+    ).catch((err) => {
+      throw new RpcException(err.response);
+    });
+
+    for (const idea of userIdeaDetails.sharedIdeas) {
+      const user = await this.getUserDetails(idea.userId);
+      idea['user'] = user;
+    }
+    for (const idea of userIdeaDetails.likedIdeas) {
+      const user = await this.getUserDetails(idea.userId);
+      idea['user'] = user;
+    }
+    return userIdeaDetails;
   }
 
   async getUserInterests(id: string) {

@@ -27,6 +27,9 @@ export class NotificationService {
       where: {
         userId,
       },
+      order: {
+        createdAt: 'DESC',
+      },
     });
     return notifications;
   }

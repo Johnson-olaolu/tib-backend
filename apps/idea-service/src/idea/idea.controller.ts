@@ -95,6 +95,10 @@ export class IdeaController {
   async fetchComments(@Payload() getCommentsDto: GetCommentsDto) {
     return this.ideaService.findComments(getCommentsDto);
   }
+  @MessagePattern('fetchUserIdeaDetails')
+  async fetchUserIdeaDetails(@Payload() userId: string) {
+    return this.ideaService.fetchUserIdeaDetails(userId);
+  }
 
   @MessagePattern('removeIdea')
   remove(@Payload() id: number) {

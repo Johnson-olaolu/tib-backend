@@ -295,44 +295,51 @@ export class UserService {
 
   async query(query: QueryUserDto) {
     const users = await this.userRepository.find({
-      where: {
-        planName: query.plan,
-        isEmailVerified: true,
-        roleName: 'user',
-        userName: query.userName,
-        profile: [
-          {
-            firstName: ILike(`%${query.name || ''}%`),
-            phoneNumber: ILike(`%${query.phoneNumber || ''}%`),
-          },
-          {
-            lastName: ILike(`%${query.name || ''}%`),
-            phoneNumber: ILike(`%${query.phoneNumber || ''}%`),
-          },
-        ],
-      },
+      // where: {
+      //   planName: query.plan,
+      //   isEmailVerified: true,
+      //   roleName: 'user',
+      //   // userName: ILike(`%${query.userName || ''}%`),
+      //   profile: [
+      //     {
+      //       firstName: ILike(`%${query.name || ''}%`),
+      //       phoneNumber: ILike(`%${query.phoneNumber || ''}%`),
+      //     },
+      //     {
+      //       lastName: ILike(`%${query.name || ''}%`),
+      //       phoneNumber: ILike(`%${query.phoneNumber || ''}%`),
+      //     },
+      //   ],
+      // },
       // {  roleName: 'user',  },
-      // { email: query.email, , isEmailVerified: true },
-      // {
-      //   userName: ILike(`%${query.email}%`),
-      //   roleName: 'user',
-      //   isEmailVerified: true,
-      // },
-      // {
-      //   profile: { firstName: ILike(`%${query.name}%`) },
-      //   roleName: 'user',
-      //   isEmailVerified: true,
-      // },
-      // {
-      //   profile: { lastName: ILike(`%${query.name}%`) },
-      //   roleName: 'user',
-      //   isEmailVerified: true,
-      // },
-      // {
-      //   profile: { phoneNumber: ILike(`%${query.phoneNumber}%`) },
-      //   roleName: 'user',
-      //   isEmailVerified: true,
-      // },
+
+      where: [
+        {
+          email: ILike(`%${query.email}%`),
+          roleName: 'user',
+          isEmailVerified: true,
+        },
+        {
+          userName: ILike(`%${query.userName}%`),
+          roleName: 'user',
+          isEmailVerified: true,
+        },
+        {
+          profile: { firstName: ILike(`%${query.name}%`) },
+          roleName: 'user',
+          isEmailVerified: true,
+        },
+        {
+          profile: { lastName: ILike(`%${query.name}%`) },
+          roleName: 'user',
+          isEmailVerified: true,
+        },
+        {
+          profile: { phoneNumber: ILike(`%${query.phoneNumber}%`) },
+          roleName: 'user',
+          isEmailVerified: true,
+        },
+      ],
       relations: {
         profile: true,
       },
