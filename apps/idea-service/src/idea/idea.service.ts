@@ -362,6 +362,12 @@ export class IdeaService {
   async fetchUserIdeaDetails(userId: string) {
     const ideas = await this.ideaRepository.find({
       where: [{ userId }, { shares: { userId } }],
+      relations: {
+        categories: true,
+        likes: true,
+        shares: true,
+        comments: true,
+      },
     });
     const sharedIdeas = await this.ideaRepository.find({
       where: { shares: { userId } },
