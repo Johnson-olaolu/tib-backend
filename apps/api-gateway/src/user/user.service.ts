@@ -121,6 +121,10 @@ export class UserService {
       throw new RpcException(err.response);
     });
 
+    for (const idea of userIdeaDetails.ideas) {
+      const user = await this.getUserDetails(idea.userId);
+      idea['user'] = user;
+    }
     for (const idea of userIdeaDetails.sharedIdeas) {
       const user = await this.getUserDetails(idea.userId);
       idea['user'] = user;
