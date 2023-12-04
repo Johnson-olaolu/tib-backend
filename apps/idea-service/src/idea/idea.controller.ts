@@ -12,6 +12,7 @@ import { LikeIdeaDto } from '@app/shared/dto/idea/like-idea.dto';
 import { ShareIdeaDto } from '@app/shared/dto/idea/share-idea.dto';
 import { CreateCommentDto } from '@app/shared/dto/idea/create-comment.dto';
 import { GetCommentsDto } from '@app/shared/dto/idea/get-comments.dto';
+import { QueryIdeaVaultDto } from '@app/shared/dto/idea/query-idea-vault.dto';
 
 @Controller()
 export class IdeaController {
@@ -49,6 +50,11 @@ export class IdeaController {
   @MessagePattern('querySimpleIdea')
   querySimpleIdea(@Payload() queryIdeaSimpleDto: QueryIdeaSimpleDto) {
     return this.ideaService.querySimpleIdea(queryIdeaSimpleDto);
+  }
+
+  @MessagePattern('queryVaultIdea')
+  queryVaultIdea(@Payload() queryIdeaVaultDto: QueryIdeaVaultDto) {
+    return this.ideaService.queryVaultIdea(queryIdeaVaultDto);
   }
 
   @MessagePattern('findOneIdea')

@@ -39,6 +39,7 @@ import { ShareIdeaDto } from '@app/shared/dto/idea/share-idea.dto';
 import { CreateCommentDto } from '@app/shared/dto/idea/create-comment.dto';
 import { Comment } from './entities/comment.entity';
 import { GetCommentsDto } from '@app/shared/dto/idea/get-comments.dto';
+import { QueryIdeaVaultDto } from '@app/shared/dto/idea/query-idea-vault.dto';
 
 @Injectable()
 export class IdeaService {
@@ -128,7 +129,7 @@ export class IdeaService {
     });
 
     const ideaFiles: FileModel[] = [];
-    for (let i = 0; i < createIdeaFundingNeededDto.media.length; i++) {
+    for (let i = 0; i < createIdeaFundingNeededDto.media?.length || 0; i++) {
       const fileName = idea.id + '_' + `file_${i}`;
       const fileDetails: SaveFileDto = {
         author: createIdeaFundingNeededDto.userId,
@@ -170,7 +171,7 @@ export class IdeaService {
     });
 
     const ideaFiles: FileModel[] = [];
-    for (let i = 0; i < createIdeaForSaleDto.media.length; i++) {
+    for (let i = 0; i < createIdeaForSaleDto.media?.length || 0; i++) {
       const fileName = idea.id + '_' + `file_${i}`;
       const fileDetails: SaveFileDto = {
         author: createIdeaForSaleDto.userId,
@@ -188,7 +189,11 @@ export class IdeaService {
     idea.media = ideaFiles;
 
     const ideaAttachMents: FileModel[] = [];
-    for (let i = 0; i < createIdeaForSaleDto.additionalAttachment.length; i++) {
+    for (
+      let i = 0;
+      i < createIdeaForSaleDto.additionalAttachment?.length || 0;
+      i++
+    ) {
       const fileName = idea.id + '_' + `file_${i}`;
       const fileDetails: SaveFileDto = {
         author: createIdeaForSaleDto.userId,
@@ -230,7 +235,7 @@ export class IdeaService {
     });
 
     const ideaFiles: FileModel[] = [];
-    for (let i = 0; i < createIdeaNewConceptDto.media.length; i++) {
+    for (let i = 0; i < createIdeaNewConceptDto.media?.length || 0; i++) {
       const fileName = idea.id + '_' + `file_${i}`;
       const fileDetails: SaveFileDto = {
         author: createIdeaNewConceptDto.userId,
@@ -276,6 +281,29 @@ export class IdeaService {
         {
           title: ILike(`%${query.title || ''}%`),
           ideaType: IdeaTypeEnum.FREE,
+          userId: query.user,
+          spotlight: query.spotlight,
+          categories: {
+            name: query.category,
+          },
+        },
+      ],
+    });
+    return ideas;
+  }
+  async queryVaultIdea(query: QueryIdeaVaultDto) {
+    const ideas = await this.ideaRepository.find({
+      relations: {
+        categories: true,
+        likes: true,
+        shares: true,
+        comments: true,
+      },
+      where: [
+        {
+          title: ILike(`%${query.title || ''}%`),
+          ideaType: IdeaTypeEnum.VAULT,
+          ideaNeed: query.ideaNeed,
           userId: query.user,
           spotlight: query.spotlight,
           categories: {
@@ -474,9 +502,57 @@ export class IdeaService {
     }
   }
 
-  // update(id: number, updateIdeaDto: UpdateIdeaDto) {
-  //   return `This action updates a #${id} idea`;
-  // }
+  async updateIdeaSimple(id: string, createIdeaSimpleDto: CreateIdeaSimpleDto) {
+    const idea = await this.findOne(id);
+    for (const detail in createIdeaSimpleDto) {
+      if (detail !== 'media') {
+        idea[detail] = createIdeaSimpleDto[detail];
+      } else {
+      }
+    }
+    await idea.save();
+  }
+  async updateIdeaFundingNeeded(
+    id: string,
+    createIdeaFundingNeededDto: CreateIdeaFundingNeededDto,
+  ) {
+    const idea = await this.findOne(id);
+    for (const detail in createIdeaFundingNeededDto) {
+      if (detail !== 'media') {
+        idea[detail] = createIdeaFundingNeededDto[detail];
+      } else {
+      }
+    }
+    await idea.save();
+  }
+
+  async updateIdeaForSale(
+    id: string,
+    createIdeaForSaleDto: CreateIdeaForSaleDto,
+  ) {
+    const idea = await this.findOne(id);
+    for (const detail in createIdeaForSaleDto) {
+      if (detail !== 'media' && detail !== 'additionalAttachment') {
+        idea[detail] = createIdeaForSaleDto[detail];
+      } else {
+      }
+    }
+    await idea.save();
+  }
+
+  async updateIdeaNewConcept(
+    id: string,
+    createIdeaForSaleDto: CreateIdeaForSaleDto,
+  ) {
+    const idea = await this.findOne(id);
+    for (const detail in createIdeaForSaleDto) {
+      if (detail !== 'media' && detail !== 'additionalAttachment') {
+        idea[detail] = createIdeaForSaleDto[detail];
+      } else {
+      }
+    }
+    await idea.save();
+  }
 
   //Custom
   async fetchUserIdeaDetails(userId: string) {

@@ -18,6 +18,7 @@ import { ShareModel } from '@app/shared/model/share.model';
 import { CreateCommentDto } from '@app/shared/dto/idea/create-comment.dto';
 import { GetCommentsDto } from '@app/shared/dto/idea/get-comments.dto';
 import { CommentModel } from '@app/shared/model/comment.model';
+import { QueryIdeaVaultDto } from '@app/shared/dto/idea/query-idea-vault.dto';
 
 @Injectable()
 export class IdeaService {
@@ -87,13 +88,29 @@ export class IdeaService {
     return ideas;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} idea`;
+  async queryVaultIdea(queryIdeaVaultDto: QueryIdeaVaultDto) {
+    const ideas = await lastValueFrom(
+      this.ideaClient.send<IdeaModel[]>('queryVaultIdea', queryIdeaVaultDto),
+    ).catch((err) => {
+      throw new RpcException(err.response);
+    });
+    for (const idea of ideas) {
+      const user = await this.userService.getUserDetails(idea.userId);
+      idea['user'] = user;
+    }
+    return ideas;
   }
 
-  // update(id: number, updateIdeaDto: UpdateIdeaDto) {
+  // async findOne(id: string) {
+  //   const idea = await
+  //   return `This action returns a #${id} idea`;
+  // }
+
+  // async updateSimpleIdea(id: string,  createIdeaSimpleDto : CreateIdeaSimpleDto) {
+  //   const idea = await this.findOne()
   //   return `This action updates a #${id} idea`;
   // }
+
   async like(ideaId: string, likeIdeaDto: Omit<LikeIdeaDto, 'ideaId'>) {
     const like = await lastValueFrom(
       this.ideaClient.send<LikeModel>('like', { ...likeIdeaDto, ideaId }),

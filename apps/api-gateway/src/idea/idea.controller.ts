@@ -39,6 +39,7 @@ import { GetCommentsDto } from '@app/shared/dto/idea/get-comments.dto';
 import { LikeModel } from '@app/shared/model/like.model';
 import { ShareModel } from '@app/shared/model/share.model';
 import { CommentModel } from '@app/shared/model/comment.model';
+import { QueryIdeaVaultDto } from '@app/shared/dto/idea/query-idea-vault.dto';
 
 @ApiTags('Idea')
 @ApiExtraModels(IdeaModel, CommentModel, LikeModel, ShareModel)
@@ -106,7 +107,36 @@ export class IdeaController {
     const data = await this.ideaService.querySimpleIdea(query);
     return {
       success: true,
-      message: 'Idea Created Successfully',
+      message: 'Idea queried Successfully',
+      data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Ideas fetched successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                $ref: getSchemaPath(IdeaModel),
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Get('vault/query')
+  async queryVaultIdea(@Query() query: QueryIdeaVaultDto) {
+    const data = await this.ideaService.queryVaultIdea(query);
+    return {
+      success: true,
+      message: 'Idea queried Successfully',
       data,
     };
   }
@@ -196,10 +226,16 @@ export class IdeaController {
     },
   })
   @Post('new-concept')
-  async createIdea(@Body() createIdeaNewConceptDto: CreateIdeaNewConceptDto) {
-    const data = await this.ideaService.createIdeaNewConcept(
-      createIdeaNewConceptDto,
-    );
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('media[]'))
+  async createIdea(
+    @Body() createIdeaNewConceptDto: CreateIdeaNewConceptDto,
+    @UploadedFiles() media: Express.Multer.File[],
+  ) {
+    const data = await this.ideaService.createIdeaNewConcept({
+      ...createIdeaNewConceptDto,
+      media,
+    });
     return {
       success: true,
       message: 'Idea Created Successfully',
@@ -212,10 +248,10 @@ export class IdeaController {
   //   return this.ideaService.findAll();
   // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ideaService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.ideaService.findOne(+id);
+  // }
 
   @ApiResponse({
     status: 200,

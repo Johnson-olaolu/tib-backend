@@ -72,13 +72,14 @@ export class CreateIdeaFundingNeededDto {
   @IsOptional()
   media?: Express.Multer.File[];
 
+  @IsOptional()
   @IsString({
     each: true,
   })
   @IsNotEmpty({
     each: true,
   })
-  collaborators: string[];
+  collaborators?: string[];
 
   @IsString()
   @IsNotEmpty()
@@ -99,13 +100,14 @@ export class CreateIdeaFundingNeededDto {
   @Type(() => SocialMediaLinks)
   socialMediaLinks?: SocialMediaLinks[];
 
+  @IsOptional()
   @IsString({
     each: true,
   })
   @IsNotEmpty({
     each: true,
   })
-  competitors: string[];
+  competitors?: string[];
 
   @ValidateNested()
   @IsDefined()
@@ -167,13 +169,14 @@ export class CreateIdeaForSaleDto {
   @IsOptional()
   media?: Express.Multer.File[];
 
+  @IsOptional()
   @IsString({
     each: true,
   })
   @IsNotEmpty({
     each: true,
   })
-  collaborators: string[];
+  collaborators?: string[];
 
   @IsString()
   @IsNotEmpty()
@@ -183,22 +186,25 @@ export class CreateIdeaForSaleDto {
   @IsNotEmpty()
   location: string;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  website: string;
+  website?: string;
 
+  @IsOptional()
   @ValidateNested({ each: true })
   @IsArray()
   @Type(() => SocialMediaLinks)
-  socialMediaLinks: SocialMediaLinks[];
+  socialMediaLinks?: SocialMediaLinks[];
 
+  @IsOptional()
   @IsString({
     each: true,
   })
   @IsNotEmpty({
     each: true,
   })
-  competitors: string[];
+  competitors?: string[];
 
   @IsOptional()
   additionalAttachment?: Express.Multer.File[];
@@ -238,6 +244,7 @@ export class CreateIdeaNewConceptDto {
   @IsOptional()
   media?: Express.Multer.File[];
 
+  @IsOptional()
   @IsString({
     each: true,
   })
@@ -254,15 +261,18 @@ export class CreateIdeaNewConceptDto {
   @IsNotEmpty()
   location: string;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
   website: string;
 
+  @IsOptional()
   @ValidateNested({ each: true })
   @IsArray()
   @Type(() => SocialMediaLinks)
   socialMediaLinks: SocialMediaLinks[];
 
+  @IsOptional()
   @IsString({
     each: true,
   })
