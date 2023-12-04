@@ -7,10 +7,11 @@ import { CategoryModule } from '../category/category.module';
 import { Share } from './entities/share.entity';
 import { Like } from './entities/like.entity';
 import { Comment } from './entities/comment.entity';
+import { View } from './entities/view.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Idea, Share, Like, Comment]),
+    TypeOrmModule.forFeature([Idea, Share, Like, Comment, View]),
     CategoryModule,
   ],
   controllers: [IdeaController],

@@ -1,12 +1,15 @@
 import { AmountWithCurrency } from '@app/shared/utils/amount-with-currency.dto';
+import { SocialMediaLinks } from '@app/shared/utils/social-media-links.dto';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsDefined,
   IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
   IsOptional,
   IsString,
+  IsUrl,
   ValidateNested,
 } from 'class-validator';
 
@@ -66,13 +69,8 @@ export class CreateIdeaFundingNeededDto {
   })
   categories: string[];
 
-  @IsString({
-    each: true,
-  })
-  @IsNotEmpty({
-    each: true,
-  })
-  media: string[];
+  @IsOptional()
+  media?: Express.Multer.File[];
 
   @IsString({
     each: true,
@@ -90,13 +88,16 @@ export class CreateIdeaFundingNeededDto {
   @IsNotEmpty()
   location: string;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  website: string;
+  website?: string;
 
-  @IsString()
-  @IsNotEmpty()
-  socialMediaLinks: string[];
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @IsArray()
+  @Type(() => SocialMediaLinks)
+  socialMediaLinks?: SocialMediaLinks[];
 
   @IsString({
     each: true,
@@ -129,7 +130,7 @@ export class CreateIdeaFundingNeededDto {
   @IsNotEmptyObject()
   @IsObject()
   @Type(() => AmountWithCurrency)
-  projectedRenue: AmountWithCurrency;
+  projectedRevenue: AmountWithCurrency;
 
   @IsString()
   @IsNotEmpty()
@@ -163,13 +164,8 @@ export class CreateIdeaForSaleDto {
   })
   categories: string[];
 
-  @IsString({
-    each: true,
-  })
-  @IsNotEmpty({
-    each: true,
-  })
-  media: string[];
+  @IsOptional()
+  media?: Express.Multer.File[];
 
   @IsString({
     each: true,
@@ -191,13 +187,10 @@ export class CreateIdeaForSaleDto {
   @IsNotEmpty()
   website: string;
 
-  @IsString({
-    each: true,
-  })
-  @IsNotEmpty({
-    each: true,
-  })
-  socialMediaLinks: string[];
+  @ValidateNested({ each: true })
+  @IsArray()
+  @Type(() => SocialMediaLinks)
+  socialMediaLinks: SocialMediaLinks[];
 
   @IsString({
     each: true,
@@ -207,14 +200,8 @@ export class CreateIdeaForSaleDto {
   })
   competitors: string[];
 
-  @IsString({
-    each: true,
-  })
-  @IsNotEmpty({
-    each: true,
-  })
   @IsOptional()
-  additionalAttachment: string[];
+  additionalAttachment?: Express.Multer.File[];
 
   @ValidateNested()
   @IsDefined()
@@ -248,13 +235,8 @@ export class CreateIdeaNewConceptDto {
   })
   categories: string[];
 
-  @IsString({
-    each: true,
-  })
-  @IsNotEmpty({
-    each: true,
-  })
-  media: string[];
+  @IsOptional()
+  media?: Express.Multer.File[];
 
   @IsString({
     each: true,
@@ -276,9 +258,10 @@ export class CreateIdeaNewConceptDto {
   @IsNotEmpty()
   website: string;
 
-  @IsString()
-  @IsNotEmpty()
-  socialMediaLinks: string[];
+  @ValidateNested({ each: true })
+  @IsArray()
+  @Type(() => SocialMediaLinks)
+  socialMediaLinks: SocialMediaLinks[];
 
   @IsString({
     each: true,

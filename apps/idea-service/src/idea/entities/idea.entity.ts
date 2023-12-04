@@ -17,6 +17,8 @@ import { FileModel } from '@app/shared/model/file.model';
 import { Like } from './like.entity';
 import { Comment } from './comment.entity';
 import { Share } from './share.entity';
+import { View } from './view.entity';
+import { SocialMediaLinks } from '@app/shared/utils/social-media-links.dto';
 
 @Entity()
 export class Idea extends BaseEntity {
@@ -95,7 +97,7 @@ export class Idea extends BaseEntity {
     type: 'simple-array',
     nullable: true,
   })
-  additionalAttachment: string[];
+  additionalAttachment: FileModel[];
 
   @Column({
     type: 'simple-json',
@@ -105,6 +107,9 @@ export class Idea extends BaseEntity {
 
   @Column({ nullable: true })
   sellingReason: string;
+
+  @Column({ nullable: true, type: 'simple-array' })
+  socialMediaLinks: SocialMediaLinks[];
 
   @Column({ type: 'simple-json', nullable: true })
   valuation: AmountWithCurrency;
@@ -141,6 +146,9 @@ export class Idea extends BaseEntity {
 
   @OneToMany(() => Share, (share) => share.idea)
   shares: Share[];
+
+  @OneToMany(() => View, (view) => view.idea)
+  views: View[];
 
   @CreateDateColumn()
   createdAt: Date;

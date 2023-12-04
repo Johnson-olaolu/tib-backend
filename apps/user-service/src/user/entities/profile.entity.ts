@@ -40,10 +40,7 @@ export class Profile extends BaseEntity {
   })
   backgroundPicture: string;
 
-  @Column({
-    type: 'simple-array',
-    nullable: true,
-  })
+  @Column('text', { array: true, default: {} })
   interests: string[];
 
   @Column({

@@ -3,6 +3,12 @@ export class CategoryModel {
 
   name: string;
 
+  description: string;
+
+  profilePicture: string;
+
+  backgroundPicture: string;
+
   createdAt: Date;
 
   updatedAt: Date;

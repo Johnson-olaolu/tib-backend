@@ -107,27 +107,147 @@ export class IdeaService {
   async createIdeaFundingNeeded(
     createIdeaFundingNeededDto: CreateIdeaFundingNeededDto,
   ) {
-    // const idea = await this.ideaRepository.create(createIdeaFundingNeededDto);
-    // idea.ideaType = IdeaTypeEnum.VAULT;
-    // idea.ideaNeed = IdeaNeedEnum.FUNDING;
-    // await idea.save();
-    // return idea;
+    await this.checkIfExistingIdea(
+      createIdeaFundingNeededDto.userId,
+      createIdeaFundingNeededDto.title,
+    );
+    const categories: Category[] = [];
+    for (const category of createIdeaFundingNeededDto.categories) {
+      const c = await this.categoryService.findOneByName(category);
+      categories.push(c);
+    }
+
+    const idea = await this.ideaRepository.save({
+      ...createIdeaFundingNeededDto,
+      accepted: true,
+      media: [],
+      additionalAttachment: [],
+      categories: categories,
+      ideaNeed: IdeaNeedEnum.FUNDING,
+      ideaType: IdeaTypeEnum.VAULT,
+    });
+
+    const ideaFiles: FileModel[] = [];
+    for (let i = 0; i < createIdeaFundingNeededDto.media.length; i++) {
+      const fileName = idea.id + '_' + `file_${i}`;
+      const fileDetails: SaveFileDto = {
+        author: createIdeaFundingNeededDto.userId,
+        name: fileName,
+        file: createIdeaFundingNeededDto.media[i],
+        mimetype: createIdeaFundingNeededDto.media[i].mimetype,
+        parent: idea.id,
+        type: FileTypeEnum.IDEA,
+      };
+      const savedFile = await lastValueFrom(
+        this.fileClient.send<FileModel>('saveFile', fileDetails),
+      );
+      ideaFiles.push(savedFile);
+    }
+    idea.media = ideaFiles;
+    await this.ideaRepository.save(idea);
+    return idea;
   }
 
   async createIdeaForSale(createIdeaForSaleDto: CreateIdeaForSaleDto) {
-    // const idea = await this.ideaRepository.create(createIdeaForSaleDto);
-    // idea.ideaType = IdeaTypeEnum.VAULT;
-    // idea.ideaNeed = IdeaNeedEnum.SALE;
-    // await idea.save();
-    // return idea;
+    await this.checkIfExistingIdea(
+      createIdeaForSaleDto.userId,
+      createIdeaForSaleDto.title,
+    );
+    const categories: Category[] = [];
+    for (const category of createIdeaForSaleDto.categories) {
+      const c = await this.categoryService.findOneByName(category);
+      categories.push(c);
+    }
+
+    const idea = await this.ideaRepository.save({
+      ...createIdeaForSaleDto,
+      accepted: true,
+      media: [],
+      additionalAttachment: [],
+      categories: categories,
+      ideaNeed: IdeaNeedEnum.SALE,
+      ideaType: IdeaTypeEnum.VAULT,
+    });
+
+    const ideaFiles: FileModel[] = [];
+    for (let i = 0; i < createIdeaForSaleDto.media.length; i++) {
+      const fileName = idea.id + '_' + `file_${i}`;
+      const fileDetails: SaveFileDto = {
+        author: createIdeaForSaleDto.userId,
+        name: fileName,
+        file: createIdeaForSaleDto.media[i],
+        mimetype: createIdeaForSaleDto.media[i].mimetype,
+        parent: idea.id,
+        type: FileTypeEnum.IDEA,
+      };
+      const savedFile = await lastValueFrom(
+        this.fileClient.send<FileModel>('saveFile', fileDetails),
+      );
+      ideaFiles.push(savedFile);
+    }
+    idea.media = ideaFiles;
+
+    const ideaAttachMents: FileModel[] = [];
+    for (let i = 0; i < createIdeaForSaleDto.additionalAttachment.length; i++) {
+      const fileName = idea.id + '_' + `file_${i}`;
+      const fileDetails: SaveFileDto = {
+        author: createIdeaForSaleDto.userId,
+        name: fileName,
+        file: createIdeaForSaleDto.additionalAttachment[i],
+        mimetype: createIdeaForSaleDto.additionalAttachment[i].mimetype,
+        parent: idea.id,
+        type: FileTypeEnum.IDEA,
+      };
+      const savedFile = await lastValueFrom(
+        this.fileClient.send<FileModel>('saveFile', fileDetails),
+      );
+      ideaAttachMents.push(savedFile);
+    }
+    idea.additionalAttachment = ideaAttachMents;
+
+    await this.ideaRepository.save(idea);
+    return idea;
   }
 
   async createIdeaNewConcept(createIdeaNewConceptDto: CreateIdeaNewConceptDto) {
-    // const idea = await this.ideaRepository.create(createIdeaNewConceptDto);
-    // idea.ideaType = IdeaTypeEnum.VAULT;
-    // idea.ideaNeed = IdeaNeedEnum.SALE;
-    // await idea.save();
-    // return idea;
+    await this.checkIfExistingIdea(
+      createIdeaNewConceptDto.userId,
+      createIdeaNewConceptDto.title,
+    );
+    const categories: Category[] = [];
+    for (const category of createIdeaNewConceptDto.categories) {
+      const c = await this.categoryService.findOneByName(category);
+      categories.push(c);
+    }
+
+    const idea = await this.ideaRepository.save({
+      ...createIdeaNewConceptDto,
+      accepted: true,
+      media: [],
+      categories: categories,
+      ideaNeed: IdeaNeedEnum.NEW_CONCEPT,
+      ideaType: IdeaTypeEnum.VAULT,
+    });
+
+    const ideaFiles: FileModel[] = [];
+    for (let i = 0; i < createIdeaNewConceptDto.media.length; i++) {
+      const fileName = idea.id + '_' + `file_${i}`;
+      const fileDetails: SaveFileDto = {
+        author: createIdeaNewConceptDto.userId,
+        name: fileName,
+        file: createIdeaNewConceptDto.media[i],
+        mimetype: createIdeaNewConceptDto.media[i].mimetype,
+        parent: idea.id,
+        type: FileTypeEnum.IDEA,
+      };
+      const savedFile = await lastValueFrom(
+        this.fileClient.send<FileModel>('saveFile', fileDetails),
+      );
+      ideaFiles.push(savedFile);
+    }
+    idea.media = ideaFiles;
+    await this.ideaRepository.save(idea);
+    return idea;
   }
 
   async findAll() {
@@ -409,6 +529,70 @@ export class IdeaService {
       sharedIdeas,
       likedIdeas,
     };
+  }
+
+  async fetchCategoryIdeaDetails(categoryId: string) {
+    const likes = await this.likeRepository.find({
+      where: {
+        idea: {
+          categories: {
+            id: categoryId,
+          },
+        },
+      },
+    });
+    const shares = await this.shareRepository.find({
+      where: {
+        idea: {
+          categories: {
+            id: categoryId,
+          },
+        },
+      },
+    });
+    const sharedIdeas = await this.ideaRepository
+      .createQueryBuilder('idea')
+      .innerJoinAndSelect('idea.shares', 'share')
+      .innerJoin('idea.categories', 'category')
+      .where('category.id = :categoryId', { categoryId })
+      .groupBy('idea.id, share.id')
+      .having('COUNT(share.id) > 1')
+      .getMany();
+
+    const likedIdeas = await this.ideaRepository
+      .createQueryBuilder('idea')
+      .innerJoinAndSelect('idea.likes', 'like')
+      .innerJoin('idea.categories', 'category')
+      .where('category.id = :categoryId', { categoryId })
+      .groupBy('idea.id, like.id')
+      .having('COUNT(like.id) > 1')
+      .getMany();
+
+    // const mostViewed = await this.ideaRepository
+    //   .createQueryBuilder('idea')
+    //   .innerJoin('idea.categories', 'category')
+    //   .leftJoin('idea.views', 'view')
+    //   .where('category.id = :categoryId', { categoryId })
+    //   .groupBy('idea.id, view.id')
+    //   .orderBy('COUNT(view.id)', 'DESC')
+    //   .take(10)
+    //   .getMany();
+
+    const mostViewed = [];
+
+    // const mostViewed = await this.ideaRepository.find({
+    //   take: 10,
+    //   where: {
+    //     categories: {
+    //       id: categoryId,
+    //     },
+    //   },
+    //   order: {
+    //     view: 'DESC',
+    //   },
+    // });
+
+    return { likedIdeas, likes, sharedIdeas, shares, mostViewed };
   }
 
   remove(id: number) {

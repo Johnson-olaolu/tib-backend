@@ -4,6 +4,10 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { CategoryModel } from '@app/shared/model/category.model';
 import { lastValueFrom } from 'rxjs';
 import { CreateCategoryDto } from '@app/shared/dto/user-service/create-category.dto';
+import { LikeModel } from '@app/shared/model/like.model';
+import { IdeaModel } from '@app/shared/model/idea.model';
+import { ShareModel } from '@app/shared/model/share.model';
+import { UserModel } from '@app/shared/model/user.model';
 
 @Injectable()
 export class CategoryService {
@@ -35,6 +39,39 @@ export class CategoryService {
       throw new RpcException(error.response);
     });
     return category;
+  }
+
+  async findOneByName(name: string) {
+    const category = await lastValueFrom(
+      this.ideaClient.send<CategoryModel>('findOneByName', name),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return category;
+  }
+
+  async getCategoryDetails(id: string) {
+    const categoryIdeaDetails = await lastValueFrom(
+      this.ideaClient.send<{
+        likes: LikeModel[];
+        sharedIdeas: IdeaModel[];
+        likedIdeas: IdeaModel[];
+        shares: ShareModel[];
+        mostViewed: IdeaModel[];
+      }>('fetchCategoryIdeaDetails', id),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return categoryIdeaDetails;
+  }
+
+  async getCategoryFollowers(id: string) {
+    const followers = await lastValueFrom(
+      this.ideaClient.send<UserModel[]>('getCategoryFollowers', id),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return followers;
   }
 
   async query(name: string) {

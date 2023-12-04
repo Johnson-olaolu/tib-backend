@@ -1,15 +1,19 @@
 import { CreateCategoryDto } from '@app/shared/dto/user-service/create-category.dto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
 import { ILike, Repository } from 'typeorm';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { RABBITMQ_QUEUES } from '@app/shared/utils/constants';
+import { lastValueFrom } from 'rxjs';
+import { UserModel } from '@app/shared/model/user.model';
 
 @Injectable()
 export class CategoryService {
   constructor(
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    @Inject(RABBITMQ_QUEUES.USER_SERVICE) private userClient: ClientProxy,
   ) {}
   async create(createCategoryDto: CreateCategoryDto) {
     const category = await this.categoryRepository.save(createCategoryDto);
@@ -76,4 +80,18 @@ export class CategoryService {
       );
     }
   }
+
+  async getCategoryFollowers(categoryId: string) {
+    const category = await this.findOne(categoryId);
+    const followers = await lastValueFrom(
+      this.userClient.send<UserModel[]>('fetchInterestFollows', category.name),
+    ).catch((error) => {
+      throw new RpcException(error.response);
+    });
+    return followers;
+  }
+  // async getCategoryDetails(id: string) {
+
+  //   return;
+  // }
 }

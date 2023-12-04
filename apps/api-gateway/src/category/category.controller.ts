@@ -20,10 +20,11 @@ import { CategoryModel } from '@app/shared/model/category.model';
 import { ResponseDto } from '../utils/Response.dto';
 import { CreateCategoryDto } from '@app/shared/dto/user-service/create-category.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { UserModel } from '@app/shared/model/user.model';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Category')
-@ApiExtraModels(CategoryModel)
+@ApiExtraModels(CategoryModel, UserModel)
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
@@ -128,12 +129,93 @@ export class CategoryController {
       ],
     },
   })
+  @Get(':id/idea-details')
+  async getCategoryIdeaDetails(@Param('id') id: string) {
+    const data = await this.categoryService.getCategoryDetails(id);
+    return {
+      success: true,
+      message: 'Category Idea details fetched successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Category fetched successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              $ref: getSchemaPath(CategoryModel),
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Get('name')
+  async findOneByName(@Query('name') name: string) {
+    const data = await this.categoryService.findOneByName(name);
+    return {
+      success: true,
+      message: 'Category fetched successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Category fetched successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              $ref: getSchemaPath(CategoryModel),
+            },
+          },
+        },
+      ],
+    },
+  })
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const data = await this.categoryService.findOne(id);
     return {
       success: true,
       message: 'Category fetched successfully',
+      data: data,
+    };
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Category fetched successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                $ref: getSchemaPath(UserModel),
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  @Get(':id/followers')
+  async getCategoryFollowers(@Param('id') id: string) {
+    const data = await this.categoryService.getCategoryFollowers(id);
+    return {
+      success: true,
+      message: 'Category Followers fetched successfully',
       data: data,
     };
   }

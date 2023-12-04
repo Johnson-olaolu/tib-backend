@@ -153,6 +153,11 @@ export class UserController {
     return this.userService.fetchUserFollows(fetchFollowsDto);
   }
 
+  @MessagePattern('fetchInterestFollows')
+  fetchInterestFollows(@Payload() interest: string) {
+    return this.userService.fetchInterestFollows(interest);
+  }
+
   @MessagePattern('blockUser')
   blockUser(@Payload() blockUserDto: BlockUserDto) {
     return this.userService.blockUser(blockUserDto);

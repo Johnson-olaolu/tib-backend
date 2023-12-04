@@ -17,6 +17,7 @@ import { CategoryModule } from './category/category.module';
     DatabaseModule,
     RmqModule,
     RmqModule.register({ name: RABBITMQ_QUEUES.FILE_SERVICE }),
+    RmqModule.register({ name: RABBITMQ_QUEUES.USER_SERVICE }),
     ConfigModule.forRoot({
       isGlobal: true,
       validate: validateEnv,

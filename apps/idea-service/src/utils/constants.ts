@@ -3,6 +3,10 @@ import { CreateCategoryDto } from '@app/shared/dto/user-service/create-category.
 
 export const defaultIdeaConstants: CreateIdeaConstantDto[] = [
   {
+    name: 'Need',
+    value: ['Partnership', 'Mentorship', 'Capital'],
+  },
+  {
     name: 'Funding Stage',
     value: ['Seed Stage', 'Series A', 'Series B'],
   },
@@ -33,12 +37,12 @@ export enum IdeaNeedEnum {
 }
 
 export const defaultCategories: CreateCategoryDto[] = [
-  { name: 'Cartoons' },
-  { name: 'Science' },
-  { name: 'Marriage' },
-  { name: 'Technology', isTopCategory: true },
-  { name: 'Art', isTopCategory: true },
-  { name: 'Entertainment', isTopCategory: true },
-  { name: 'Finance', isTopCategory: true },
-  { name: 'Music', isTopCategory: true },
+  { name: 'Cartoons', description: 'Cartoons' },
+  { name: 'Science', description: 'Science' },
+  { name: 'Marriage', description: 'Marraige' },
+  { name: 'Technology', isTopCategory: true, description: 'Technology' },
+  { name: 'Art', isTopCategory: true, description: 'Art' },
+  { name: 'Entertainment', isTopCategory: true, description: 'Entertainment' },
+  { name: 'Finance', isTopCategory: true, description: 'Finance' },
+  { name: 'Music', isTopCategory: true, description: 'Music' },
 ];

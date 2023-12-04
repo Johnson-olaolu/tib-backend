@@ -22,6 +22,11 @@ export class CategoryController {
     return this.categoryService.findOne(id);
   }
 
+  @MessagePattern('findOneByName')
+  findOneCategoryByName(@Payload() name: string) {
+    return this.categoryService.findOneByName(name);
+  }
+
   @MessagePattern('queryCategory')
   queryCategory(@Payload() name: string) {
     return this.categoryService.queryCategory(name);
@@ -35,5 +40,10 @@ export class CategoryController {
   @MessagePattern('removeCategory')
   remove(@Payload() id: string) {
     return this.categoryService.remove(id);
+  }
+
+  @MessagePattern('getCategoryFollowers')
+  getCategoryFollowers(@Payload() id: string) {
+    return this.categoryService.getCategoryFollowers(id);
   }
 }

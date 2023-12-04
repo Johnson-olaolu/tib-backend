@@ -5,6 +5,10 @@ export class CreateCategoryDto {
   @IsNotEmpty()
   name: string;
 
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
   @IsOptional()
   @IsBoolean()
   isTopCategory?: boolean;

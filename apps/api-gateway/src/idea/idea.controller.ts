@@ -128,12 +128,16 @@ export class IdeaController {
     },
   })
   @Post('funding-needed')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('media[]'))
   async createIdeaFundingNeeded(
+    @UploadedFiles() media: Express.Multer.File[],
     @Body() createIdeaFundingNeededDto: CreateIdeaFundingNeededDto,
   ) {
-    const data = await this.ideaService.createIdeaFundingNeeded(
-      createIdeaFundingNeededDto,
-    );
+    const data = await this.ideaService.createIdeaFundingNeeded({
+      ...createIdeaFundingNeededDto,
+      media,
+    });
     return {
       success: true,
       message: 'Idea Created Successfully',
@@ -158,8 +162,16 @@ export class IdeaController {
     },
   })
   @Post('for-sale')
-  async createIdeaForSale(@Body() createIdeaForSaleDto: CreateIdeaForSaleDto) {
-    const data = await this.ideaService.createIdeaForSale(createIdeaForSaleDto);
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('media[]'))
+  async createIdeaForSale(
+    @Body() createIdeaForSaleDto: CreateIdeaForSaleDto,
+    @UploadedFiles() media: Express.Multer.File[],
+  ) {
+    const data = await this.ideaService.createIdeaForSale({
+      ...createIdeaForSaleDto,
+      media,
+    });
     return {
       success: true,
       message: 'Idea Created Successfully',

@@ -13,7 +13,7 @@ import * as otpGenerator from 'otp-generator';
 import { BCRYPT_HASH_ROUND, FollowStatusEnum } from '../utils/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { DataSource, ILike, Repository } from 'typeorm';
+import { ArrayContains, DataSource, ILike, Repository } from 'typeorm';
 import { RoleService } from '../role/role.service';
 import { PlanService } from '../plan/plan.service';
 import { ValidateUserDto } from '@app/shared/dto/user-service/validate-user.dto';
@@ -465,6 +465,21 @@ export class UserService {
     profile.backgroundPicture = savedFile.path;
     await profile.save();
     return profile;
+  }
+
+  //interests
+  async fetchInterestFollows(interest: string) {
+    const users = await this.userRepository.find({
+      where: {
+        profile: {
+          interests: ArrayContains(['Art']),
+        },
+      },
+      relations: {
+        profile: true,
+      },
+    });
+    return users;
   }
 
   //handle plans
