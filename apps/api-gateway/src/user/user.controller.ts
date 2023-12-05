@@ -248,7 +248,7 @@ export class UserController {
       ],
     },
   })
-  @Patch(':userId/upgradePlan')
+  @Patch(':userId/upgrade-plan')
   async upgradeUserPlan(
     @Param('userId') userId: string,
     @Body() upgradeUserPlanDto: Omit<UpgradePlanDto, 'userId'>,
